@@ -1,0 +1,163 @@
+# Required checks for main (plan section 6.8).
+# Actions are pinned to full commit SHAs; Dependabot proposes updates weekly.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install clang-format 18
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-format-18
+      - name: Check formatting
+        run: |
+          git ls-files -z -- '*.hpp' '*.cpp' '*.h' '*.cc' \
+            | xargs -0 --no-run-if-empty clang-format-18 --dry-run --Werror
+
+  build-test:
+    name: build + test (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-gcc
+            os: ubuntu-24.04
+            cc: gcc-14
+            cxx: g++-14
+          - name: linux-clang
+            os: ubuntu-24.04
+            cc: clang-18
+            cxx: clang++-18
+          - name: windows-msvc
+            os: windows-2025-vs2026
+            cc: cl
+            cxx: cl
+          - name: macos-appleclang
+            os: macos-15
+            cc: clang
+            cxx: clang++
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Ninja (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build
+      - name: Install Ninja (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja
+      - name: MSVC developer environment (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Configure
+        run: cmake --preset release
+      - name: Build
+        run: cmake --build --preset release
+      - name: Test
+        run: ctest --preset release
+
+      - name: JUnit report
+        if: always()
+        run: |
+          exe=build/release/tests/wg_tests
+          [ -f "$exe.exe" ] && exe="$exe.exe"
+          "$exe" --reporters=junit --out=wg_tests-junit.xml || true
+          wgcli=build/release/tools/wgcli/wgcli
+          {
+            echo "### ${{ matrix.name }}"
+            echo
+            echo "- \`$("$wgcli" --version)\`"
+            echo "- $("$exe" --count | tail -n 1)"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: junit-${{ matrix.name }}
+          path: wg_tests-junit.xml
+          retention-days: 14
+          if-no-files-found: ignore
+
+  sanitizers:
+    name: ASan + UBSan (linux-clang)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CC: clang-18
+      CXX: clang++-18
+      ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build
+      - name: Configure
+        run: cmake --preset asan
+      - name: Build
+        run: cmake --build --preset asan
+      - name: Test
+        run: ctest --preset asan
+
+  coverage:
+    name: coverage (linux-clang)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CC: clang-18
+      CXX: clang++-18
+      COVERAGE_MIN_LINES: 80
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Ninja and LLVM tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build llvm-18
+      - name: Configure
+        run: cmake --preset coverage
+      - name: Build
+        run: cmake --build --preset coverage
+      - name: Test
+        env:
+          LLVM_PROFILE_FILE: ${{ github.workspace }}/build/coverage/profraw/%p-%m.profraw
+        run: ctest --preset coverage
+      - name: Report and threshold
+        run: |
+          cd build/coverage
+          llvm-profdata-18 merge -sparse profraw/*.profraw -o wg.profdata
+          ignore='(_deps|tests)/'
+          llvm-cov-18 report tests/wg_tests -instr-profile=wg.profdata \
+            -ignore-filename-regex="$ignore" | tee coverage.txt
+          pct=$(llvm-cov-18 export tests/wg_tests -instr-profile=wg.profdata \
+            -ignore-filename-regex="$ignore" -summary-only | jq '.data[0].totals.lines.percent')
+          {
+            echo "### Coverage"
+            echo
+            echo "Line coverage: **${pct} %** (minimum ${COVERAGE_MIN_LINES} %)"
+            echo
+            echo '```'
+            cat coverage.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          awk -v p="$pct" -v m="$COVERAGE_MIN_LINES" 'BEGIN { exit (p + 0 < m + 0) }' \
+            || { echo "::error::Line coverage ${pct} % is below ${COVERAGE_MIN_LINES} %"; exit 1; }

@@ -1,0 +1,14 @@
+---
+# Profile of plan section 10: bugprone, performance, modernize, concurrency.
+Checks: >
+  -*,
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  concurrency-*,
+  -modernize-use-trailing-return-type,
+  -bugprone-easily-swappable-parameters
+WarningsAsErrors: '*'
+HeaderFilterRegex: '(include/wg|src|tools|tests)/'
+FormatStyle: file
+...

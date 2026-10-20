@@ -1,0 +1,89 @@
+cmake_minimum_required(VERSION 3.25)
+
+project(
+  worldgen_core
+  VERSION 0.1.0
+  DESCRIPTION "Engine-independent world generation library"
+  LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Options (plan section 6.2).
+option(WG_BUILD_TESTS "Build the doctest runner wg_tests" ${PROJECT_IS_TOP_LEVEL})
+option(WG_BUILD_CLI "Build the command-line tool wgcli" ON)
+option(WG_SHARED "Build worldgen_core as a shared library" OFF)
+option(WG_NATIVE_ARCH "Optimise for the build machine (never for golden-hash jobs)" OFF)
+
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+include(GNUInstallDirs)
+include(CompilerWarnings)
+include(Sanitizers)
+include(Coverage)
+include(dependencies)
+
+# ---------------------------------------------------------------------------
+# Library
+# ---------------------------------------------------------------------------
+if(WG_SHARED)
+  set(WG_LIBRARY_TYPE SHARED)
+else()
+  set(WG_LIBRARY_TYPE STATIC)
+endif()
+
+add_library(worldgen_core ${WG_LIBRARY_TYPE} src/core/version.cpp)
+add_library(worldgen_core::worldgen_core ALIAS worldgen_core)
+
+target_include_directories(
+  worldgen_core PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_compile_features(worldgen_core PUBLIC cxx_std_20)
+target_compile_definitions(
+  worldgen_core
+  PRIVATE WG_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+          WG_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+          WG_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+          WG_VERSION_STRING="${PROJECT_VERSION}")
+target_link_libraries(worldgen_core PRIVATE $<BUILD_INTERFACE:wg_build_flags>)
+set_target_properties(worldgen_core PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+# ---------------------------------------------------------------------------
+# Tools and tests
+# ---------------------------------------------------------------------------
+if(WG_BUILD_CLI)
+  add_subdirectory(tools/wgcli)
+endif()
+
+if(WG_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
+
+# ---------------------------------------------------------------------------
+# Install and CMake package: find_package(worldgen_core)
+# ---------------------------------------------------------------------------
+include(CMakePackageConfigHelpers)
+
+install(
+  TARGETS worldgen_core
+  EXPORT worldgen_coreTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY include/wg DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(
+  EXPORT worldgen_coreTargets
+  NAMESPACE worldgen_core::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/worldgen_core)
+
+configure_package_config_file(
+  cmake/worldgen_coreConfig.cmake.in "${PROJECT_BINARY_DIR}/worldgen_coreConfig.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/worldgen_core)
+write_basic_package_version_file(
+  "${PROJECT_BINARY_DIR}/worldgen_coreConfigVersion.cmake"
+  COMPATIBILITY SameMajorVersion)
+install(FILES "${PROJECT_BINARY_DIR}/worldgen_coreConfig.cmake"
+              "${PROJECT_BINARY_DIR}/worldgen_coreConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/worldgen_core)
