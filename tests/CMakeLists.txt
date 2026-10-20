@@ -4,8 +4,11 @@ file(GLOB_RECURSE WG_UNIT_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE
 
 add_executable(wg_tests main.cpp ${WG_UNIT_TEST_SOURCES})
 target_link_libraries(wg_tests PRIVATE worldgen_core::worldgen_core doctest::doctest wg_build_flags)
+# DOCTEST_CONFIG_USE_STD_HEADERS: include <ostream> instead of doctest's forward declarations;
+# MSVC needs the complete std::ostream to stringify std types such as std::string_view.
 target_compile_definitions(
-  wg_tests PRIVATE WG_TEST_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+  wg_tests PRIVATE DOCTEST_CONFIG_USE_STD_HEADERS
+                   WG_TEST_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
                    WG_TEST_VERSION_MINOR=${PROJECT_VERSION_MINOR}
                    WG_TEST_VERSION_PATCH=${PROJECT_VERSION_PATCH})
 
