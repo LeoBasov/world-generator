@@ -79,7 +79,9 @@ class WorldState {
 
   /// write<field_t<F>>(F).
   template <FieldId F>
-  [[nodiscard]] Expected<FieldView<field_t<F>>> write() noexcept { return write<field_t<F>>(F); }
+  [[nodiscard]] Expected<FieldView<field_t<F>>> write() noexcept {
+    return write<field_t<F>>(F);
+  }
 
   /// Uses a caller-owned buffer as field id without copying (plan section 6.6). external must
   /// hold grid().cells() values of the field's dtype and outlive the state or release(id).

@@ -132,7 +132,7 @@ TEST_CASE("core.world_state released memory is returned") {
     WorldState ws = make_state(counter);
     REQUIRE(ws.write<FieldId::elevation>());
     REQUIRE(ws.write<FieldId::flow_receiver>());
-    const std::size_t cells = static_cast<std::size_t>(kGrid.cells());
+    const auto cells = static_cast<std::size_t>(kGrid.cells());
     CHECK(counter.allocations == 2);
     CHECK(counter.bytes_outstanding == cells * 8);
     CHECK(ws.bytes_owned() == counter.bytes_outstanding);

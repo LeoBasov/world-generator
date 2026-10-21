@@ -22,8 +22,8 @@ inline constexpr std::int32_t kMaxGridN = 2049;
 enum class Dir8 : std::uint8_t { e, se, s, sw, w, nw, n, ne };
 
 /// All D8 directions, in order.
-inline constexpr std::array<Dir8, 8> kDir8 = {
-    Dir8::e, Dir8::se, Dir8::s, Dir8::sw, Dir8::w, Dir8::nw, Dir8::n, Dir8::ne};
+inline constexpr std::array<Dir8, 8> kDir8 = {Dir8::e, Dir8::se, Dir8::s, Dir8::sw,
+                                              Dir8::w, Dir8::nw, Dir8::n, Dir8::ne};
 
 /// The four axis directions (D4), in D8 order.
 inline constexpr std::array<Dir8, 4> kDir4 = {Dir8::e, Dir8::s, Dir8::w, Dir8::n};
