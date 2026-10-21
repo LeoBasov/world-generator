@@ -2,11 +2,13 @@
 // Kernel and stage benchmarks join as their work packages land; `--json <file>` writes the
 // results for the CI benchmark job (plan section 6.8).
 
+#include <cstddef>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <nanobench.h>
 
@@ -33,6 +35,23 @@ void bench_poisson(double lambda) {
   ankerl::nanobench::doNotOptimizeAway(wg::core::poisson(stream, lambda));
 }
 
+// Executor (A05): float64 sum of 2^20 floats with a fixed grain, the shape of a field statistic.
+const std::vector<float> kBenchValues(std::size_t{1} << 20U, 1.0F);
+
+void bench_reduce_sum(wg::core::Executor& exec) {
+  const auto map = [](const wg::core::ChunkRange& r) {
+    double s = 0.0;
+    for (std::int64_t i = r.begin; i < r.end; ++i) {
+      s += kBenchValues[static_cast<std::size_t>(i)];
+    }
+    return s;
+  };
+  const auto add = [](double a, double b) { return a + b; };
+  const auto n = static_cast<std::int64_t>(kBenchValues.size());
+  const auto sum = wg::core::parallel_reduce(exec, 0, n, 16384, 0.0, map, add);
+  ankerl::nanobench::doNotOptimizeAway(sum.value_or(0.0));
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -54,6 +73,14 @@ int main(int argc, char** argv) {
   bench.run("core.rng.normal", bench_normal);
   bench.run("core.rng.poisson(4)", [] { bench_poisson(4.0); });
   bench.run("core.rng.poisson(1000)", [] { bench_poisson(1000.0); });
+
+  wg::core::SerialExecutor serial;
+  bench.run("core.exec.reduce_sum(serial)", [&] { bench_reduce_sum(serial); });
+  auto pool = wg::core::ThreadPool::create(8);
+  if (pool) {
+    wg::core::ThreadPool& p = **pool;
+    bench.run("core.exec.reduce_sum(8 threads)", [&] { bench_reduce_sum(p); });
+  }
 
   if (!json_path.empty()) {
     std::ofstream out{json_path};
