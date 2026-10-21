@@ -5,3 +5,4 @@
 *.py text eol=lf
 *.sh text eol=lf
 include/wg/generated/*.hpp text eol=lf
+tests/unit/core/rng_kat.inc text eol=lf

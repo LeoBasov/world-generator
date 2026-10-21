@@ -54,6 +54,12 @@ jobs:
           [ -z "$untracked" ] || { echo "::error::Untracked generated files: $untracked"; exit 1; }
       - name: Codegen tests
         run: python -m unittest discover -s tools/codegen/tests -v
+      - name: Check RNG known-answer vectors
+        run: |
+          # Regenerate tests/unit/core/rng_kat.inc from the Python reference and fail on any
+          # difference, then test the reference itself (A04).
+          python tools/rng/gen_rng_kat.py --check
+          python -m unittest discover -s tools/rng/tests -v
 
   build-test:
     name: build + test (${{ matrix.name }})
