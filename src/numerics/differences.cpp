@@ -66,8 +66,8 @@ core::Status d8_slope(std::span<const float> z, const core::Grid& grid, std::spa
       double best = 0.0;
       std::uint8_t best_dir = kNoDir;
       for_each_neighbor(grid, i, Connectivity::d8, [&](std::int64_t j, core::Dir8 d) {
-        const double drop = (zi - static_cast<double>(z[static_cast<std::size_t>(j)])) /
-                            step_length(d);
+        const double drop =
+            (zi - static_cast<double>(z[static_cast<std::size_t>(j)])) / step_length(d);
         if (drop > best) {
           best = drop;
           best_dir = static_cast<std::uint8_t>(d);

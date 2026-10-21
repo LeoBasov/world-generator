@@ -191,9 +191,8 @@ core::Status edt_squared(std::span<const std::uint8_t> seeds, const core::Grid& 
   return core::parallel_for(exec, 0, n, detail::kRowGrain, rows);
 }
 
-core::Status edt(std::span<const std::uint8_t> seeds, const core::Grid& grid,
-                 std::span<float> out, core::Executor& exec,
-                 core::MemoryResource& resource) noexcept {
+core::Status edt(std::span<const std::uint8_t> seeds, const core::Grid& grid, std::span<float> out,
+                 core::Executor& exec, core::MemoryResource& resource) noexcept {
   core::Status status = detail::first_error(
       {core::validate(grid),
        detail::check_field(out, grid, "edt: out must have one value per cell")});

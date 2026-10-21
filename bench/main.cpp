@@ -84,8 +84,7 @@ NumericsInputs make_numerics_inputs() {
 void bench_numerics(ankerl::nanobench::Bench& bench, wg::core::Executor& exec,
                     const std::string& suffix, NumericsInputs& in) {
   bench.run("num.laplacian" + suffix, [&] {
-    ankerl::nanobench::doNotOptimizeAway(
-        wg::num::laplacian(in.z, {}, in.grid, in.out, exec).ok());
+    ankerl::nanobench::doNotOptimizeAway(wg::num::laplacian(in.z, {}, in.grid, in.out, exec).ok());
   });
   bench.run("num.d8_slope" + suffix, [&] {
     ankerl::nanobench::doNotOptimizeAway(wg::num::d8_slope(in.z, in.grid, in.out, {}, exec).ok());

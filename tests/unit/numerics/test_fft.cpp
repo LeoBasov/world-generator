@@ -83,9 +83,9 @@ TEST_CASE("numerics.fft 2-D transform matches the direct 2-D DFT") {
       double im = 0.0;
       for (std::int32_t y = 0; y < kRows; ++y) {
         for (std::int32_t xx = 0; xx < kCols; ++xx) {
-          const double a = -2.0 * kPi *
-                           ((static_cast<double>(ky) * y / kRows) +
-                            (static_cast<double>(kx) * xx / kCols));
+          const double fy = static_cast<double>(ky) * y / kRows;
+          const double fx = static_cast<double>(kx) * xx / kCols;
+          const double a = -2.0 * kPi * (fy + fx);
           const Complex& v = x[at(y, xx)];
           re += (v.re * std::cos(a)) - (v.im * std::sin(a));
           im += (v.re * std::sin(a)) + (v.im * std::cos(a));

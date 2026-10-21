@@ -89,9 +89,10 @@ core::Expected<std::int32_t> label_components(std::span<const std::uint8_t> mask
   if (!sets) {
     return core::make_error(std::move(sets.error()));
   }
-  const std::span<const core::Dir8> earlier =
-      connectivity == Connectivity::d4 ? std::span<const core::Dir8>(kEarlierD4)
-                                       : std::span<const core::Dir8>(kEarlierD8);
+  std::span<const core::Dir8> earlier = kEarlierD8;
+  if (connectivity == Connectivity::d4) {
+    earlier = kEarlierD4;
+  }
   // Pass 1: join every mask cell with its mask neighbours visited before it.
   for (std::size_t i = 0; i < cells; ++i) {
     if (mask[i] == 0) {

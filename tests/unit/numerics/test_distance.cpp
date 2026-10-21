@@ -58,12 +58,12 @@ TEST_CASE("numerics.distance EDT equals brute force") {
   constexpr std::array<double, 5> kDensities = {0.001, 0.005, 0.02, 0.1, 0.5};
   for (const std::int32_t n : {33, 65}) {
     const wg::core::Grid grid = wg::test::make_grid(n);
-    for (std::size_t k = 0; k < kDensities.size(); ++k) {
+    for (const double density : kDensities) {
       for (std::uint64_t seed = 1; seed <= 3; ++seed) {
         CAPTURE(n);
-        CAPTURE(kDensities[k]);
+        CAPTURE(density);
         CAPTURE(seed);
-        const std::vector<std::uint8_t> seeds = wg::test::random_mask(grid, kDensities[k], seed);
+        const std::vector<std::uint8_t> seeds = wg::test::random_mask(grid, density, seed);
         CHECK(run_edt(exec, grid, seeds) == brute_force_edt(grid, seeds));
       }
     }

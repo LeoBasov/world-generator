@@ -74,8 +74,8 @@ TEST_CASE("numerics.spectrum of a sinusoid peaks at its frequency") {
     const wg::core::Expected<RadialSpectrum> s =
         wg::num::radial_power_spectrum(z, grid, {.hann = hann});
     REQUIRE(s);
-    const auto peak = std::distance(s->power.begin(),
-                                    std::max_element(s->power.begin(), s->power.end()));
+    const auto top = std::max_element(s->power.begin(), s->power.end());
+    const auto peak = std::distance(s->power.begin(), top);
     CHECK(peak == 15);  // bin of k = 16
     CHECK(s->freq[15] == 16.0 / 128.0);
   }

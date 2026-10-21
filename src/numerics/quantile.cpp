@@ -26,8 +26,7 @@ double interpolate(std::span<const double> sorted, double p) {
 // Calls emit(i, F(v_i)) for every mask value i, in ascending (value, index) order.
 template <class Emit>
 core::Status for_each_cdf(std::span<const float> values, std::span<const std::uint8_t> mask,
-                          std::size_t out_size, core::MemoryResource& resource,
-                          const Emit& emit) {
+                          std::size_t out_size, core::MemoryResource& resource, const Emit& emit) {
   if (!mask.empty() && mask.size() != values.size()) {
     return core::make_status(core::StatusCode::invalid_argument,
                              "empirical_cdf: mask must be empty or have one entry per value");
@@ -107,11 +106,10 @@ core::Status quantile_map(std::span<const float> values, std::span<const std::ui
     return core::make_status(core::StatusCode::invalid_argument,
                              "quantile_map: the target must be non-empty and sorted");
   }
-  return for_each_cdf(values, mask, out.size(), resource,
-                      [&out, target_sorted](std::int64_t i, double f) {
-                        out[static_cast<std::size_t>(i)] =
-                            static_cast<float>(interpolate(target_sorted, f));
-                      });
+  const auto emit = [&out, target_sorted](std::int64_t i, double f) {
+    out[static_cast<std::size_t>(i)] = static_cast<float>(interpolate(target_sorted, f));
+  };
+  return for_each_cdf(values, mask, out.size(), resource, emit);
 }
 
 }  // namespace wg::num

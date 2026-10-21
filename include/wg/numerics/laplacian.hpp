@@ -22,7 +22,7 @@ namespace wg::num {
 
 /// Parameters of laplacian_smooth.
 struct SmoothParams {
-  double alpha = 0.25;         ///< step weight, in (0, 0.25] for stability
+  double alpha = 0.25;          ///< step weight, in (0, 0.25] for stability
   std::int32_t iterations = 1;  ///< number of Jacobi steps, >= 0
 };
 

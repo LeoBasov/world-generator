@@ -21,9 +21,9 @@ struct SpectrumParams {
 /// Radially averaged periodogram. Entry k (k = 1 ... (n - 1) / 2) is the mean power of the
 /// Fourier modes whose radius rounds to k.
 struct RadialSpectrum {
-  std::vector<double> freq;          ///< k / (n - 1), cycles per cell
-  std::vector<double> power;         ///< mean |F|^2 / sum(w^2) of the modes in the bin
-  std::vector<std::int64_t> modes;   ///< number of modes in the bin
+  std::vector<double> freq;         ///< k / (n - 1), cycles per cell
+  std::vector<double> power;        ///< mean |F|^2 / sum(w^2) of the modes in the bin
+  std::vector<std::int64_t> modes;  ///< number of modes in the bin
 };
 
 /// Radially averaged power spectrum of the (n - 1) x (n - 1) block at the north-west corner of

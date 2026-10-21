@@ -20,10 +20,10 @@ struct VariogramParams {
 
 /// Semivariance at one lag.
 struct VariogramPoint {
-  std::int32_t lag = 0;      ///< h
-  double distance = 0.0;     ///< h * |step|, in cells
-  double gamma = 0.0;        ///< semivariance; NaN if there is no pair
-  std::int64_t pairs = 0;    ///< |P_h|
+  std::int32_t lag = 0;    ///< h
+  double distance = 0.0;   ///< h * |step|, in cells
+  double gamma = 0.0;      ///< semivariance; NaN if there is no pair
+  std::int64_t pairs = 0;  ///< |P_h|
 };
 
 /// Directional variogram of plan section 10.1, gamma(h) = sum over P_h of (z(x + h e) - z(x))^2

@@ -76,8 +76,7 @@ TEST_CASE("numerics.labeling joins diagonal cells only under D8") {
   CHECK(*wg::num::label_components(mask, grid, Connectivity::d4, labels) == 3);
   CHECK(*wg::num::label_components(mask, grid, Connectivity::d8, labels) == 1);
 
-  const wg::core::Expected<std::vector<std::int64_t>> sizes =
-      wg::num::component_sizes(labels, 1);
+  const wg::core::Expected<std::vector<std::int64_t>> sizes = wg::num::component_sizes(labels, 1);
   REQUIRE(sizes);
   CHECK(*sizes == std::vector<std::int64_t>{22, 3});
 

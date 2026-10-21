@@ -96,9 +96,9 @@ TEST_CASE("numerics.variogram rejects bad parameters") {
   const std::vector<float> z(static_cast<std::size_t>(grid.cells()));
   const std::vector<float> short_z(3);
   SerialExecutor exec;
-  CHECK(wg::num::directional_variogram(z, {}, grid, {.step_x = 0, .step_y = 0}, exec)
-            .error()
-            .code == StatusCode::invalid_argument);
+  const wg::num::VariogramParams zero_step{.step_x = 0, .step_y = 0};
+  CHECK(wg::num::directional_variogram(z, {}, grid, zero_step, exec).error().code ==
+        StatusCode::invalid_argument);
   CHECK(wg::num::directional_variogram(z, {}, grid, {.step_x = 10}, exec).error().code ==
         StatusCode::invalid_argument);
   CHECK(wg::num::directional_variogram(z, {}, grid, {.max_lag = 0}, exec).error().code ==

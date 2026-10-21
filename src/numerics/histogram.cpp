@@ -60,9 +60,8 @@ core::Expected<Histogram> histogram(std::span<const float> values,
   result.hi = params.hi;
   const double scale = static_cast<double>(params.bins) / (params.hi - params.lo);
   const auto body = [&](const core::ChunkRange& r) {
-    const std::span<std::int64_t> c =
-        std::span<std::int64_t>(partials).subspan(static_cast<std::size_t>(r.index) * stride,
-                                                  stride);
+    const std::size_t offset = static_cast<std::size_t>(r.index) * stride;
+    const std::span<std::int64_t> c = std::span<std::int64_t>(partials).subspan(offset, stride);
     for (std::int64_t i = r.begin; i < r.end; ++i) {
       if (!detail::in_mask(mask, i)) {
         continue;
@@ -123,9 +122,10 @@ core::Expected<ValueRange> value_range(std::span<const float> values,
     if (b.count == 0) {
       return a;
     }
-    return ValueRange{.min = std::min(a.min, b.min),
-                      .max = std::max(a.max, b.max),
-                      .count = a.count + b.count};
+    a.min = std::min(a.min, b.min);
+    a.max = std::max(a.max, b.max);
+    a.count += b.count;
+    return a;
   };
   const auto size = static_cast<std::int64_t>(values.size());
   return core::parallel_reduce(exec, 0, size, detail::kValueGrain, ValueRange{}, map, combine);

@@ -114,7 +114,8 @@ TEST_CASE("numerics.laplacian smoothing conserves the mask sum and lowers the va
   const std::vector<float> z0 = wg::test::white_noise(grid, 2);
   std::vector<float> z = z0;
   SerialExecutor exec;
-  REQUIRE(wg::num::laplacian_smooth(z, mask, grid, {.alpha = 0.25, .iterations = 20}, exec).ok());
+  const wg::num::SmoothParams params{.alpha = 0.25, .iterations = 20};
+  REQUIRE(wg::num::laplacian_smooth(z, mask, grid, params, exec).ok());
   const double before = masked_sum(z0, mask);
   const double after = masked_sum(z, mask);
   // Exact in real arithmetic; float32 storage rounds each step.
@@ -130,8 +131,7 @@ TEST_CASE("numerics.laplacian smoothing conserves the mask sum and lowers the va
   auto pool = wg::core::ThreadPool::create(8);
   REQUIRE(pool);
   std::vector<float> zp = z0;
-  REQUIRE(wg::num::laplacian_smooth(zp, mask, grid, {.alpha = 0.25, .iterations = 20}, **pool)
-              .ok());
+  REQUIRE(wg::num::laplacian_smooth(zp, mask, grid, params, **pool).ok());
   CHECK(zp == z);
 }
 

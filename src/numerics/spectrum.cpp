@@ -89,7 +89,7 @@ core::Expected<RadialSpectrum> radial_power_spectrum(std::span<const float> z,
     const double fy = ky <= m / 2 ? ky : ky - m;
     for (std::int32_t kx = 0; kx < m; ++kx) {
       const double fx = kx <= m / 2 ? kx : kx - m;
-      const auto k = static_cast<std::int32_t>(std::sqrt((fx * fx) + (fy * fy)) + 0.5);
+      const auto k = static_cast<std::int32_t>(std::lround(std::sqrt((fx * fx) + (fy * fy))));
       if (k < 1 || k > bins) {
         continue;
       }
