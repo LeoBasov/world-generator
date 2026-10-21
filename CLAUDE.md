@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository is `worldgen-core`, Phase 1 of the world generator: an engine-independent C++20 library (`worldgen_core`) plus the `wgcli` tool. The specification is the project plan doc "World Generator – Implementation Project Plan" (https://claude.ai/artifact/QRYJWfqWmhjwVwjr3fb97t). Work is organised as work packages A01–A32. Read the plan section for a package before implementing it. Its acceptance tests define "done".
 
-Current state: A01, A02 and A03 done. A01 is the folder tree, CMake, a placeholder `wg::core::version()`, a placeholder `wgcli`, the doctest runner, the nanobench runner `wg_bench`, the example `wg_example` and the three workflows. A02 is the field registry `schema/field_registry.json` (with its JSON Schema), the generator `tools/codegen/gen_field_ids.py` and the committed header `include/wg/generated/field_ids.hpp` (`wg::core::FieldId`, `kFields`, `field_info`, `field_id_from_name`, `field_t<F>`). A03 is the core data model in `wg::core`: `Status`/`Expected` (tl::expected), `WG_CHECK`/`WG_ASSERT`, `Grid` with D8 neighbours, `FieldView`, `MemoryResource`, `FieldStore`, `WorldState` (typed read/write, zero-copy `adopt`, `release`), `VectorLayers`, `Provenance` and the scratch `Arena`. Shared test helpers live in `tests/support/`. Empty module folders hold `.gitkeep` files.
+Current state: A01 to A04 done. A01 is the folder tree, CMake, a placeholder `wg::core::version()`, a placeholder `wgcli`, the doctest runner, the nanobench runner `wg_bench`, the example `wg_example` and the three workflows. A02 is the field registry `schema/field_registry.json` (with its JSON Schema), the generator `tools/codegen/gen_field_ids.py` and the committed header `include/wg/generated/field_ids.hpp` (`wg::core::FieldId`, `kFields`, `field_info`, `field_id_from_name`, `field_t<F>`). A03 is the core data model in `wg::core`: `Status`/`Expected` (tl::expected), `WG_CHECK`/`WG_ASSERT`, `Grid` with D8 neighbours, `FieldView`, `MemoryResource`, `FieldStore`, `WorldState` (typed read/write, zero-copy `adopt`, `release`), `VectorLayers`, `Provenance` and the scratch `Arena`. A04 is the RNG in `wg::core` (`rng.hpp`: counter hash, `stage_key`, `uniform01`, `RngStream`; `detmath.hpp`: platform-independent `det_exp`/`det_log`; `distributions.hpp`: normal, log-normal, Poisson, `WeightedBins`) with its frozen layout in ADR 0002 and a bit-exact Python reference in `tools/rng/`. Shared test helpers live in `tests/support/`. Empty module folders hold `.gitkeep` files.
 
 ## Build and test
 
@@ -32,6 +32,13 @@ Generated code: never edit `include/wg/generated/` by hand. Change `schema/field
 ```bash
 python tools/codegen/gen_field_ids.py           # regenerate; --check only compares
 python -m unittest discover -s tools/codegen/tests -v
+```
+
+RNG known-answer vectors: `tests/unit/core/rng_kat.inc` is generated from the Python reference `tools/rng/rng_reference.py`, which must mirror `rng.hpp`, `detmath.cpp` and `distributions.cpp` operation by operation (standard library only). After changing either side, regenerate and commit:
+
+```bash
+python tools/rng/gen_rng_kat.py                 # --check only compares
+python -m unittest discover -s tools/rng/tests -v
 ```
 
 ## Architecture and conventions (from the plan)

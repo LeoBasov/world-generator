@@ -38,3 +38,11 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   index and D8 neighbour helpers), `FieldView`, `MemoryResource`, `FieldStore`, `WorldState`
   (dtype-checked `read` / `write`, zero-copy `adopt`, `release`), the vector layers of plan
   section 4.2, `Provenance` and the fixed-capacity scratch `Arena`.
+- RNG and distributions (A04) in `wg::core`: the counter-based hash RNG of plan section 2
+  (`mix64`, `combine`, `RngKey`, `stage_key`, `bits64`, `uniform01`, `uniform_open01`,
+  `uniform`, `uniform_index`, `RngStream`), deterministic `det_exp` / `det_log` /
+  `log_factorial`, and `inverse_normal_cdf`, `normal`, `log_normal`, `poisson` and
+  `WeightedBins`. Draws are bit-identical on all platforms. ADR 0002 records the frozen layout.
+- Bit-exact Python reference `tools/rng/rng_reference.py` and the generator
+  `tools/rng/gen_rng_kat.py`, which writes the known-answer vectors
+  `tests/unit/core/rng_kat.inc`. CI `lint` checks that they are current.

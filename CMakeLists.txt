@@ -45,6 +45,8 @@ add_library(
   worldgen_core ${WG_LIBRARY_TYPE}
   src/core/arena.cpp
   src/core/assert.cpp
+  src/core/detmath.cpp
+  src/core/distributions.cpp
   src/core/field_store.cpp
   src/core/grid.cpp
   src/core/memory.cpp
