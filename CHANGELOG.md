@@ -33,3 +33,8 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `field_info`, `field_id_from_name`, `field_t`); optional CMake target `wg_codegen`; schema
   files are installed to `share/worldgen_core/schema`.
 - `.gitattributes` with LF line endings for JSON, Python and generated headers.
+- Core data model (A03) in `wg::core`: `Status` and `Expected<T>` (tl::expected v1.3.1, new
+  dependency), `WG_CHECK` / `WG_ASSERT` with a replaceable failure handler, `Grid` (validation,
+  index and D8 neighbour helpers), `FieldView`, `MemoryResource`, `FieldStore`, `WorldState`
+  (dtype-checked `read` / `write`, zero-copy `adopt`, `release`), the vector layers of plan
+  section 4.2, `Provenance` and the fixed-capacity scratch `Arena`.
