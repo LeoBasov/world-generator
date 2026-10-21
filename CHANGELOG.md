@@ -16,8 +16,8 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - nanobench benchmark runner `wg_bench` and example program `wg_example`; options
   `WG_BUILD_BENCH`, `WG_BUILD_EXAMPLES` and `WG_WITH_EXR`.
 - GitHub Actions, push-triggered only (plan section 6.8):
-  - `ci.yml` on every push: clang-format, build and test on Linux (GCC, Clang), Windows (MSVC)
-    and macOS (Apple Clang), ASan + UBSan, line coverage with an 80 % gate, and clang-tidy on the
+  - `ci.yml` on every push: `lint` (clang-format, generated-file check, codegen tests), build
+    and test on Linux (GCC, Clang), Windows (MSVC) and macOS (Apple Clang), ASan + UBSan, line coverage with an 80 % gate, and clang-tidy on the
     files changed against `main`. On pushes to `main` also TSan, every preset on the primary and
     extended runner matrix, and a benchmark run.
   - `release.yml` on `v*.*.*` tags: packages per platform, Doxygen docs on GitHub Pages and a
@@ -26,3 +26,10 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - Compiler cache (ccache / sccache) and FetchContent cache.
 - Importable ruleset for `main` (`.github/rulesets/main.json`), pull request template,
   CODEOWNERS, clang-format and clang-tidy configuration, ADR template and ADR 0001.
+- Field registry (A02): `schema/field_registry.json` with the 28 raster fields of plan
+  section 4.1 and its JSON Schema `schema/field_registry.schema.json`; the generator
+  `tools/codegen/gen_field_ids.py`, which validates the registry and writes the committed header
+  `include/wg/generated/field_ids.hpp` (`wg::core::FieldId`, dtypes, ranges, units, enum labels,
+  `field_info`, `field_id_from_name`, `field_t`); optional CMake target `wg_codegen`; schema
+  files are installed to `share/worldgen_core/schema`.
+- `.gitattributes` with LF line endings for JSON, Python and generated headers.
