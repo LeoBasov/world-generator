@@ -15,6 +15,31 @@ set(EXPECTED_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(EXPECTED_BUILD_PACKAGE OFF CACHE BOOL "" FORCE)  # keeps its CPack setup out of our build
 FetchContent_MakeAvailable(expected)  # provides tl::expected
 
+# nlohmann/json for parameters, data tables and metadata (A07). Used only inside the library
+# (src/io/json.*, which catches its exceptions); worldgen_core links it as a build interface.
+FetchContent_Declare(
+  nlohmann_json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.12.0
+  GIT_SHALLOW TRUE
+  SYSTEM)
+set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
+set(JSON_Install OFF CACHE BOOL "" FORCE)
+set(JSON_ImplicitConversions OFF CACHE BOOL "" FORCE)  # explicit get<T>() only
+FetchContent_MakeAvailable(nlohmann_json)  # provides nlohmann_json::nlohmann_json
+
+# xxHash (XXH3-64) for the parameter hash, golden hashes and chunk checksums. The repository
+# root has no CMakeLists.txt, so this only downloads it; the library compiles it inline in one
+# translation unit (XXH_INLINE_ALL) through the interface target wg_xxhash.
+FetchContent_Declare(
+  xxhash
+  GIT_REPOSITORY https://github.com/Cyan4973/xxHash.git
+  GIT_TAG v0.8.3
+  GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(xxhash)
+add_library(wg_xxhash INTERFACE)
+target_include_directories(wg_xxhash SYSTEM INTERFACE "${xxhash_SOURCE_DIR}")
+
 if(WG_BUILD_TESTS)
   FetchContent_Declare(
     doctest

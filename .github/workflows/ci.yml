@@ -45,15 +45,23 @@ jobs:
             | xargs -0 --no-run-if-empty clang-format-18 --dry-run --Werror
       - name: Check generated files
         run: |
-          # Regenerate from schema/field_registry.json (validated against its schema), then
-          # fail if the committed header differs (plan section 8).
+          # Regenerate from schema/field_registry.json and schema/params.schema.json (both
+          # checked against their schemas), then fail if a committed header differs (plan
+          # section 8).
           python tools/codegen/gen_field_ids.py
+          python tools/codegen/gen_params.py
           git diff --exit-code -- include/wg/generated \
-            || { echo "::error::Generated files are out of date; run tools/codegen/gen_field_ids.py and commit"; exit 1; }
+            || { echo "::error::Generated files are out of date; run tools/codegen/gen_field_ids.py and tools/codegen/gen_params.py and commit"; exit 1; }
           untracked=$(git status --porcelain -- include/wg/generated)
           [ -z "$untracked" ] || { echo "::error::Untracked generated files: $untracked"; exit 1; }
       - name: Codegen tests
         run: python -m unittest discover -s tools/codegen/tests -v
+      - name: Validate data files
+        run: |
+          # Every data/**/*.json against the JSON Schema it names (A07); the C++ loaders check
+          # the rules JSON Schema cannot express.
+          python tools/data/validate_data.py
+          python -m unittest discover -s tools/data/tests -v
       - name: Check RNG known-answer vectors
         run: |
           # Regenerate tests/unit/core/rng_kat.inc from the Python reference and fail on any

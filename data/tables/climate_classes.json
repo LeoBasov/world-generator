@@ -1,0 +1,48 @@
+{
+  "$schema": "../../schema/climate_classes.schema.json",
+  "schema_version": 1,
+  "classes": [
+    {
+      "name": "freezing",
+      "min_value": -1000,
+      "celsius_min": -50,
+      "celsius_max": 0,
+      "confidence": "observed"
+    },
+    {
+      "name": "cold",
+      "min_value": 1,
+      "celsius_min": 1,
+      "celsius_max": 8,
+      "confidence": "observed"
+    },
+    {
+      "name": "temperate",
+      "min_value": 19,
+      "celsius_min": 8,
+      "celsius_max": 27,
+      "confidence": "observed"
+    },
+    {
+      "name": "warm",
+      "min_value": 67,
+      "celsius_min": 28,
+      "celsius_max": 41,
+      "confidence": "observed"
+    },
+    {
+      "name": "hot",
+      "min_value": 99,
+      "celsius_min": 41,
+      "celsius_max": 49,
+      "confidence": "observed"
+    },
+    {
+      "name": "scorching",
+      "min_value": 119,
+      "celsius_min": 50,
+      "celsius_max": 60,
+      "confidence": "observed"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "../../schema/params.schema.json",
+  "schema_version": 1,
+  "profile": "classic",
+  "seed": 1234,
+  "grid": { "size": 257, "dx_m": 1000.0, "hu_m": 10.0 },
+  "poles": "north",
+  "fields": {
+    "elevation": { "min": 1, "max": 400, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 1600, "y_variance": 1600 },
+    "rainfall": { "min": 0, "max": 100, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800 },
+    "temperature": { "min": 25, "max": 75, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800 },
+    "drainage": { "min": 0, "max": 100, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800 },
+    "volcanism": { "min": 0, "max": 100, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800 },
+    "savagery": { "min": 0, "max": 100, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800 }
+  },
+  "erosion": { "EROSION_CYCLE_COUNT": 250, "PERIODICALLY_ERODE_EXTREMES": true },
+  "precipitation": { "OROGRAPHIC_PRECIPITATION": true },
+  "geology": { "MINERAL_SCARCITY": 2500 },
+  "checks": {
+    "PARTIAL_OCEAN_EDGE_MIN": 1,
+    "PEAK_NUMBER_MIN": 5,
+    "VOLCANO_MIN": 0,
+    "RIVER_MINS": [400, 400],
+    "SUBREGION_MAX": 2750
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "../../schema/salinity_classes.schema.json",
+  "schema_version": 1,
+  "classes": [
+    {
+      "name": "fresh",
+      "value": 0,
+      "min_salinity": 0,
+      "confidence": "observed"
+    },
+    {
+      "name": "brackish",
+      "value": 33,
+      "min_salinity": 16.5,
+      "confidence": "observed"
+    },
+    {
+      "name": "saline",
+      "value": 66,
+      "min_salinity": 49.5,
+      "confidence": "observed"
+    },
+    {
+      "name": "ocean",
+      "value": 100,
+      "min_salinity": 83,
+      "confidence": "documented"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LeoBasov/world-generator/schema/climate_classes.schema.json",
+  "title": "worldgen-core climate classes",
+  "description": "Temperature classes on the game scale (R5.2, A14). A temperature belongs to the last class whose min_value it reaches; classes are sorted by min_value and the first starts at -1000.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "classes"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "min_value",
+          "celsius_min",
+          "celsius_max",
+          "confidence"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "min_value": {
+            "description": "Lowest game-scale temperature of the class (inclusive).",
+            "type": "number",
+            "minimum": -1000,
+            "maximum": 1000
+          },
+          "celsius_min": {
+            "description": "Lower end of the peak-summer temperature in degC.",
+            "type": "number",
+            "minimum": -273.15,
+            "maximum": 1000
+          },
+          "celsius_max": {
+            "description": "Upper end of the peak-summer temperature in degC.",
+            "type": "number",
+            "minimum": -273.15,
+            "maximum": 1000
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

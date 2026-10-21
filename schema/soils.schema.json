@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LeoBasov/world-generator/schema/soils.schema.json",
+  "title": "worldgen-core soil types",
+  "description": "Soil layers (R10.1, A21) with their placement and the permeability k_soil of the derived drainage (A28).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "soils"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "soils": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "aquifer",
+          "permeability",
+          "land",
+          "shallow_ocean",
+          "deep_ocean",
+          "sand_desert",
+          "confidence"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "aquifer": {
+            "description": "The layer can hold an aquifer (R10.3).",
+            "type": "boolean"
+          },
+          "permeability": {
+            "description": "Relative permeability k_soil.",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "land": {
+            "description": "Allowed on land.",
+            "type": "boolean"
+          },
+          "shallow_ocean": {
+            "description": "Allowed under shallow ocean.",
+            "type": "boolean"
+          },
+          "deep_ocean": {
+            "description": "Allowed under deep ocean.",
+            "type": "boolean"
+          },
+          "sand_desert": {
+            "description": "Used for the sand layers of sand deserts.",
+            "type": "boolean"
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

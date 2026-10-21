@@ -6,13 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository is `worldgen-core`, Phase 1 of the world generator: an engine-independent C++20 library (`worldgen_core`) plus the `wgcli` tool. The specification is the project plan doc "World Generator – Implementation Project Plan" (https://claude.ai/artifact/QRYJWfqWmhjwVwjr3fb97t). Work is organised as work packages A01–A32. Read the plan section for a package before implementing it. Its acceptance tests define "done".
 
-Current state: A01 to A06 done. A01 is the folder tree, CMake, a placeholder `wg::core::version()`, a placeholder `wgcli`, the doctest runner, the nanobench runner `wg_bench`, the example `wg_example` and the three workflows. A02 is the field registry `schema/field_registry.json` (with its JSON Schema), the generator `tools/codegen/gen_field_ids.py` and the committed header `include/wg/generated/field_ids.hpp` (`wg::core::FieldId`, `kFields`, `field_info`, `field_id_from_name`, `field_t<F>`). A03 is the core data model in `wg::core`: `Status`/`Expected` (tl::expected), `WG_CHECK`/`WG_ASSERT`, `Grid` with D8 neighbours, `FieldView`, `MemoryResource`, `FieldStore`, `WorldState` (typed read/write, zero-copy `adopt`, `release`), `VectorLayers`, `Provenance` and the scratch `Arena`. A04 is the RNG in `wg::core` (`rng.hpp`: counter hash, `stage_key`, `uniform01`, `RngStream`; `detmath.hpp`: platform-independent `det_exp`/`det_log`; `distributions.hpp`: normal, log-normal, Poisson, `WeightedBins`) with its frozen layout in ADR 0002 and a bit-exact Python reference in `tools/rng/`. A05 is parallel execution in `wg::core`:
+Current state: A01 to A07 done. A01 is the folder tree, CMake, a placeholder `wg::core::version()`, a placeholder `wgcli`, the doctest runner, the nanobench runner `wg_bench`, the example `wg_example` and the three workflows. A02 is the field registry `schema/field_registry.json` (with its JSON Schema), the generator `tools/codegen/gen_field_ids.py` and the committed header `include/wg/generated/field_ids.hpp` (`wg::core::FieldId`, `kFields`, `field_info`, `field_id_from_name`, `field_t<F>`). A03 is the core data model in `wg::core`: `Status`/`Expected` (tl::expected), `WG_CHECK`/`WG_ASSERT`, `Grid` with D8 neighbours, `FieldView`, `MemoryResource`, `FieldStore`, `WorldState` (typed read/write, zero-copy `adopt`, `release`), `VectorLayers`, `Provenance` and the scratch `Arena`. A04 is the RNG in `wg::core` (`rng.hpp`: counter hash, `stage_key`, `uniform01`, `RngStream`; `detmath.hpp`: platform-independent `det_exp`/`det_log`; `distributions.hpp`: normal, log-normal, Poisson, `WeightedBins`) with its frozen layout in ADR 0002 and a bit-exact Python reference in `tools/rng/`. A05 is parallel execution in `wg::core`:
   - `executor.hpp` has the `Executor` interface, the fixed chunking `chunk_count`/`chunk_at`, `SerialExecutor`, and `parallel_for`/`parallel_reduce`, which cancel per chunk and reduce in order.
   - `thread_pool.hpp` is the internal pool. The caller is worker 0, and nested calls run inline.
   - Also `function_ref.hpp`, `cancel.hpp` (`CancelFlag`) and `sinks.hpp` (`LogSink`, `ProgressSink` and null sinks).
   - ADR 0003 records the chunking rule. Shared test helpers live in `tests/support/` (`fixtures.hpp` has grids, ramps, random masks and white noise). Empty module folders hold `.gitkeep` files.
 
 A06 is the numerics library in `wg::num` (`include/wg/numerics/`, `src/numerics/`): neighbourhoods, `IndexHeap`, central differences and D8 slope, masked Laplacian and smoothing, BFS distance and exact EDT, union–find labelling, empirical CDF and quantile mapping, histograms, FFT, radial power spectrum and variogram. ADR 0004 records the kernel conventions (zero-flux edges, tie rules, 16-row grain). The FFT and spectrum are diagnostics only and not bit-identical across platforms. Internal kernel helpers are in `src/numerics/common.hpp`.
+
+A07 is parameters and data tables in `wg::params` (`include/wg/params/`, `src/params/`):
+  - `schema/params.schema.json` is the source of the parameter model. `tools/codegen/gen_params.py` generates `include/wg/generated/gen_params.hpp` (`GenParams` with the schema defaults, `kParamDescriptors`, `find_param`); `get_param`/`set_param` access a parameter through its descriptor.
+  - `load.hpp` (`read_params`, `load_params`, `load_params_file`, `to_json`; files list only what differs, issues carry JSON paths), `validation.hpp` (`validate`, errors and warnings), `hash.hpp` (`params_hash`, XXH3-64 over values; seed and profile excluded).
+  - `tables.hpp`: biome, climate, salinity, rock, soil and mineral tables from `data/tables/` and `data/geology/` with per-table and cross-table rules and `tables_hash`. Presets are in `data/presets/`. Every data file names its JSON Schema in `schema/` via `$schema`.
+  - JSON parsing is confined to the internal `src/io/json.{hpp,cpp}` (nlohmann/json, exceptions caught there); `wg::io::xxh3_64` wraps xxHash. Internal headers are included from `src/` (`"io/json.hpp"`), also by tests. ADR 0005 records the model and the hash.
 
 ## Build and test
 
@@ -40,6 +46,8 @@ python tools/codegen/gen_field_ids.py           # regenerate; --check only compa
 python -m unittest discover -s tools/codegen/tests -v
 ```
 
+Parameters work the same way: change `schema/params.schema.json`, then run `python tools/codegen/gen_params.py` and commit the header (it needs only the standard library). Adding or renaming a parameter changes every parameter hash (ADR 0005). Data files are checked against their schemas with `python tools/data/validate_data.py` (needs jsonschema); the C++ loaders check the rules JSON Schema cannot express.
+
 RNG known-answer vectors: `tests/unit/core/rng_kat.inc` is generated from the Python reference `tools/rng/rng_reference.py`, which must mirror `rng.hpp`, `detmath.cpp` and `distributions.cpp` operation by operation (standard library only). After changing either side, regenerate and commit:
 
 ```bash
@@ -59,14 +67,14 @@ python -m unittest discover -s tools/rng/tests -v
   - Reductions use fixed chunk boundaries.
 - Floating point: keep `-ffp-contract=off` / `/fp:precise`. Never use `-ffast-math`. Store float32, accumulate in float64.
 - Warnings are errors: `-Wall -Wextra -Wpedantic -Werror` and `/W4 /WX`. They are set on the INTERFACE target `wg_build_flags` (`cmake/CompilerWarnings.cmake`), which every wg target links privately.
-- Third-party dependencies come only through FetchContent at pinned tags in `cmake/dependencies.cmake` (currently doctest, nanobench and tl::expected).
+- Third-party dependencies come only through FetchContent at pinned tags in `cmake/dependencies.cmake` (currently doctest, nanobench, tl::expected, nlohmann/json and xxHash; the last two are private to the library).
 - Large buffers come from an injected `wg::core::MemoryResource` (not `std::pmr`, which Apple's libc++ only has from macOS 14). Factories (`WorldState::create`, `Arena::create`) return `Expected` instead of throwing constructors.
 - No logging to stdout/stderr from the library. Use the injected sinks (from A05 on).
 
 ## CI
 
 All workflows are triggered only by `git push` (no `pull_request`, schedule or manual triggers). Shared setup (Ninja, MSVC env, ccache/sccache, FetchContent cache) lives in `.github/actions/setup-build`.
-- `ci.yml`, every push to any branch: `lint` (clang-format, generated-file check, codegen tests), release build and test on ubuntu-24.04 (GCC 14, Clang 18), windows-2025-vs2026 (MSVC) and macos-15 (Apple Clang), ASan+UBSan, llvm-cov coverage with an 80 % line gate, clang-tidy on `.cpp` files changed against `main`. These are the required checks in `.github/rulesets/main.json`; renaming a job means updating the ruleset.
+- `ci.yml`, every push to any branch: `lint` (clang-format, generated-file checks, codegen tests, data-schema validation), release build and test on ubuntu-24.04 (GCC 14, Clang 18), windows-2025-vs2026 (MSVC) and macos-15 (Apple Clang), ASan+UBSan, llvm-cov coverage with an 80 % line gate, clang-tidy on `.cpp` files changed against `main`. These are the required checks in `.github/rulesets/main.json`; renaming a job means updating the ruleset.
 - `ci.yml`, pushes to `main` only: TSan, every preset on the primary plus extended matrix (windows-2022, ubuntu-24.04-arm without asan, macos-26), `wg_bench` run.
 - `release.yml`, tags `v*.*.*`: packages, Doxygen (`docs/Doxyfile`) to Pages, GitHub Release. The tag must match the CMake project version and have a `CHANGELOG.md` section.
 - `golden-update.yml`, branches `golden/**`: per-toolchain hash files (`tools/ci/toolchain_key.sh`) as artifacts. The hash step activates once `tests/golden/seeds.json` exists (A10).

@@ -1,0 +1,166 @@
+{
+  "$schema": "../../schema/soils.schema.json",
+  "schema_version": 1,
+  "soils": [
+    {
+      "name": "clay",
+      "aquifer": false,
+      "permeability": 0.05,
+      "land": true,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "silty_clay",
+      "aquifer": false,
+      "permeability": 0.1,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "sandy_clay",
+      "aquifer": false,
+      "permeability": 0.2,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "clay_loam",
+      "aquifer": true,
+      "permeability": 0.3,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "silty_clay_loam",
+      "aquifer": true,
+      "permeability": 0.3,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "sandy_clay_loam",
+      "aquifer": true,
+      "permeability": 0.4,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "loam",
+      "aquifer": true,
+      "permeability": 0.5,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "silt_loam",
+      "aquifer": true,
+      "permeability": 0.45,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "sandy_loam",
+      "aquifer": true,
+      "permeability": 0.65,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "loamy_sand",
+      "aquifer": true,
+      "permeability": 0.8,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "silt",
+      "aquifer": true,
+      "permeability": 0.4,
+      "land": true,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "sand",
+      "aquifer": true,
+      "permeability": 0.95,
+      "land": true,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "sand_desert": true,
+      "confidence": "observed"
+    },
+    {
+      "name": "peat",
+      "aquifer": true,
+      "permeability": 0.6,
+      "land": true,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "calcareous_ooze",
+      "aquifer": true,
+      "permeability": 0.5,
+      "land": false,
+      "shallow_ocean": false,
+      "deep_ocean": true,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "siliceous_ooze",
+      "aquifer": true,
+      "permeability": 0.5,
+      "land": false,
+      "shallow_ocean": false,
+      "deep_ocean": true,
+      "sand_desert": false,
+      "confidence": "observed"
+    },
+    {
+      "name": "pelagic_clay",
+      "aquifer": false,
+      "permeability": 0.05,
+      "land": false,
+      "shallow_ocean": false,
+      "deep_ocean": true,
+      "sand_desert": false,
+      "confidence": "observed"
+    }
+  ]
+}

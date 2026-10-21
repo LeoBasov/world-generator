@@ -1,0 +1,21 @@
+{
+  "$schema": "../../schema/params.schema.json",
+  "schema_version": 1,
+  "profile": "classic",
+  "grid": { "size": 65 },
+  "poles": "none",
+  "fields": {
+    "elevation": { "min": 1, "max": 400, "weights": [8, 1, 1, 1, 1], "mesh": 2, "x_variance": 1200, "y_variance": 1200 },
+    "rainfall": { "min": 30, "max": 100, "weights": [1, 1, 2, 2, 1], "mesh": 2 },
+    "temperature": { "min": 60, "max": 90, "mesh": 2 }
+  },
+  "erosion": { "EROSION_CYCLE_COUNT": 100 },
+  "rivers": { "small_ocean_min_area": 16 },
+  "checks": {
+    "COMPLETE_OCEAN_EDGE_MIN": 4,
+    "PEAK_NUMBER_MIN": 1,
+    "RIVER_MINS": [10, 10],
+    "SUBREGION_MAX": 500,
+    "max_attempts": 200
+  }
+}
