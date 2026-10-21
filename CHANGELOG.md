@@ -46,3 +46,9 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Bit-exact Python reference `tools/rng/rng_reference.py` and the generator
   `tools/rng/gen_rng_kat.py`, which writes the known-answer vectors
   `tests/unit/core/rng_kat.inc`. CI `lint` checks that they are current.
+- Executor, sinks and cancellation (A05) in `wg::core`: the `Executor` interface with the fixed
+  chunking rule (`chunk_count`, `chunk_at`, `ChunkRange` with a worker index), `SerialExecutor`,
+  the internal `ThreadPool`, `parallel_for` with per-chunk cancellation and the ordered
+  `parallel_reduce`. Reductions are bit-identical for any thread count. Also `FunctionRef`,
+  `CancelFlag`, `LogSink` and `ProgressSink` with null sinks. `worldgen_core` now links
+  `Threads::Threads`. ADR 0003 records the chunking and cancellation rules.

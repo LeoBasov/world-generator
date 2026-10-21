@@ -31,6 +31,7 @@ include(CompilerWarnings)
 include(Sanitizers)
 include(Coverage)
 include(dependencies)
+find_package(Threads REQUIRED)
 
 # ---------------------------------------------------------------------------
 # Library
@@ -47,10 +48,13 @@ add_library(
   src/core/assert.cpp
   src/core/detmath.cpp
   src/core/distributions.cpp
+  src/core/executor.cpp
   src/core/field_store.cpp
   src/core/grid.cpp
   src/core/memory.cpp
+  src/core/sinks.cpp
   src/core/status.cpp
+  src/core/thread_pool.cpp
   src/core/version.cpp
   src/core/world_state.cpp)
 add_library(worldgen_core::worldgen_core ALIAS worldgen_core)
@@ -61,6 +65,8 @@ target_include_directories(
 target_compile_features(worldgen_core PUBLIC cxx_std_20)
 # Installed consumers find tl/expected.hpp in the same include directory (installed by tl-expected).
 target_link_libraries(worldgen_core PUBLIC $<BUILD_INTERFACE:tl::expected>)
+# ThreadPool (A05) uses std::thread; consumers of the static library need the thread library too.
+target_link_libraries(worldgen_core PUBLIC Threads::Threads)
 target_compile_definitions(
   worldgen_core
   PRIVATE WG_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
