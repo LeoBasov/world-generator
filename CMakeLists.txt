@@ -11,9 +11,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Embed MSVC debug info in the objects (/Z7) so sccache can cache them in CI (CMP0141).
+if(NOT DEFINED CMAKE_MSVC_DEBUG_INFORMATION_FORMAT)
+  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
+endif()
+
 # Options (plan section 6.2).
 option(WG_BUILD_TESTS "Build the doctest runner wg_tests" ${PROJECT_IS_TOP_LEVEL})
 option(WG_BUILD_CLI "Build the command-line tool wgcli" ON)
+option(WG_BUILD_BENCH "Build the nanobench benchmarks wg_bench" ${PROJECT_IS_TOP_LEVEL})
+option(WG_BUILD_EXAMPLES "Build the example program wg_example" ${PROJECT_IS_TOP_LEVEL})
+option(WG_WITH_EXR "Enable EXR export through tinyexr (from A09)" OFF)
 option(WG_SHARED "Build worldgen_core as a shared library" OFF)
 option(WG_NATIVE_ARCH "Optimise for the build machine (never for golden-hash jobs)" OFF)
 
@@ -50,15 +58,26 @@ target_link_libraries(worldgen_core PRIVATE $<BUILD_INTERFACE:wg_build_flags>)
 set_target_properties(worldgen_core PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # ---------------------------------------------------------------------------
-# Tools and tests
+# Tools, tests, benchmarks and examples
 # ---------------------------------------------------------------------------
+if(WG_BUILD_TESTS OR WG_BUILD_EXAMPLES)
+  enable_testing()
+endif()
+
 if(WG_BUILD_CLI)
   add_subdirectory(tools/wgcli)
 endif()
 
 if(WG_BUILD_TESTS)
-  enable_testing()
   add_subdirectory(tests)
+endif()
+
+if(WG_BUILD_BENCH)
+  add_subdirectory(bench)
+endif()
+
+if(WG_BUILD_EXAMPLES)
+  add_subdirectory(examples)
 endif()
 
 # ---------------------------------------------------------------------------

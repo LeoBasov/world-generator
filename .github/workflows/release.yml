@@ -1,0 +1,153 @@
+# Release on a pushed tag vX.Y.Z (plan section 6.8): build and test the primary and extended matrix,
+# package `cmake --install` per platform, publish the Doxygen docs to GitHub Pages and create the
+# GitHub Release with archives, SHA-256 checksums and the matching CHANGELOG.md section.
+# Uses only the built-in GITHUB_TOKEN; write permissions are granted per job.
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: build + package (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-x64-gcc, os: ubuntu-24.04, cc: gcc-14, cxx: g++-14 }
+          - { name: linux-x64-clang, os: ubuntu-24.04, cc: clang-18, cxx: clang++-18 }
+          - { name: windows-x64-msvc, os: windows-2025-vs2026, cc: cl, cxx: cl }
+          - { name: macos-arm64-appleclang, os: macos-15, cc: clang, cxx: clang++ }
+          - { name: windows-x64-msvc2022, os: windows-2022, cc: cl, cxx: cl }
+          - { name: linux-arm64-gcc, os: ubuntu-24.04-arm, cc: gcc-14, cxx: g++-14, packages: g++-14 }
+          - { name: macos26-arm64-appleclang, os: macos-26, cc: clang, cxx: clang++ }
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: ${{ matrix.name }}-release
+          packages: ${{ matrix.packages }}
+
+      - name: Configure
+        run: cmake --preset release
+      - name: Build
+        run: cmake --build --preset release
+      - name: Test
+        run: ctest --preset release
+      - name: Check that the tag matches the library version
+        run: |
+          wgcli=build/release/tools/wgcli/wgcli
+          [ -f "$wgcli.exe" ] && wgcli="$wgcli.exe"
+          actual=$("$wgcli" --version | tr -d '\r')
+          expected="wgcli ${GITHUB_REF_NAME#v}"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match '$actual' (project VERSION in CMakeLists.txt)"
+            exit 1
+          fi
+
+      - name: Package
+        run: |
+          pkg="worldgen_core-${GITHUB_REF_NAME}-${{ matrix.name }}"
+          cmake --install build/release --prefix "dist/$pkg"
+          cd dist
+          if [ "$RUNNER_OS" = Windows ]; then
+            7z a -tzip "$pkg.zip" "$pkg" > /dev/null
+          else
+            tar -czf "$pkg.tar.gz" "$pkg"
+          fi
+      - name: Upload package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: package-${{ matrix.name }}
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+          retention-days: 90
+          if-no-files-found: error
+
+  docs:
+    name: docs (Doxygen)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Doxygen
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends doxygen graphviz
+      - name: Generate API reference
+        env:
+          WG_DOC_VERSION: ${{ github.ref_name }}
+        run: doxygen docs/Doxyfile
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: build/docs/html
+
+  deploy-docs:
+    name: deploy docs (GitHub Pages)
+    needs: docs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  release:
+    name: GitHub Release
+    needs: [build, deploy-docs]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: package-*
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum -- *.zip *.tar.gz > SHA256SUMS
+          cat SHA256SUMS
+      - name: Release notes from CHANGELOG.md
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          awk -v v="$version" '
+            /^## \[/ { p = index($0, "## [" v "]") == 1; next }
+            p
+          ' CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "::error::CHANGELOG.md has no section '## [$version]'"
+            exit 1
+          fi
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "worldgen-core $GITHUB_REF_NAME" --notes-file notes.md

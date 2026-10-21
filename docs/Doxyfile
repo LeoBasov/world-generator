@@ -1,0 +1,18 @@
+# Doxygen configuration for the worldgen-core API reference (plan section 5, deliverables).
+# Run from the repository root: doxygen docs/Doxyfile. release.yml publishes the HTML to Pages.
+# Settings not listed here keep Doxygen's defaults.
+
+PROJECT_NAME           = worldgen-core
+PROJECT_NUMBER         = $(WG_DOC_VERSION)
+PROJECT_BRIEF          = "Engine-independent world generation library"
+OUTPUT_DIRECTORY       = build/docs
+INPUT                  = include/wg README.md
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp *.md
+USE_MDFILE_AS_MAINPAGE = README.md
+STRIP_FROM_PATH        = include
+EXTRACT_ALL            = YES
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO

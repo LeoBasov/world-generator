@@ -1,0 +1,51 @@
+# Shared build setup for ci.yml, release.yml and golden-update.yml (plan section 6.8):
+# Ninja, the MSVC developer environment, a compiler cache (ccache on Linux and macOS,
+# sccache on Windows) and the FetchContent cache keyed on cmake/dependencies.cmake.
+# Expects the repository to be checked out and CC/CXX to be set by the job.
+name: setup-build
+description: Install Ninja, set up MSVC and restore the compiler and FetchContent caches
+
+inputs:
+  cache-key:
+    description: Toolchain and preset part of the cache keys, e.g. linux-gcc-release
+    required: true
+  packages:
+    description: Extra apt packages to install on Linux, e.g. g++-14
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Install Ninja (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends ninja-build ${{ inputs.packages }}
+    - name: Install Ninja (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: brew install ninja
+    - name: MSVC developer environment (Windows)
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+    - name: Compiler cache
+      uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+      with:
+        key: ${{ runner.os }}-${{ runner.arch }}-${{ inputs.cache-key }}
+        variant: ${{ runner.os == 'Windows' && 'sccache' || 'ccache' }}
+        max-size: 500M
+    - name: Use the compiler cache as CMake launcher
+      shell: bash
+      run: |
+        launcher=${{ runner.os == 'Windows' && 'sccache' || 'ccache' }}
+        echo "CMAKE_C_COMPILER_LAUNCHER=$launcher" >> "$GITHUB_ENV"
+        echo "CMAKE_CXX_COMPILER_LAUNCHER=$launcher" >> "$GITHUB_ENV"
+
+    - name: FetchContent cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: build/*/_deps
+        key: fetchcontent-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cache-key }}-${{ hashFiles('cmake/dependencies.cmake') }}
