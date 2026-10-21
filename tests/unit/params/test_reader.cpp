@@ -2,8 +2,10 @@
 
 #include <doctest/doctest.h>
 
+#include <cstdint>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 using wg::io::Json;
@@ -90,10 +92,7 @@ TEST_CASE("params.reader intervals") {
   const Json j = parse(R"({"ok": [2, 5], "rev": [5, 2], "out": [0, 200]})");
   std::vector<ValidationIssue> issues;
   ObjectReader r(j, "$", issues);
-  const auto ok = r.interval("ok", 0, 100);
-  REQUIRE(ok.has_value());
-  CHECK(ok->first == 2);
-  CHECK(ok->second == 5);
+  CHECK(r.interval("ok", 0, 100) == std::pair<std::int64_t, std::int64_t>{2, 5});
   CHECK(!r.interval("rev", 0, 100));
   CHECK(!r.interval("out", 0, 100));
   REQUIRE(issues.size() == 2);

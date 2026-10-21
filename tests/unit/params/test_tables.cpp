@@ -56,6 +56,33 @@ std::string refusal(const wg::core::Expected<T>& result) {
   return result.error().message;
 }
 
+// The refusal message of each table with one change applied.
+using Change = std::function<void(Json&)>;
+
+std::string biome_error(const Change& change) {
+  return refusal(wg::params::load_biome_table(mutated(kBiomes, change)));
+}
+
+std::string climate_error(const Change& change) {
+  return refusal(wg::params::load_climate_classes(mutated(kClimate, change)));
+}
+
+std::string salinity_error(const Change& change) {
+  return refusal(wg::params::load_salinity_classes(mutated(kSalinity, change)));
+}
+
+std::string rock_error(const Change& change) {
+  return refusal(wg::params::load_rock_types(mutated(kRocks, change)));
+}
+
+std::string soil_error(const Change& change) {
+  return refusal(wg::params::load_soils(mutated(kSoils, change)));
+}
+
+std::string mineral_error(const Change& change) {
+  return refusal(wg::params::load_minerals(mutated(kMinerals, change)));
+}
+
 bool contains(const std::string& text, std::string_view part) {
   return text.find(part) != std::string::npos;
 }
@@ -135,137 +162,111 @@ TEST_CASE("params.tables hash is stable and sees every change") {
 }
 
 TEST_CASE("params.tables biome base rows must partition rainfall x drainage") {
-  const std::string overlap = refusal(wg::params::load_biome_table(mutated(kBiomes, [](Json& j) {
-    j["base"][0]["rainfall"] = Json::array({0, 10});
-  })));
-  CHECK(contains(overlap, "$.base[3]: overlaps $.base[0] at rainfall 10, drainage 0"));
-  const std::string gap = refusal(wg::params::load_biome_table(mutated(kBiomes, [](Json& j) {
-    j["base"][0]["rainfall"] = Json::array({0, 8});
-  })));
-  CHECK(contains(gap, "$.base: rainfall 9, drainage 0 is covered by no row"));
-  const std::string reversed = refusal(wg::params::load_biome_table(mutated(kBiomes, [](Json& j) {
-    j["base"][0]["drainage"] = Json::array({32, 0});
-  })));
-  CHECK(contains(reversed, "$.base[0].drainage: lower end 32 is above upper end 0"));
+  const Change overlap = [](Json& j) { j["base"][0]["rainfall"] = Json::array({0, 10}); };
+  CHECK(contains(biome_error(overlap), "$.base[3]: overlaps $.base[0] at rainfall 10, drainage 0"));
+  const Change gap = [](Json& j) { j["base"][0]["rainfall"] = Json::array({0, 8}); };
+  CHECK(contains(biome_error(gap), "$.base: rainfall 9, drainage 0 is covered by no row"));
+  const Change reversed = [](Json& j) { j["base"][0]["drainage"] = Json::array({32, 0}); };
+  CHECK(contains(biome_error(reversed), "$.base[0].drainage: lower end 32 is above upper end 0"));
 }
 
 TEST_CASE("params.tables biome ids, names and references") {
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes, [](Json& j) { j["biomes"][5]["id"] = 4; }))),
-                 "$.biomes[5].id: is 4, expected 5"));
+  const Change id = [](Json& j) { j["biomes"][5]["id"] = 4; };
+  CHECK(contains(biome_error(id), "$.biomes[5].id: is 4, expected 5"));
   // FOREST_TROPICAL_DRY_BROADLEAF (16) is the one biome no rule names, so renaming it leaves
   // every reference intact and only the duplicate remains.
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes, [](Json& j) { j["biomes"][16]["name"] = "FOREST_TAIGA"; }))),
-                 "$.biomes[16].name: duplicate name \"FOREST_TAIGA\""));
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes, [](Json& j) { j["variants"][0]["biome"] = "NOPE"; }))),
-                 "$.variants[0].biome: unknown biome \"NOPE\""));
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes, [](Json& j) { j["biomes"][0]["region_type"] = "moon"; }))),
-                 "$.biomes[0].region_type: unknown region type \"moon\""));
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes,
-                             [](Json& j) {
-                               Json& types = j["region_types"];
-                               types.erase(types.begin() + 6);  // "hills": no biome uses it
-                             }))),
+  const Change duplicate = [](Json& j) { j["biomes"][16]["name"] = "FOREST_TAIGA"; };
+  CHECK(contains(biome_error(duplicate), "$.biomes[16].name: duplicate name \"FOREST_TAIGA\""));
+  const Change unknown = [](Json& j) { j["variants"][0]["biome"] = "NOPE"; };
+  CHECK(contains(biome_error(unknown), "$.variants[0].biome: unknown biome \"NOPE\""));
+  const Change region = [](Json& j) { j["biomes"][0]["region_type"] = "moon"; };
+  CHECK(contains(biome_error(region), "$.biomes[0].region_type: unknown region type \"moon\""));
+  const Change no_hills = [](Json& j) {
+    Json& types = j["region_types"];
+    types.erase(types.begin() + 6);  // "hills": no biome uses it
+  };
+  CHECK(contains(biome_error(no_hills),
                  "$.region_types: missing region type \"hills\" of $.checks.REGION_COUNTS.HILLS"));
 }
 
 TEST_CASE("params.tables biome variants cover every base and band") {
-  CHECK(contains(refusal(wg::params::load_biome_table(mutated(
-                     kBiomes, [](Json& j) { j["variants"].erase(j["variants"].begin()); }))),
-                 "no variant of base \"desert_sand\" in band \"cold\""));
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes, [](Json& j) { j["variants"].push_back(j["variants"][0]); }))),
-                 "second variant of base \"desert_sand\" in band \"cold\""));
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes, [](Json& j) { j["variants"][0]["saline"] = true; }))),
-                 "$.variants[0].saline: only wetland variants have saline"));
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes, [](Json& j) { j["variants"][0]["bands"][0] = "frozen"; }))),
+  const Change missing = [](Json& j) { j["variants"].erase(j["variants"].begin()); };
+  CHECK(contains(biome_error(missing), "no variant of base \"desert_sand\" in band \"cold\""));
+  const Change twice = [](Json& j) { j["variants"].push_back(j["variants"][0]); };
+  CHECK(contains(biome_error(twice), "second variant of base \"desert_sand\" in band \"cold\""));
+  const Change saline = [](Json& j) { j["variants"][0]["saline"] = true; };
+  CHECK(contains(biome_error(saline), "$.variants[0].saline: only wetland variants have saline"));
+  const Change frozen = [](Json& j) { j["variants"][0]["bands"][0] = "frozen"; };
+  CHECK(contains(biome_error(frozen),
                  "$.variants[0].bands[0]: frozen band \"frozen\" has no variants"));
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes, [](Json& j) { j["mangrove"]["base"] = "badlands"; }))),
-                 "$.mangrove.base: \"badlands\" is not a wetland base"));
+  const Change mangrove = [](Json& j) { j["mangrove"]["base"] = "badlands"; };
+  CHECK(contains(biome_error(mangrove), "$.mangrove.base: \"badlands\" is not a wetland base"));
 }
 
 TEST_CASE("params.tables temperature bands and water rows") {
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes,
-                             [](Json& j) {
-                               j["temperature_bands"][1]["range"] = Json::array({-3, 9});
-                             }))),
-                 "$.temperature_bands[1].range: starts at -3, expected -4"));
-  CHECK(contains(refusal(wg::params::load_biome_table(
-                     mutated(kBiomes, [](Json& j) { j["ocean"].erase(j["ocean"].begin()); }))),
-                 "$.ocean: no row for band \"frozen\""));
-  CHECK(contains(refusal(wg::params::load_biome_table(mutated(
-                     kBiomes, [](Json& j) { j["lakes"][1]["salinity"] = Json::array({0}); }))),
-                 "second row for band \"frozen\" and salinity 0"));
+  const Change band = [](Json& j) { j["temperature_bands"][1]["range"] = Json::array({-3, 9}); };
+  CHECK(contains(biome_error(band), "$.temperature_bands[1].range: starts at -3, expected -4"));
+  const Change ocean = [](Json& j) { j["ocean"].erase(j["ocean"].begin()); };
+  CHECK(contains(biome_error(ocean), "$.ocean: no row for band \"frozen\""));
+  const Change lake_twice = [](Json& j) { j["lakes"][1]["salinity"] = Json::array({0}); };
+  CHECK(contains(biome_error(lake_twice), "second row for band \"frozen\" and salinity 0"));
   // Lake salinities must cover the salinity classes: a rule across tables.
+  const Change lake_gap = [](Json& j) { j["lakes"][2]["salinity"] = Json::array({66}); };
   Texts texts;
-  texts.biomes = mutated(kBiomes, [](Json& j) { j["lakes"][2]["salinity"] = Json::array({66}); });
+  texts.biomes = mutated(kBiomes, lake_gap);
   REQUIRE(wg::params::load_biome_table(texts.biomes).has_value());
   CHECK(contains(refusal(wg::params::load_tables(texts.sources())),
                  "biome_table:$.lakes: no row for band \"frozen\" and salinity 100"));
 }
 
 TEST_CASE("params.tables climate and salinity rules") {
-  CHECK(contains(refusal(wg::params::load_climate_classes(
-                     mutated(kClimate, [](Json& j) { j["classes"][2]["min_value"] = 0; }))),
+  const Change unsorted = [](Json& j) { j["classes"][2]["min_value"] = 0; };
+  CHECK(contains(climate_error(unsorted),
                  "$.classes[2].min_value: classes must be sorted by increasing min_value"));
-  CHECK(contains(refusal(wg::params::load_climate_classes(
-                     mutated(kClimate, [](Json& j) { j["classes"][0]["min_value"] = -999; }))),
-                 "$.classes[0].min_value: the first class must start at"));
-  CHECK(contains(refusal(wg::params::load_salinity_classes(
-                     mutated(kSalinity, [](Json& j) { j["classes"][1]["value"] = 30; }))),
+  const Change start = [](Json& j) { j["classes"][0]["min_value"] = -999; };
+  CHECK(contains(climate_error(start), "$.classes[0].min_value: the first class must start at"));
+  const Change value = [](Json& j) { j["classes"][1]["value"] = 30; };
+  CHECK(contains(salinity_error(value),
                  "$.classes: class values must be the salinity field values 0, 33, 66, 100"));
 }
 
 TEST_CASE("params.tables geology rules") {
-  CHECK(contains(refusal(wg::params::load_rock_types(
-                     mutated(kRocks, [](Json& j) { j["rocks"][1]["name"] = "sandstone"; }))),
-                 "$.rocks[1].name: duplicate name \"sandstone\""));
-  CHECK(contains(refusal(wg::params::load_rock_types(
-                     mutated(kRocks, [](Json& j) { j["rocks"][0]["extra"] = 1; }))),
-                 "$.rocks[0].extra: unknown key"));
-  CHECK(contains(refusal(wg::params::load_rock_types(
-                     mutated(kRocks, [](Json& j) { j["rocks"][0]["erodibility"] = 0; }))),
-                 "$.rocks[0].erodibility: must be positive"));
-  CHECK(contains(refusal(wg::params::load_soils(mutated(kSoils,
-                                                        [](Json& j) {
-                                                          j["soils"][0]["land"] = false;
-                                                          j["soils"][0]["shallow_ocean"] = false;
-                                                        }))),
+  const Change duplicate = [](Json& j) { j["rocks"][1]["name"] = "sandstone"; };
+  CHECK(contains(rock_error(duplicate), "$.rocks[1].name: duplicate name \"sandstone\""));
+  const Change extra = [](Json& j) { j["rocks"][0]["extra"] = 1; };
+  CHECK(contains(rock_error(extra), "$.rocks[0].extra: unknown key"));
+  const Change zero_k = [](Json& j) { j["rocks"][0]["erodibility"] = 0; };
+  CHECK(contains(rock_error(zero_k), "$.rocks[0].erodibility: must be positive"));
+  const Change nowhere = [](Json& j) {
+    j["soils"][0]["land"] = false;
+    j["soils"][0]["shallow_ocean"] = false;
+  };
+  CHECK(contains(soil_error(nowhere),
                  "$.soils[0]: needs at least one of land, shallow_ocean, deep_ocean"));
-  CHECK(
-      contains(refusal(wg::params::load_minerals(mutated(
-                   kMinerals,
-                   [](Json& j) { j["minerals"][0]["environments"][0]["host_rock"] = "granite"; }))),
-               "needs exactly one of host_class, host_rock, host_mineral"));
-  CHECK(contains(
-      refusal(wg::params::load_minerals(mutated(kMinerals,
-                                                [](Json& j) {
-                                                  Json& minerals = j["minerals"];
-                                                  Json& last = minerals[minerals.size() - 1];
-                                                  last["environments"][0]["host_mineral"] =
-                                                      last["name"];
-                                                }))),
-      "a mineral cannot host itself"));
+  const Change two_hosts = [](Json& j) {
+    j["minerals"][0]["environments"][0]["host_rock"] = "granite";
+  };
+  CHECK(contains(mineral_error(two_hosts),
+                 "needs exactly one of host_class, host_rock, host_mineral"));
+  const Change self_host = [](Json& j) {
+    Json& last = j["minerals"][j["minerals"].size() - 1];
+    last["environments"][0]["host_mineral"] = last["name"];
+  };
+  CHECK(contains(mineral_error(self_host), "a mineral cannot host itself"));
   // A rock named by a mineral must exist: a rule across tables.
+  const Change unknown_rock = [](Json& j) {
+    j["minerals"][4]["environments"][0]["host_rock"] = "unobtainium";
+  };
   Texts texts;
-  texts.minerals = mutated(
-      kMinerals, [](Json& j) { j["minerals"][4]["environments"][0]["host_rock"] = "unobtainium"; });
+  texts.minerals = mutated(kMinerals, unknown_rock);
   REQUIRE(wg::params::load_minerals(texts.minerals).has_value());
   CHECK(contains(refusal(wg::params::load_tables(texts.sources())),
                  "minerals:$.minerals[4].environments[0].host_rock: unknown rock \"unobtainium\""));
 }
 
 TEST_CASE("params.tables versions and malformed text") {
-  const auto future =
-      wg::params::load_soils(mutated(kSoils, [](Json& j) { j["schema_version"] = 2; }));
+  const Change future_version = [](Json& j) { j["schema_version"] = 2; };
+  const auto future = wg::params::load_soils(mutated(kSoils, future_version));
   REQUIRE(!future.has_value());
   CHECK(future.error().code == StatusCode::unsupported_version);
   const auto broken = wg::params::load_soils("{");

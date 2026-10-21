@@ -69,12 +69,9 @@ TEST_CASE("params.hash changes with every single parameter element") {
       CAPTURE(i);
       GenParams p = base;
       const double v = wg::params::get_param(p, d, i);
-      double changed = v + 1.0;
-      if (d.kind == ParamKind::boolean) {
-        changed = v == 0.0 ? 1.0 : 0.0;
-      } else if (d.kind == ParamKind::enumeration) {
-        changed = v == 0.0 ? 1.0 : 0.0;
-      }
+      // Booleans and enumerations flip between 0 and 1; numbers grow by 1.
+      const bool flag = d.kind == ParamKind::boolean || d.kind == ParamKind::enumeration;
+      const double changed = flag ? (v == 0.0 ? 1.0 : 0.0) : v + 1.0;
       wg::params::set_param(p, d, i, changed);
       const std::uint64_t hp = params_hash(p);
       CHECK(hp != h);
