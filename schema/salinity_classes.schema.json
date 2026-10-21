@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LeoBasov/world-generator/schema/salinity_classes.schema.json",
+  "title": "worldgen-core salinity classes",
+  "description": "Quantisation of the coastal salinity S(d) into the classes of the field registry (R8.2, A19). A value belongs to the last class whose min_salinity it reaches.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "classes"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "value",
+          "min_salinity",
+          "confidence"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "value": {
+            "description": "Stored class value; the values must equal the registry values 0, 33, 66, 100 in order.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "min_salinity": {
+            "description": "Lowest S(d) of the class (inclusive).",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

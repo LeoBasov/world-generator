@@ -57,6 +57,8 @@ add_library(
   src/core/thread_pool.cpp
   src/core/version.cpp
   src/core/world_state.cpp
+  src/io/hash.cpp
+  src/io/json.cpp
   src/numerics/differences.cpp
   src/numerics/distance.cpp
   src/numerics/fft.cpp
@@ -65,7 +67,13 @@ add_library(
   src/numerics/laplacian.cpp
   src/numerics/quantile.cpp
   src/numerics/spectrum.cpp
-  src/numerics/variogram.cpp)
+  src/numerics/variogram.cpp
+  src/params/hash.cpp
+  src/params/load.cpp
+  src/params/params.cpp
+  src/params/reader.cpp
+  src/params/tables.cpp
+  src/params/validation.cpp)
 add_library(worldgen_core::worldgen_core ALIAS worldgen_core)
 
 target_include_directories(
@@ -74,6 +82,11 @@ target_include_directories(
 target_compile_features(worldgen_core PUBLIC cxx_std_20)
 # Installed consumers find tl/expected.hpp in the same include directory (installed by tl-expected).
 target_link_libraries(worldgen_core PUBLIC $<BUILD_INTERFACE:tl::expected>)
+# Internal headers (src/io/json.hpp, ...) are included as "io/json.hpp"; never installed.
+target_include_directories(worldgen_core PRIVATE ${PROJECT_SOURCE_DIR}/src)
+# nlohmann/json and xxHash are implementation details: no public header includes them.
+target_link_libraries(worldgen_core PRIVATE $<BUILD_INTERFACE:nlohmann_json::nlohmann_json>
+                                            $<BUILD_INTERFACE:wg_xxhash>)
 # ThreadPool (A05) uses std::thread; consumers of the static library need the thread library too.
 target_link_libraries(worldgen_core PUBLIC Threads::Threads)
 target_compile_definitions(
@@ -115,8 +128,9 @@ if(Python3_Interpreter_FOUND)
   add_custom_target(
     wg_codegen
     COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tools/codegen/gen_field_ids.py"
+    COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tools/codegen/gen_params.py"
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    COMMENT "Generating include/wg/generated/field_ids.hpp"
+    COMMENT "Generating include/wg/generated/field_ids.hpp and gen_params.hpp"
     VERBATIM)
 endif()
 
@@ -133,6 +147,7 @@ install(
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY include/wg DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY schema/ DESTINATION ${CMAKE_INSTALL_DATADIR}/worldgen_core/schema)
+install(DIRECTORY data/ DESTINATION ${CMAKE_INSTALL_DATADIR}/worldgen_core/data)
 install(
   EXPORT worldgen_coreTargets
   NAMESPACE worldgen_core::

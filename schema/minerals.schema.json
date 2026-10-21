@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LeoBasov/world-generator/schema/minerals.schema.json",
+  "title": "worldgen-core minerals",
+  "description": "Mineral deposits (R10.2, A21). Each environment names exactly one host: a rock class, a rock of rock_types.json, or another mineral for nested inclusions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "minerals"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "minerals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "kind",
+          "environments",
+          "confidence"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "kind": {
+            "enum": [
+              "ore",
+              "fuel",
+              "gem",
+              "host"
+            ]
+          },
+          "environments": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "inclusion",
+                "frequency"
+              ],
+              "properties": {
+                "host_class": {
+                  "enum": [
+                    "sedimentary",
+                    "igneous_extrusive",
+                    "igneous_intrusive",
+                    "metamorphic"
+                  ]
+                },
+                "host_rock": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "host_mineral": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "inclusion": {
+                  "enum": [
+                    "vein",
+                    "cluster",
+                    "small_cluster",
+                    "single"
+                  ]
+                },
+                "frequency": {
+                  "description": "Relative frequency in this host (DF ENVIRONMENT).",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                }
+              },
+              "oneOf": [
+                {
+                  "required": [
+                    "host_class"
+                  ]
+                },
+                {
+                  "required": [
+                    "host_rock"
+                  ]
+                },
+                {
+                  "required": [
+                    "host_mineral"
+                  ]
+                }
+              ]
+            }
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

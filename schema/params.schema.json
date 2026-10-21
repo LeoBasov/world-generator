@@ -1,0 +1,711 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LeoBasov/world-generator/schema/params.schema.json",
+  "title": "worldgen-core generation parameters",
+  "description": "Parameter file params.json (plan section 6.5, A07). Source of include/wg/generated/gen_params.hpp; regenerate with tools/codegen/gen_params.py. Every leaf has a default, so a file lists only what differs. DF parameter names are kept verbatim where they exist. Values are defaults, not calibration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version"],
+  "x-document-keys": ["$schema", "schema_version", "seed", "profile"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "seed": {
+      "description": "World seed; a run default that wgcli --seed overrides. Not part of the parameter hash.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "profile": {
+      "description": "Profile id (data/profiles/<id>.json); a run default. Not part of the parameter hash.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "grid": {
+      "description": "Region-tile grid and physical scale (R3, plan section 3).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "size": {
+          "description": "Region tiles per axis, N = 2^n + 1 (R3).",
+          "type": "integer", "minimum": 17, "maximum": 257, "default": 129,
+          "x-df-name": "DIM", "x-unit": "tiles", "x-report": "R3"
+        },
+        "dx_m": {
+          "description": "Size of one region tile.",
+          "type": "number", "minimum": 1, "maximum": 100000, "default": 1000,
+          "x-unit": "m", "x-report": "R6.3"
+        },
+        "hu_m": {
+          "description": "Metres per elevation unit.",
+          "type": "number", "minimum": 0.1, "maximum": 1000, "default": 10,
+          "x-unit": "m", "x-report": "R5.3"
+        },
+        "refinement": {
+          "description": "Refinement factor r of the physical simulation grid, N_sim = r (N - 1) + 1; one of 1, 2, 4, 8 (plan section 3).",
+          "type": "integer", "minimum": 1, "maximum": 8, "default": 2,
+          "x-unit": ""
+        }
+      }
+    },
+    "poles": {
+      "description": "Pole placement (R2 stage 1, R5.1).",
+      "type": "string", "enum": ["none", "north", "south", "both"], "default": "north",
+      "x-df-name": "POLE", "x-report": "R5.1"
+    },
+    "fields": {
+      "description": "The six primary fractal fields (R3). min and max must lie inside the field's registry range.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "elevation": {
+          "$ref": "#/$defs/field_gen", "x-df-name": "ELEVATION",
+          "default": { "min": 1, "max": 400, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 1600, "y_variance": 1600, "hurst": 0.5, "noise_scale": 0.25 }
+        },
+        "rainfall": {
+          "$ref": "#/$defs/field_gen", "x-df-name": "RAINFALL",
+          "default": { "min": 0, "max": 100, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800, "hurst": 0.5, "noise_scale": 0.25 }
+        },
+        "temperature": {
+          "$ref": "#/$defs/field_gen", "x-df-name": "TEMPERATURE",
+          "default": { "min": 25, "max": 75, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800, "hurst": 0.5, "noise_scale": 0.25 }
+        },
+        "drainage": {
+          "$ref": "#/$defs/field_gen", "x-df-name": "DRAINAGE",
+          "default": { "min": 0, "max": 100, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800, "hurst": 0.5, "noise_scale": 0.25 }
+        },
+        "volcanism": {
+          "$ref": "#/$defs/field_gen", "x-df-name": "VOLCANISM",
+          "default": { "min": 0, "max": 100, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800, "hurst": 0.5, "noise_scale": 0.25 }
+        },
+        "savagery": {
+          "$ref": "#/$defs/field_gen", "x-df-name": "SAVAGERY",
+          "default": { "min": 0, "max": 100, "weights": [1, 1, 1, 1, 1], "mesh": 3, "x_variance": 800, "y_variance": 800, "hurst": 0.5, "noise_scale": 0.25 }
+        }
+      }
+    },
+    "elevation_post": {
+      "description": "Elevation post-processing (R4, A13).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plains_z_lo": {
+          "description": "Lower edge of the plains smoothing band.",
+          "type": "number", "minimum": 0, "maximum": 400, "default": 110,
+          "x-unit": "eu", "x-report": "R4.4"
+        },
+        "plains_z_hi": {
+          "description": "Upper edge of the plains smoothing band.",
+          "type": "number", "minimum": 0, "maximum": 400, "default": 290,
+          "x-unit": "eu", "x-report": "R4.4"
+        },
+        "plains_taper": {
+          "description": "Width outside the band over which the smoothing weight w(z) tapers to 0.",
+          "type": "number", "minimum": 0, "maximum": 100, "default": 10,
+          "x-unit": "eu", "x-report": "R4.4"
+        },
+        "plains_lambda": {
+          "description": "Relaxation factor lambda of one smoothing step.",
+          "type": "number", "minimum": 0, "maximum": 1, "default": 0.5,
+          "x-unit": "", "x-report": "R4.4"
+        },
+        "plains_iterations": {
+          "description": "Number of plains smoothing steps.",
+          "type": "integer", "minimum": 0, "maximum": 1000, "default": 20,
+          "x-unit": "", "x-report": "R4.4"
+        },
+        "peak_height": {
+          "description": "Height A_p of the Gaussian peak bump (clamped at 400).",
+          "type": "number", "minimum": 0, "maximum": 400, "default": 30,
+          "x-unit": "eu", "x-report": "R4.3"
+        },
+        "peak_width": {
+          "description": "Width l of the Gaussian peak bump.",
+          "type": "number", "minimum": 0.1, "maximum": 64, "default": 3,
+          "x-unit": "tiles", "x-report": "R4.3"
+        },
+        "volcano_height": {
+          "description": "Height of the local elevation bump around a volcano.",
+          "type": "number", "minimum": 0, "maximum": 400, "default": 20,
+          "x-unit": "eu", "x-report": "R4.5"
+        },
+        "volcano_width": {
+          "description": "Width of the local elevation bump around a volcano.",
+          "type": "number", "minimum": 0.1, "maximum": 64, "default": 2,
+          "x-unit": "tiles", "x-report": "R4.5"
+        }
+      }
+    },
+    "temperature": {
+      "description": "Temperature model (R5.3, A14). Game-scale temperature = k * degC + offset.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "equator_pole_delta": {
+          "description": "Equator-to-pole difference Delta T of the latitude term -Delta T sin^2(phi).",
+          "type": "number", "minimum": 0, "maximum": 400, "default": 75,
+          "x-unit": "game", "x-report": "R5.3"
+        },
+        "lapse_rate": {
+          "description": "Environmental lapse rate Gamma.",
+          "type": "number", "minimum": 0, "maximum": 20, "default": 6.5,
+          "x-unit": "K/km", "x-report": "R5.3"
+        },
+        "game_per_kelvin": {
+          "description": "Game-scale units per kelvin, k (fitted to the R5.2 classes).",
+          "type": "number", "minimum": 0.1, "maximum": 10, "default": 2.4,
+          "x-unit": "game/K", "x-report": "R5.2"
+        },
+        "celsius_offset": {
+          "description": "Game-scale value of 0 degC.",
+          "type": "number", "minimum": -100, "maximum": 100, "default": 1,
+          "x-unit": "game", "x-report": "R5.2"
+        },
+        "forest_damping": {
+          "description": "Forest damping alpha, subtracted as alpha * V_veg.",
+          "type": "number", "minimum": 0, "maximum": 50, "default": 10,
+          "x-unit": "game", "x-report": "R5.3"
+        },
+        "rain_damping": {
+          "description": "Wet-cell damping: delta T_P = -rain_damping * P / 100.",
+          "type": "number", "minimum": 0, "maximum": 50, "default": 5,
+          "x-unit": "game", "x-report": "R5.3"
+        }
+      }
+    },
+    "erosion": {
+      "description": "Test-river incision and thermal erosion, classic profile (R6, A16).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "EROSION_CYCLE_COUNT": {
+          "description": "Number of erosion cycles of test rivers.",
+          "type": "integer", "minimum": 0, "maximum": 1000, "default": 250,
+          "x-df-name": "EROSION_CYCLE_COUNT", "x-unit": "", "x-report": "R6.1"
+        },
+        "PERIODICALLY_ERODE_EXTREMES": {
+          "description": "Smooth very large elevation steps between cycles (R6.4).",
+          "type": "boolean", "default": true,
+          "x-df-name": "PERIODICALLY_ERODE_EXTREMES", "x-report": "R6.1"
+        },
+        "dig_depth": {
+          "description": "Depth epsilon a walker digs per step when stuck.",
+          "type": "number", "minimum": 0, "maximum": 50, "default": 1,
+          "x-unit": "eu", "x-report": "R6.3"
+        },
+        "walker_step_limit": {
+          "description": "Step limit L_max of a test-river walker.",
+          "type": "integer", "minimum": 1, "maximum": 100000, "default": 1024,
+          "x-unit": "steps", "x-report": "R6.3"
+        },
+        "talus_threshold": {
+          "description": "Talus threshold Theta of thermal erosion.",
+          "type": "number", "minimum": 0, "maximum": 400, "default": 30,
+          "x-unit": "eu", "x-report": "R6.4"
+        },
+        "talus_fraction": {
+          "description": "Fraction c of the excess moved downhill per thermal step.",
+          "type": "number", "minimum": 0, "maximum": 1, "default": 0.5,
+          "x-unit": "", "x-report": "R6.4"
+        }
+      }
+    },
+    "rivers": {
+      "description": "Rivers, lakes and small oceans (R6.5, R6.6, plan 7.1; A15, A17).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width_coefficient": {
+          "description": "Coefficient a_w of the hydraulic geometry w = a_w Q^b.",
+          "type": "number", "minimum": 0, "maximum": 1000, "default": 1,
+          "x-unit": "", "x-report": "R6.5"
+        },
+        "width_exponent": {
+          "description": "Exponent b of the hydraulic geometry w = a_w Q^b.",
+          "type": "number", "minimum": 0, "maximum": 1, "default": 0.5,
+          "x-unit": "", "x-report": "R6.5"
+        },
+        "min_drop": {
+          "description": "Minimal drop epsilon_z between a river cell and its receiver after the final smoothing.",
+          "type": "number", "minimum": 0, "maximum": 10, "default": 0.01,
+          "x-unit": "eu", "x-report": "plan 7.1"
+        },
+        "lake_min_volume": {
+          "description": "Minimal depression volume V_min (sum of fill depths over the cells) that becomes a lake.",
+          "type": "number", "minimum": 0, "maximum": 1000000000, "default": 10,
+          "x-unit": "eu*tiles", "x-report": "plan 7.1"
+        },
+        "lake_bulge_count": {
+          "description": "Number of river cells where a lake is bulged out.",
+          "type": "integer", "minimum": 0, "maximum": 1000, "default": 10,
+          "x-unit": "", "x-report": "R6.1"
+        },
+        "lake_bulge_height": {
+          "description": "Flood height Delta h_lake of a bulged lake.",
+          "type": "number", "minimum": 0, "maximum": 50, "default": 2,
+          "x-unit": "eu", "x-report": "plan 7.1"
+        },
+        "small_ocean_min_area": {
+          "description": "Ocean components with fewer cells are removed (R6.6).",
+          "type": "integer", "minimum": 0, "maximum": 66049, "default": 64,
+          "x-unit": "tiles", "x-report": "R6.6"
+        }
+      }
+    },
+    "precipitation": {
+      "description": "Orographic precipitation with moisture depletion (R7.2, A18).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "OROGRAPHIC_PRECIPITATION": {
+          "description": "Apply orographic precipitation and rain shadows.",
+          "type": "boolean", "default": true,
+          "x-df-name": "OROGRAPHIC_PRECIPITATION", "x-report": "R7.1"
+        },
+        "df_drainage_quirk": {
+          "description": "DF fidelity toggle: orographic rain only where drainage >= 50 (R7.1, plan 16).",
+          "type": "boolean", "default": true,
+          "x-report": "R7.1"
+        },
+        "q_max": {
+          "description": "Moisture content q_max of saturated air.",
+          "type": "number", "minimum": 0.001, "maximum": 1000, "default": 100,
+          "x-unit": "", "x-report": "R7.2"
+        },
+        "orographic_gain": {
+          "description": "Orographic gain k_o.",
+          "type": "number", "minimum": 0, "maximum": 100, "default": 0.5,
+          "x-unit": "", "x-report": "R7.2"
+        },
+        "draw_fraction": {
+          "description": "Fraction eta of rainfall drawn from the moisture column per tile.",
+          "type": "number", "minimum": 0, "maximum": 1, "default": 0.02,
+          "x-unit": "1/tile", "x-report": "R7.2"
+        },
+        "recharge_ocean": {
+          "description": "Moisture recharge E over ocean per tile.",
+          "type": "number", "minimum": 0, "maximum": 1000, "default": 10,
+          "x-unit": "1/tile", "x-report": "R7.2"
+        },
+        "recharge_land": {
+          "description": "Moisture recharge E over land per tile.",
+          "type": "number", "minimum": 0, "maximum": 1000, "default": 0.5,
+          "x-unit": "1/tile", "x-report": "R7.2"
+        }
+      }
+    },
+    "vegetation": {
+      "description": "Vegetation from the Miami model (R8.1, A19).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rain_mm_per_index": {
+          "description": "Millimetres per year per rainfall index unit, P_mm = factor * P.",
+          "type": "number", "minimum": 0, "maximum": 1000, "default": 30,
+          "x-unit": "mm/yr", "x-report": "R8.1"
+        },
+        "tree_line": {
+          "description": "Elevation above which vegetation is 0.",
+          "type": "number", "minimum": 100, "maximum": 400, "default": 300,
+          "x-unit": "eu", "x-report": "R8.1"
+        }
+      }
+    },
+    "salinity": {
+      "description": "Coastal salinity S(d) = 100 exp(-d / lambda) (R8.2, A19).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "decay_length": {
+          "description": "Decay length lambda.",
+          "type": "number", "minimum": 0.1, "maximum": 10, "default": 1.5,
+          "x-unit": "tiles", "x-report": "R8.2"
+        }
+      }
+    },
+    "geology": {
+      "description": "Stone column, soils, minerals and caverns (R10, A21).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "MINERAL_SCARCITY": {
+          "description": "Overall mineral scarcity; higher is rarer.",
+          "type": "integer", "minimum": 100, "maximum": 100000, "default": 2500,
+          "x-df-name": "MINERAL_SCARCITY", "x-unit": "", "x-report": "R10.2"
+        },
+        "sedimentary_top_probability": {
+          "description": "Probability that the first stone layer is sedimentary where volcanism allows it.",
+          "type": "number", "minimum": 0, "maximum": 1, "default": 0.8,
+          "x-unit": "", "x-report": "R10.1"
+        },
+        "layer_count_min": {
+          "description": "Minimal number of stone layers per column.",
+          "type": "integer", "minimum": 1, "maximum": 32, "default": 3,
+          "x-unit": "", "x-report": "R10.4"
+        },
+        "layer_count_max": {
+          "description": "Maximal number of stone layers per column.",
+          "type": "integer", "minimum": 1, "maximum": 32, "default": 8,
+          "x-unit": "", "x-report": "R10.4"
+        },
+        "layer_thickness_log_mean": {
+          "description": "Mean mu of ln(thickness) of a stone layer.",
+          "type": "number", "minimum": -10, "maximum": 10, "default": 3,
+          "x-unit": "ln(z-levels)", "x-report": "R10.4"
+        },
+        "layer_thickness_log_sigma": {
+          "description": "Standard deviation sigma of ln(thickness) of a stone layer.",
+          "type": "number", "minimum": 0, "maximum": 5, "default": 0.5,
+          "x-unit": "", "x-report": "R10.4"
+        },
+        "soil_max_layers": {
+          "description": "Maximal number of soil layers (none on mountains).",
+          "type": "integer", "minimum": 0, "maximum": 32, "default": 10,
+          "x-unit": "", "x-report": "R10.1"
+        },
+        "soil_production": {
+          "description": "Soil production rate P_0 on bare bedrock.",
+          "type": "number", "minimum": 0, "maximum": 1, "default": 0.0002,
+          "x-unit": "m/yr", "x-report": "R10.4"
+        },
+        "soil_decay_depth": {
+          "description": "Decay depth h_0 of soil production.",
+          "type": "number", "minimum": 0.01, "maximum": 10, "default": 0.5,
+          "x-unit": "m", "x-report": "R10.4"
+        },
+        "soil_diffusivity": {
+          "description": "Soil diffusivity kappa of downslope transport.",
+          "type": "number", "minimum": 0, "maximum": 10, "default": 0.01,
+          "x-unit": "m^2/yr", "x-report": "R10.4"
+        },
+        "df_heavy_aquifer_quirk": {
+          "description": "DF fidelity toggle: an aquifer is heavy when drainage mod 20 = 7 (R10.3, plan 16).",
+          "type": "boolean", "default": true,
+          "x-report": "R10.3"
+        },
+        "CAVERN_LAYER_OPENNESS_MIN": {
+          "description": "Minimal openness of the three cavern layers.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [0, 0, 0],
+          "items": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "x-df-name": "CAVERN_LAYER_OPENNESS_MIN", "x-unit": "", "x-report": "R10.1"
+        },
+        "CAVERN_LAYER_OPENNESS_MAX": {
+          "description": "Maximal openness of the three cavern layers.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [100, 100, 100],
+          "items": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "x-df-name": "CAVERN_LAYER_OPENNESS_MAX", "x-unit": "", "x-report": "R10.1"
+        },
+        "CAVERN_LAYER_PASSAGE_DENSITY_MIN": {
+          "description": "Minimal passage density of the three cavern layers.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [0, 0, 0],
+          "items": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "x-df-name": "CAVERN_LAYER_PASSAGE_DENSITY_MIN", "x-unit": "", "x-report": "R10.1"
+        },
+        "CAVERN_LAYER_PASSAGE_DENSITY_MAX": {
+          "description": "Maximal passage density of the three cavern layers.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [100, 100, 100],
+          "items": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "x-df-name": "CAVERN_LAYER_PASSAGE_DENSITY_MAX", "x-unit": "", "x-report": "R10.1"
+        },
+        "CAVERN_LAYER_WATER_MIN": {
+          "description": "Minimal water content of the three cavern layers.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [0, 0, 0],
+          "items": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "x-df-name": "CAVERN_LAYER_WATER_MIN", "x-unit": "", "x-report": "R10.1"
+        },
+        "CAVERN_LAYER_WATER_MAX": {
+          "description": "Maximal water content of the three cavern layers.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [100, 100, 100],
+          "items": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "x-df-name": "CAVERN_LAYER_WATER_MAX", "x-unit": "", "x-report": "R10.1"
+        }
+      }
+    },
+    "checks": {
+      "description": "Rejection thresholds (R11, A22). The defaults impose no constraint; presets set DF-like values.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ELEVATION_RANGES": {
+          "description": "Minimal counts of low, mid and high elevation squares.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [0, 0, 0],
+          "items": { "type": "integer", "minimum": 0, "maximum": 66049 },
+          "x-df-name": "ELEVATION_RANGES", "x-unit": "tiles", "x-report": "R11"
+        },
+        "RAIN_RANGES": {
+          "description": "Minimal counts of low, mid and high rainfall squares.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [0, 0, 0],
+          "items": { "type": "integer", "minimum": 0, "maximum": 66049 },
+          "x-df-name": "RAIN_RANGES", "x-unit": "tiles", "x-report": "R11"
+        },
+        "DRAINAGE_RANGES": {
+          "description": "Minimal counts of low, mid and high drainage squares.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [0, 0, 0],
+          "items": { "type": "integer", "minimum": 0, "maximum": 66049 },
+          "x-df-name": "DRAINAGE_RANGES", "x-unit": "tiles", "x-report": "R11"
+        },
+        "VOLCANISM_RANGES": {
+          "description": "Minimal counts of low, mid and high volcanism squares.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [0, 0, 0],
+          "items": { "type": "integer", "minimum": 0, "maximum": 66049 },
+          "x-df-name": "VOLCANISM_RANGES", "x-unit": "tiles", "x-report": "R11"
+        },
+        "SAVAGERY_RANGES": {
+          "description": "Minimal counts of low, mid and high savagery squares.",
+          "type": "array", "minItems": 3, "maxItems": 3, "default": [0, 0, 0],
+          "items": { "type": "integer", "minimum": 0, "maximum": 66049 },
+          "x-df-name": "SAVAGERY_RANGES", "x-unit": "tiles", "x-report": "R11"
+        },
+        "PARTIAL_OCEAN_EDGE_MIN": {
+          "description": "Minimal number of map edges partly covered by ocean.",
+          "type": "integer", "minimum": 0, "maximum": 4, "default": 0,
+          "x-df-name": "PARTIAL_OCEAN_EDGE_MIN", "x-unit": "edges", "x-report": "R11"
+        },
+        "COMPLETE_OCEAN_EDGE_MIN": {
+          "description": "Minimal number of map edges completely covered by ocean.",
+          "type": "integer", "minimum": 0, "maximum": 4, "default": 0,
+          "x-df-name": "COMPLETE_OCEAN_EDGE_MIN", "x-unit": "edges", "x-report": "R11"
+        },
+        "PEAK_NUMBER_MIN": {
+          "description": "Minimal number of peaks (z = 400).",
+          "type": "integer", "minimum": 0, "maximum": 1000, "default": 0,
+          "x-df-name": "PEAK_NUMBER_MIN", "x-unit": "", "x-report": "R4.3"
+        },
+        "VOLCANO_MIN": {
+          "description": "Minimal number of volcanoes (V = 100).",
+          "type": "integer", "minimum": 0, "maximum": 1000, "default": 0,
+          "x-df-name": "VOLCANO_MIN", "x-unit": "", "x-report": "R4.5"
+        },
+        "RIVER_MINS": {
+          "description": "Minimal numbers of river sources before and after erosion.",
+          "type": "array", "minItems": 2, "maxItems": 2, "default": [0, 0],
+          "items": { "type": "integer", "minimum": 0, "maximum": 800 },
+          "x-df-name": "RIVER_MINS", "x-unit": "", "x-report": "R6.1"
+        },
+        "REGION_COUNTS": {
+          "description": "Per region type: minimal initial squares, initial regions and final regions (R11).",
+          "type": "object",
+          "additionalProperties": false,
+          "x-df-name": "REGION_COUNTS",
+          "properties": {
+            "SWAMP": { "$ref": "#/$defs/region_count" },
+            "DESERT": { "$ref": "#/$defs/region_count" },
+            "FOREST": { "$ref": "#/$defs/region_count" },
+            "MOUNTAINS": { "$ref": "#/$defs/region_count" },
+            "OCEAN": { "$ref": "#/$defs/region_count" },
+            "GLACIER": { "$ref": "#/$defs/region_count" },
+            "TUNDRA": { "$ref": "#/$defs/region_count" },
+            "GRASSLAND": { "$ref": "#/$defs/region_count" },
+            "HILLS": { "$ref": "#/$defs/region_count" }
+          }
+        },
+        "SUBREGION_MAX": {
+          "description": "Maximal number of regions.",
+          "type": "integer", "minimum": 0, "maximum": 5000, "default": 2750,
+          "x-df-name": "SUBREGION_MAX", "x-unit": "", "x-report": "R9.3"
+        },
+        "max_attempts": {
+          "description": "Attempt cap of the rejection loop (R8 requirement).",
+          "type": "integer", "minimum": 1, "maximum": 100000, "default": 100,
+          "x-unit": "", "x-report": "R11"
+        }
+      }
+    },
+    "physical": {
+      "description": "Parameters of the physical profile only (R12, plan 7.2).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tectonics": {
+          "description": "Plate tectonics (A24).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "plate_count": {
+              "description": "Number of plates K.",
+              "type": "integer", "minimum": 2, "maximum": 64, "default": 12,
+              "x-unit": "", "x-report": "plan 7.2"
+            },
+            "oceanic_fraction": {
+              "description": "Expected fraction of oceanic plates.",
+              "type": "number", "minimum": 0, "maximum": 1, "default": 0.6,
+              "x-unit": "", "x-report": "plan 7.2"
+            },
+            "plate_speed_max": {
+              "description": "Maximal plate speed.",
+              "type": "number", "minimum": 0, "maximum": 30, "default": 5,
+              "x-unit": "cm/yr", "x-report": "plan 7.2"
+            },
+            "boundary_noise": {
+              "description": "Amplitude of the fBm added to the Voronoi distance, relative to the mean plate radius.",
+              "type": "number", "minimum": 0, "maximum": 1, "default": 0.1,
+              "x-unit": "", "x-report": "plan 7.2"
+            },
+            "convergence_threshold": {
+              "description": "Threshold c_0 separating convergent, divergent and transform boundaries.",
+              "type": "number", "minimum": 0, "maximum": 30, "default": 0.5,
+              "x-unit": "cm/yr", "x-report": "plan 7.2"
+            },
+            "kernel_width": {
+              "description": "Width w of the uplift kernels.",
+              "type": "number", "minimum": 1, "maximum": 1000, "default": 100,
+              "x-unit": "km", "x-report": "plan 7.2"
+            },
+            "arc_offset": {
+              "description": "Offset d_0 of the arc on the overriding plate at subduction boundaries.",
+              "type": "number", "minimum": 0, "maximum": 1000, "default": 150,
+              "x-unit": "km", "x-report": "plan 7.2"
+            },
+            "uplift_max": {
+              "description": "Maximal uplift rate U.",
+              "type": "number", "minimum": 0, "maximum": 0.1, "default": 0.002,
+              "x-unit": "m/yr", "x-report": "R6.3"
+            },
+            "hotspot_density": {
+              "description": "Expected hot spots per 10^6 km^2 (Poisson points).",
+              "type": "number", "minimum": 0, "maximum": 100, "default": 1,
+              "x-unit": "1/Mkm^2", "x-report": "plan 7.2"
+            }
+          }
+        },
+        "erosion": {
+          "description": "Flux erosion and deposition (A26). Erodibility K comes from the rock table.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "area_exponent": {
+              "description": "Stream-power exponent m.",
+              "type": "number", "minimum": 0, "maximum": 2, "default": 0.5,
+              "x-unit": "", "x-report": "R6.3"
+            },
+            "slope_exponent": {
+              "description": "Stream-power exponent n.",
+              "type": "number", "minimum": 0.5, "maximum": 3, "default": 1,
+              "x-unit": "", "x-report": "R6.3"
+            },
+            "hillslope_diffusivity": {
+              "description": "Hillslope diffusivity kappa.",
+              "type": "number", "minimum": 0, "maximum": 10, "default": 0.01,
+              "x-unit": "m^2/yr", "x-report": "R4.4"
+            },
+            "settling_velocity": {
+              "description": "Settling velocity V_s of the erosion-deposition model.",
+              "type": "number", "minimum": 0, "maximum": 10, "default": 1,
+              "x-unit": "", "x-report": "plan 7.2"
+            },
+            "time_step": {
+              "description": "Time step Delta t of the implicit solver.",
+              "type": "number", "minimum": 1, "maximum": 10000000, "default": 10000,
+              "x-unit": "yr", "x-report": "plan 7.2"
+            },
+            "steps": {
+              "description": "Number of time steps.",
+              "type": "integer", "minimum": 1, "maximum": 100000, "default": 200,
+              "x-unit": "", "x-report": "plan 7.2"
+            }
+          }
+        },
+        "atmosphere": {
+          "description": "Seasonal amplitude A_s = A_0 + a_phi sin^2(phi) + a_c (1 - exp(-d_coast / L_c)) (A27).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "seasonal_base": {
+              "description": "Base amplitude A_0.",
+              "type": "number", "minimum": 0, "maximum": 200, "default": 10,
+              "x-unit": "game", "x-report": "plan 7.2"
+            },
+            "seasonal_latitude": {
+              "description": "Latitude gain a_phi.",
+              "type": "number", "minimum": 0, "maximum": 200, "default": 40,
+              "x-unit": "game", "x-report": "plan 7.2"
+            },
+            "seasonal_continentality": {
+              "description": "Continentality gain a_c.",
+              "type": "number", "minimum": 0, "maximum": 200, "default": 20,
+              "x-unit": "game", "x-report": "plan 7.2"
+            },
+            "continentality_length": {
+              "description": "Coastal distance scale L_c.",
+              "type": "number", "minimum": 1, "maximum": 10000, "default": 500,
+              "x-unit": "km", "x-report": "plan 7.2"
+            }
+          }
+        },
+        "drainage": {
+          "description": "Derived drainage from the topographic wetness index (A28).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "slope_min": {
+              "description": "Slope floor S_min of the wetness index.",
+              "type": "number", "minimum": 0.000001, "maximum": 1, "default": 0.001,
+              "x-unit": "m/m", "x-report": "plan 7.2"
+            },
+            "twi_weight": {
+              "description": "Weight w of the wetness index against soil permeability (w = 1: wetness index only).",
+              "type": "number", "minimum": 0, "maximum": 1, "default": 0.8,
+              "x-unit": "", "x-report": "plan 7.2"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "field_gen": {
+      "description": "Generation of one primary field (R3.2-R3.4). DF token <FIELD>:min:max:x_variance:y_variance and <FIELD>_FREQUENCY:mesh:w1..w5.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min": {
+          "description": "Lower end a of the field range.",
+          "type": "number", "minimum": -1000, "maximum": 1000, "default": 0,
+          "x-df-name": "{FIELD}", "x-unit": "field", "x-report": "R3.3"
+        },
+        "max": {
+          "description": "Upper end b of the field range.",
+          "type": "number", "minimum": -1000, "maximum": 1000, "default": 100,
+          "x-df-name": "{FIELD}", "x-unit": "field", "x-report": "R3.3"
+        },
+        "weights": {
+          "description": "Relative weights of the five bins of [min, max]; only ratios matter.",
+          "type": "array", "minItems": 5, "maxItems": 5, "default": [1, 1, 1, 1, 1],
+          "items": { "type": "number", "minimum": 0, "maximum": 1000000 },
+          "x-df-name": "{FIELD}_FREQUENCY", "x-unit": "", "x-report": "R3.2"
+        },
+        "mesh": {
+          "description": "Mesh parameter m: control grid of 2^(m-1) cells per axis (1 = mesh ignored).",
+          "type": "integer", "minimum": 1, "maximum": 6, "default": 3,
+          "x-df-name": "{FIELD}_FREQUENCY", "x-unit": "", "x-report": "R3.2"
+        },
+        "x_variance": {
+          "description": "X-variance V_x of the midpoint displacement.",
+          "type": "number", "minimum": 0, "maximum": 3200, "default": 800,
+          "x-df-name": "{FIELD}", "x-unit": "", "x-report": "R3.4"
+        },
+        "y_variance": {
+          "description": "Y-variance V_y of the midpoint displacement.",
+          "type": "number", "minimum": 0, "maximum": 3200, "default": 800,
+          "x-df-name": "{FIELD}", "x-unit": "", "x-report": "R3.4"
+        },
+        "hurst": {
+          "description": "Hurst exponent H of the displacement decay sigma_k = sigma_0 2^(-kH).",
+          "type": "number", "minimum": 0.01, "maximum": 0.99, "default": 0.5,
+          "x-unit": "", "x-report": "R3.4"
+        },
+        "noise_scale": {
+          "description": "Scale c: sigma_0 = c * (V / 3200) * (max - min) at the mesh level.",
+          "type": "number", "minimum": 0, "maximum": 10, "default": 0.25,
+          "x-unit": "", "x-report": "R3.4"
+        }
+      }
+    },
+    "region_count": {
+      "description": "Minimal initial squares, initial regions and final regions of one region type.",
+      "type": "array", "minItems": 3, "maxItems": 3, "default": [0, 0, 0],
+      "items": { "type": "integer", "minimum": 0, "maximum": 66049 },
+      "x-unit": "", "x-report": "R11"
+    }
+  }
+}

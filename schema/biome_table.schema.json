@@ -1,0 +1,473 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LeoBasov/world-generator/schema/biome_table.schema.json",
+  "title": "worldgen-core biome table",
+  "description": "Biome decision table of R9.1-R9.2 (A20). Biomes have stable ids (append-only, id = array position). The base rows partition rainfall x drainage on 0..100; the variants pick the biome per base label and temperature band, and for wetlands per salinity.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "region_types",
+    "biomes",
+    "thresholds",
+    "temperature_bands",
+    "base",
+    "variants",
+    "mangrove",
+    "special",
+    "ocean",
+    "lakes",
+    "rivers",
+    "region_sizes"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "region_types": {
+      "description": "Region types (R9.3); every REGION_COUNTS key must be one.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      }
+    },
+    "biomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "region_type",
+          "confidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "region_type": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ocean_max_elevation",
+        "mountain_min_elevation",
+        "glacier_min_drainage",
+        "saline_min_salinity",
+        "mangrove_max_drainage"
+      ],
+      "properties": {
+        "ocean_max_elevation": {
+          "description": "z <= this is ocean.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 400
+        },
+        "mountain_min_elevation": {
+          "description": "z >= this is mountain.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 400
+        },
+        "glacier_min_drainage": {
+          "description": "Frozen land with D >= this is glacier, else tundra.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "saline_min_salinity": {
+          "description": "Wetlands with salinity >= this take the saline variant.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "mangrove_max_drainage": {
+          "description": "A saline tropical swamp with D <= this is mangrove.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "temperature_bands": {
+      "description": "Bands partition the game-scale temperature -1000..1000.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "range",
+          "frozen",
+          "confidence"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "range": {
+            "description": "Inclusive range of the temperature rounded down.",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 1000
+            }
+          },
+          "frozen": {
+            "description": "Land in a frozen band becomes tundra or glacier.",
+            "type": "boolean"
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    },
+    "base": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "base",
+          "rainfall",
+          "drainage",
+          "hills",
+          "wetland",
+          "confidence"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "rainfall": {
+            "description": "Inclusive rainfall range.",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "drainage": {
+            "description": "Inclusive drainage range.",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "hills": {
+            "description": "The cells of the row form hills regions (R9.2: drainage decides the relief).",
+            "type": "boolean"
+          },
+          "wetland": {
+            "description": "Wetland base: its variants also depend on salinity.",
+            "type": "boolean"
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    },
+    "variants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "base",
+          "bands",
+          "biome",
+          "confidence"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "bands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "saline": {
+            "description": "Wetland variants only: saline (true) or fresh (false).",
+            "type": "boolean"
+          },
+          "biome": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    },
+    "mangrove": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base",
+        "band",
+        "biome",
+        "confidence"
+      ],
+      "properties": {
+        "base": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "band": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "biome": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "confidence": {
+          "description": "Evidence level (report section 1): documented, observed or unverified.",
+          "enum": [
+            "documented",
+            "observed",
+            "unverified"
+          ]
+        }
+      }
+    },
+    "special": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mountain",
+        "tundra",
+        "glacier"
+      ],
+      "properties": {
+        "mountain": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "tundra": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "glacier": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        }
+      }
+    },
+    "ocean": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bands",
+          "biome",
+          "confidence"
+        ],
+        "properties": {
+          "bands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "biome": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    },
+    "lakes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bands",
+          "salinity",
+          "biome",
+          "confidence"
+        ],
+        "properties": {
+          "bands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "salinity": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "biome": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    },
+    "rivers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bands",
+          "salinity",
+          "biome",
+          "confidence"
+        ],
+        "properties": {
+          "bands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "salinity": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "biome": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "confidence": {
+            "description": "Evidence level (report section 1): documented, observed or unverified.",
+            "enum": [
+              "documented",
+              "observed",
+              "unverified"
+            ]
+          }
+        }
+      }
+    },
+    "region_sizes": {
+      "description": "Region size classes (R9.3) by min_tiles; the first starts at 1.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "min_tiles"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "min_tiles": {
+            "description": "Smallest region of the class.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 66049
+          }
+        }
+      }
+    }
+  }
+}

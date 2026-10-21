@@ -1,0 +1,298 @@
+{
+  "$schema": "../../schema/minerals.schema.json",
+  "schema_version": 1,
+  "minerals": [
+    {
+      "name": "hematite",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "sedimentary",
+          "inclusion": "vein",
+          "frequency": 100
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "limonite",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "sedimentary",
+          "inclusion": "vein",
+          "frequency": 100
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "magnetite",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "sedimentary",
+          "inclusion": "vein",
+          "frequency": 50
+        },
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "vein",
+          "frequency": 25
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "native_copper",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "igneous_extrusive",
+          "inclusion": "vein",
+          "frequency": 100
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "malachite",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_rock": "limestone",
+          "inclusion": "cluster",
+          "frequency": 50
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "tetrahedrite",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "metamorphic",
+          "inclusion": "vein",
+          "frequency": 50
+        },
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "vein",
+          "frequency": 25
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "galena",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "sedimentary",
+          "inclusion": "vein",
+          "frequency": 25
+        },
+        {
+          "host_class": "metamorphic",
+          "inclusion": "vein",
+          "frequency": 25
+        },
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "vein",
+          "frequency": 25
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "sphalerite",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "metamorphic",
+          "inclusion": "vein",
+          "frequency": 25
+        },
+        {
+          "host_rock": "limestone",
+          "inclusion": "vein",
+          "frequency": 25
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "cassiterite",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "vein",
+          "frequency": 50
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "garnierite",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "vein",
+          "frequency": 25
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "bismuthinite",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "vein",
+          "frequency": 25
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "native_gold",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "igneous_extrusive",
+          "inclusion": "vein",
+          "frequency": 50
+        },
+        {
+          "host_class": "metamorphic",
+          "inclusion": "vein",
+          "frequency": 50
+        }
+      ],
+      "confidence": "documented"
+    },
+    {
+      "name": "native_silver",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "vein",
+          "frequency": 50
+        },
+        {
+          "host_class": "metamorphic",
+          "inclusion": "vein",
+          "frequency": 25
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "horn_silver",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "igneous_extrusive",
+          "inclusion": "small_cluster",
+          "frequency": 25
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "native_platinum",
+      "kind": "ore",
+      "environments": [
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "single",
+          "frequency": 10
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "bituminous_coal",
+      "kind": "fuel",
+      "environments": [
+        {
+          "host_rock": "shale",
+          "inclusion": "vein",
+          "frequency": 100
+        },
+        {
+          "host_rock": "claystone",
+          "inclusion": "vein",
+          "frequency": 50
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "lignite",
+      "kind": "fuel",
+      "environments": [
+        {
+          "host_class": "sedimentary",
+          "inclusion": "vein",
+          "frequency": 50
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "microcline",
+      "kind": "gem",
+      "environments": [
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "cluster",
+          "frequency": 50
+        }
+      ],
+      "confidence": "documented"
+    },
+    {
+      "name": "pyrope",
+      "kind": "gem",
+      "environments": [
+        {
+          "host_class": "igneous_intrusive",
+          "inclusion": "small_cluster",
+          "frequency": 25
+        }
+      ],
+      "confidence": "documented"
+    },
+    {
+      "name": "kimberlite",
+      "kind": "host",
+      "environments": [
+        {
+          "host_rock": "gabbro",
+          "inclusion": "vein",
+          "frequency": 25
+        }
+      ],
+      "confidence": "unverified"
+    },
+    {
+      "name": "diamond",
+      "kind": "gem",
+      "environments": [
+        {
+          "host_mineral": "kimberlite",
+          "inclusion": "single",
+          "frequency": 50
+        }
+      ],
+      "confidence": "documented"
+    }
+  ]
+}

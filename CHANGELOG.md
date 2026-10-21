@@ -58,4 +58,16 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   labelling, empirical CDF and quantile mapping, histograms and value ranges, radix-2 FFT,
   radially averaged power spectrum with spectral-exponent fit, and the directional variogram.
   Grid kernels are bit-identical for any thread count. ADR 0004 records the conventions.
+- Parameters and data tables (A07) in `wg::params`: the parameter schema
+  `schema/params.schema.json` with every R§3 / R§11 and physical parameter, the generator
+  `tools/codegen/gen_params.py` and the committed header `include/wg/generated/gen_params.hpp`
+  (`GenParams` with the defaults, `kParamDescriptors`, `find_param`); `load_params`,
+  `load_params_file`, `read_params` and `to_json` with errors located by JSON path; cross-field
+  validation with warnings for contradictory checks; `params_hash` (XXH3-64 over the values);
+  the presets `df_default`, `small_island` and `pangaea`; biome, climate, salinity, rock, soil
+  and mineral tables with their JSON Schemas, loaders, rules and `tables_hash`. ADR 0005
+  records the model and the hash.
+- `wg::io::xxh3_64`; new dependencies nlohmann/json v3.12.0 and xxHash v0.8.3 (private to the
+  library). Data files are installed to `share/worldgen_core/data`.
+- CI `lint` validates every data file against its schema (`tools/data/validate_data.py`).
 - Shared test fixtures `tests/support/fixtures.hpp` and numerics benchmarks in `wg_bench`.

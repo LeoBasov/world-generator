@@ -1,0 +1,231 @@
+{
+  "$schema": "../../schema/rock_types.schema.json",
+  "schema_version": 1,
+  "rocks": [
+    {
+      "name": "sandstone",
+      "class": "sedimentary",
+      "aquifer": true,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "erodibility": 2e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "siltstone",
+      "class": "sedimentary",
+      "aquifer": false,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "erodibility": 3e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "mudstone",
+      "class": "sedimentary",
+      "aquifer": false,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "erodibility": 5e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "shale",
+      "class": "sedimentary",
+      "aquifer": false,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "erodibility": 5e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "claystone",
+      "class": "sedimentary",
+      "aquifer": false,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "erodibility": 6e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "rock_salt",
+      "class": "sedimentary",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 8e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "limestone",
+      "class": "sedimentary",
+      "aquifer": false,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "erodibility": 1e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "conglomerate",
+      "class": "sedimentary",
+      "aquifer": true,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "erodibility": 2e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "dolomite",
+      "class": "sedimentary",
+      "aquifer": false,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "erodibility": 8e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "chert",
+      "class": "sedimentary",
+      "aquifer": false,
+      "shallow_ocean": true,
+      "deep_ocean": true,
+      "erodibility": 3e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "chalk",
+      "class": "sedimentary",
+      "aquifer": false,
+      "shallow_ocean": true,
+      "deep_ocean": false,
+      "erodibility": 4e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "obsidian",
+      "class": "igneous_extrusive",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 4e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "basalt",
+      "class": "igneous_extrusive",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": true,
+      "erodibility": 5e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "andesite",
+      "class": "igneous_extrusive",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 5e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "dacite",
+      "class": "igneous_extrusive",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 4e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "rhyolite",
+      "class": "igneous_extrusive",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 4e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "granite",
+      "class": "igneous_intrusive",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 2e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "diorite",
+      "class": "igneous_intrusive",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 2e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "gabbro",
+      "class": "igneous_intrusive",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": true,
+      "erodibility": 2e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "quartzite",
+      "class": "metamorphic",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 1e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "slate",
+      "class": "metamorphic",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 1e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "phyllite",
+      "class": "metamorphic",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 1.5e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "schist",
+      "class": "metamorphic",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 1e-05,
+      "confidence": "observed"
+    },
+    {
+      "name": "gneiss",
+      "class": "metamorphic",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 3e-06,
+      "confidence": "observed"
+    },
+    {
+      "name": "marble",
+      "class": "metamorphic",
+      "aquifer": false,
+      "shallow_ocean": false,
+      "deep_ocean": false,
+      "erodibility": 8e-06,
+      "confidence": "observed"
+    }
+  ]
+}
