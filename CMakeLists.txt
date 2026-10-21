@@ -56,7 +56,16 @@ add_library(
   src/core/status.cpp
   src/core/thread_pool.cpp
   src/core/version.cpp
-  src/core/world_state.cpp)
+  src/core/world_state.cpp
+  src/numerics/differences.cpp
+  src/numerics/distance.cpp
+  src/numerics/fft.cpp
+  src/numerics/histogram.cpp
+  src/numerics/labeling.cpp
+  src/numerics/laplacian.cpp
+  src/numerics/quantile.cpp
+  src/numerics/spectrum.cpp
+  src/numerics/variogram.cpp)
 add_library(worldgen_core::worldgen_core ALIAS worldgen_core)
 
 target_include_directories(
