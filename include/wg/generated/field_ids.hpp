@@ -16,7 +16,8 @@ namespace wg::core {
 inline constexpr int kFieldRegistrySchemaVersion = 1;
 
 /// Raster fields exchanged between stages (plan section 4.1). Values are append-only.
-enum class FieldId : std::uint16_t {
+/// The underlying type leaves room for appended fields, so it is fixed at 16 bits.
+enum class FieldId : std::uint16_t {  // NOLINT(performance-enum-size)
   latitude = 0,
   elevation = 1,
   rainfall = 2,

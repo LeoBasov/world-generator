@@ -164,7 +164,8 @@ def render(registry: Dict[str, Any]) -> str:
     w("inline constexpr int kFieldRegistrySchemaVersion = {};".format(registry["schema_version"]))
     w("")
     w("/// Raster fields exchanged between stages (plan section 4.1). Values are append-only.")
-    w("enum class FieldId : std::uint16_t {")
+    w("/// The underlying type leaves room for appended fields, so it is fixed at 16 bits.")
+    w("enum class FieldId : std::uint16_t {  // NOLINT(performance-enum-size)")
     for f in fields:
         w("  {} = {},".format(f["name"], f["id"]))
     w("};")
