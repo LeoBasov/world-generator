@@ -3,6 +3,18 @@
 
 include(FetchContent)
 
+# tl::expected, the Expected<T, Status> of the public API (header-only, so always needed).
+# It installs its own header next to ours; worldgen_core links it as a build interface only.
+FetchContent_Declare(
+  expected
+  GIT_REPOSITORY https://github.com/TartanLlama/expected.git
+  GIT_TAG v1.3.1
+  GIT_SHALLOW TRUE
+  SYSTEM)
+set(EXPECTED_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(EXPECTED_BUILD_PACKAGE OFF CACHE BOOL "" FORCE)  # keeps its CPack setup out of our build
+FetchContent_MakeAvailable(expected)  # provides tl::expected
+
 if(WG_BUILD_TESTS)
   FetchContent_Declare(
     doctest

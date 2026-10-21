@@ -41,13 +41,24 @@ else()
   set(WG_LIBRARY_TYPE STATIC)
 endif()
 
-add_library(worldgen_core ${WG_LIBRARY_TYPE} src/core/version.cpp)
+add_library(
+  worldgen_core ${WG_LIBRARY_TYPE}
+  src/core/arena.cpp
+  src/core/assert.cpp
+  src/core/field_store.cpp
+  src/core/grid.cpp
+  src/core/memory.cpp
+  src/core/status.cpp
+  src/core/version.cpp
+  src/core/world_state.cpp)
 add_library(worldgen_core::worldgen_core ALIAS worldgen_core)
 
 target_include_directories(
   worldgen_core PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_compile_features(worldgen_core PUBLIC cxx_std_20)
+# Installed consumers find tl/expected.hpp in the same include directory (installed by tl-expected).
+target_link_libraries(worldgen_core PUBLIC $<BUILD_INTERFACE:tl::expected>)
 target_compile_definitions(
   worldgen_core
   PRIVATE WG_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}

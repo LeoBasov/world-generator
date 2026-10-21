@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository is `worldgen-core`, Phase 1 of the world generator: an engine-independent C++20 library (`worldgen_core`) plus the `wgcli` tool. The specification is the project plan doc "World Generator – Implementation Project Plan" (https://claude.ai/artifact/QRYJWfqWmhjwVwjr3fb97t). Work is organised as work packages A01–A32. Read the plan section for a package before implementing it. Its acceptance tests define "done".
 
-Current state: A01 and A02 done. A01 is the folder tree, CMake, a placeholder `wg::core::version()`, a placeholder `wgcli`, the doctest runner, the nanobench runner `wg_bench`, the example `wg_example` and the three workflows. A02 is the field registry `schema/field_registry.json` (with its JSON Schema), the generator `tools/codegen/gen_field_ids.py` and the committed header `include/wg/generated/field_ids.hpp` (`wg::core::FieldId`, `kFields`, `field_info`, `field_id_from_name`, `field_t<F>`). Empty module folders hold `.gitkeep` files.
+Current state: A01, A02 and A03 done. A01 is the folder tree, CMake, a placeholder `wg::core::version()`, a placeholder `wgcli`, the doctest runner, the nanobench runner `wg_bench`, the example `wg_example` and the three workflows. A02 is the field registry `schema/field_registry.json` (with its JSON Schema), the generator `tools/codegen/gen_field_ids.py` and the committed header `include/wg/generated/field_ids.hpp` (`wg::core::FieldId`, `kFields`, `field_info`, `field_id_from_name`, `field_t<F>`). A03 is the core data model in `wg::core`: `Status`/`Expected` (tl::expected), `WG_CHECK`/`WG_ASSERT`, `Grid` with D8 neighbours, `FieldView`, `MemoryResource`, `FieldStore`, `WorldState` (typed read/write, zero-copy `adopt`, `release`), `VectorLayers`, `Provenance` and the scratch `Arena`. Shared test helpers live in `tests/support/`. Empty module folders hold `.gitkeep` files.
 
 ## Build and test
 
@@ -46,7 +46,8 @@ python -m unittest discover -s tools/codegen/tests -v
   - Reductions use fixed chunk boundaries.
 - Floating point: keep `-ffp-contract=off` / `/fp:precise`. Never use `-ffast-math`. Store float32, accumulate in float64.
 - Warnings are errors: `-Wall -Wextra -Wpedantic -Werror` and `/W4 /WX`. They are set on the INTERFACE target `wg_build_flags` (`cmake/CompilerWarnings.cmake`), which every wg target links privately.
-- Third-party dependencies come only through FetchContent at pinned tags in `cmake/dependencies.cmake` (currently doctest).
+- Third-party dependencies come only through FetchContent at pinned tags in `cmake/dependencies.cmake` (currently doctest, nanobench and tl::expected).
+- Large buffers come from an injected `wg::core::MemoryResource` (not `std::pmr`, which Apple's libc++ only has from macOS 14). Factories (`WorldState::create`, `Arena::create`) return `Expected` instead of throwing constructors.
 - No logging to stdout/stderr from the library. Use the injected sinks (from A05 on).
 
 ## CI
