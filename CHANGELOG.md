@@ -52,3 +52,10 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `parallel_reduce`. Reductions are bit-identical for any thread count. Also `FunctionRef`,
   `CancelFlag`, `LogSink` and `ProgressSink` with null sinks. `worldgen_core` now links
   `Threads::Threads`. ADR 0003 records the chunking and cancellation rules.
+- Numerics library (A06) in `wg::num`: D8/D4 neighbourhoods, `IndexHeap` with (key, cell)
+  tie-break, central differences and D8 slope, masked Laplacian and Laplacian smoothing, BFS
+  distance and exact Euclidean distance transform, `UnionFind` and connected-component
+  labelling, empirical CDF and quantile mapping, histograms and value ranges, radix-2 FFT,
+  radially averaged power spectrum with spectral-exponent fit, and the directional variogram.
+  Grid kernels are bit-identical for any thread count. ADR 0004 records the conventions.
+- Shared test fixtures `tests/support/fixtures.hpp` and numerics benchmarks in `wg_bench`.

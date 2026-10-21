@@ -52,6 +52,74 @@ void bench_reduce_sum(wg::core::Executor& exec) {
   ankerl::nanobench::doNotOptimizeAway(sum.value_or(0.0));
 }
 
+// Numerics (A06) on a 257 x 257 grid, the classic-profile size.
+struct NumericsInputs {
+  wg::core::Grid grid{.n = 257, .dx_m = 100.0, .hu_m = 1.0};
+  std::vector<float> z;
+  std::vector<std::uint8_t> mask;   // half of the cells
+  std::vector<std::uint8_t> seeds;  // one cell in a thousand
+  std::vector<float> out;
+  std::vector<double> out64;
+  std::vector<std::int32_t> labels;
+};
+
+NumericsInputs make_numerics_inputs() {
+  NumericsInputs in;
+  const auto cells = static_cast<std::size_t>(in.grid.cells());
+  const wg::core::RngKey key = wg::core::stage_key(1, "bench.numerics", 0);
+  in.z.resize(cells);
+  in.mask.resize(cells);
+  in.seeds.resize(cells);
+  for (std::size_t i = 0; i < cells; ++i) {
+    in.z[i] = static_cast<float>(wg::core::uniform01(key, i, 0));
+    in.mask[i] = static_cast<std::uint8_t>(wg::core::uniform01(key, i, 1) < 0.5 ? 1 : 0);
+    in.seeds[i] = static_cast<std::uint8_t>(wg::core::uniform01(key, i, 2) < 0.001 ? 1 : 0);
+  }
+  in.out.resize(cells);
+  in.out64.resize(cells);
+  in.labels.resize(cells);
+  return in;
+}
+
+void bench_numerics(ankerl::nanobench::Bench& bench, wg::core::Executor& exec,
+                    const std::string& suffix, NumericsInputs& in) {
+  bench.run("num.laplacian" + suffix, [&] {
+    ankerl::nanobench::doNotOptimizeAway(
+        wg::num::laplacian(in.z, {}, in.grid, in.out, exec).ok());
+  });
+  bench.run("num.d8_slope" + suffix, [&] {
+    ankerl::nanobench::doNotOptimizeAway(wg::num::d8_slope(in.z, in.grid, in.out, {}, exec).ok());
+  });
+  bench.run("num.edt_squared" + suffix, [&] {
+    ankerl::nanobench::doNotOptimizeAway(
+        wg::num::edt_squared(in.seeds, in.grid, in.out64, exec).ok());
+  });
+}
+
+void bench_numerics_serial_only(ankerl::nanobench::Bench& bench, NumericsInputs& in) {
+  bench.run("num.label_components(d8)", [&] {
+    ankerl::nanobench::doNotOptimizeAway(
+        wg::num::label_components(in.mask, in.grid, wg::num::Connectivity::d8, in.labels)
+            .value_or(0));
+  });
+  bench.run("num.heap(push+pop all cells)", [&] {
+    auto heap = wg::num::IndexHeap<float>::create(in.z.size());
+    if (!heap) {
+      return;
+    }
+    for (std::size_t i = 0; i < in.z.size(); ++i) {
+      static_cast<void>(heap->push(in.z[i], static_cast<std::int64_t>(i)));
+    }
+    while (!heap->empty()) {
+      ankerl::nanobench::doNotOptimizeAway(heap->pop().cell);
+    }
+  });
+  bench.run("num.radial_power_spectrum", [&] {
+    ankerl::nanobench::doNotOptimizeAway(
+        wg::num::radial_power_spectrum(in.z, in.grid, {}).has_value());
+  });
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -81,6 +149,13 @@ int main(int argc, char** argv) {
     wg::core::ThreadPool& p = **pool;
     bench.run("core.exec.reduce_sum(8 threads)", [&] { bench_reduce_sum(p); });
   }
+
+  NumericsInputs numerics = make_numerics_inputs();
+  bench_numerics(bench, serial, "(serial)", numerics);
+  if (pool) {
+    bench_numerics(bench, **pool, "(8 threads)", numerics);
+  }
+  bench_numerics_serial_only(bench, numerics);
 
   if (!json_path.empty()) {
     std::ofstream out{json_path};
