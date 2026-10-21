@@ -18,14 +18,20 @@ class FunctionRef;
 template <class R, class... Args>
 class FunctionRef<R(Args...)> {
  public:
+  // The forwarding constructor is constrained to exclude FunctionRef, so it never hides the copy
+  // constructor. The callable may itself be a pointer (a function pointer variable); its address
+  // is erased on purpose and cast back to the same type in invoke.
+  // NOLINTBEGIN(bugprone-forwarding-reference-overload)
+  // NOLINTBEGIN(bugprone-multi-level-implicit-pointer-conversion)
   template <class F>
     requires(!std::is_same_v<std::remove_cvref_t<F>, FunctionRef> &&
              !std::is_function_v<std::remove_reference_t<F>> &&
              std::is_invocable_r_v<R, std::remove_reference_t<F>&, Args...>)
-  // NOLINTNEXTLINE(bugprone-forwarding-reference-overload): constrained to exclude FunctionRef
   FunctionRef(F&& f) noexcept
       : object_(const_cast<void*>(static_cast<const void*>(std::addressof(f)))),
         call_(&invoke<std::remove_reference_t<F>>) {}
+  // NOLINTEND(bugprone-multi-level-implicit-pointer-conversion)
+  // NOLINTEND(bugprone-forwarding-reference-overload)
 
   R operator()(Args... args) const { return call_(object_, std::forward<Args>(args)...); }
 

@@ -148,7 +148,7 @@ Expected<std::unique_ptr<ThreadPool>> ThreadPool::create(std::int32_t threads) n
     // pool, if created, joins the threads started so far.
     return make_error(StatusCode::out_of_memory, "ThreadPool: cannot start a thread");
   }
-  return Expected<std::unique_ptr<ThreadPool>>(std::move(pool));
+  return {std::move(pool)};
 }
 
 std::int32_t ThreadPool::concurrency() const noexcept {
