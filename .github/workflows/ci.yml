@@ -1,24 +1,31 @@
-# Required checks for main (plan section 6.8).
-# Actions are pinned to full commit SHAs; Dependabot proposes updates weekly.
+# Per-push checks (plan section 6.8). Triggered only by pushes to branches; the every-push jobs are
+# the required status checks of the main ruleset (.github/rulesets/main.json), so keep their names
+# stable. Jobs guarded by `if: github.ref == 'refs/heads/main'` run after merge only.
+# Actions are pinned to full commit SHAs and updated by hand at each gate (no update bots).
 name: ci
 
 on:
   push:
-    branches: [main]
-  pull_request:
+    branches: ["**"]
 
 permissions:
   contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 defaults:
   run:
     shell: bash
 
+env:
+  RETENTION_DAYS: ${{ github.ref == 'refs/heads/main' && 90 || 14 }}
+
 jobs:
+  # -------------------------------------------------------------------------
+  # Every push (required checks)
+  # -------------------------------------------------------------------------
   format:
     name: clang-format
     runs-on: ubuntu-24.04
@@ -61,16 +68,9 @@ jobs:
       CXX: ${{ matrix.cxx }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Install Ninja (Linux)
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build
-      - name: Install Ninja (macOS)
-        if: runner.os == 'macOS'
-        run: brew install ninja
-      - name: MSVC developer environment (Windows)
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: ${{ matrix.name }}-release
 
       - name: Configure
         run: cmake --preset release
@@ -78,6 +78,11 @@ jobs:
         run: cmake --build --preset release
       - name: Test
         run: ctest --preset release
+      - name: Bench (smoke)
+        run: |
+          exe=build/release/bench/wg_bench
+          [ -f "$exe.exe" ] && exe="$exe.exe"
+          "$exe"
 
       - name: JUnit report
         if: always()
@@ -98,7 +103,7 @@ jobs:
         with:
           name: junit-${{ matrix.name }}
           path: wg_tests-junit.xml
-          retention-days: 14
+          retention-days: ${{ env.RETENTION_DAYS }}
           if-no-files-found: ignore
 
   sanitizers:
@@ -112,8 +117,9 @@ jobs:
       UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install Ninja
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: linux-clang-asan
       - name: Configure
         run: cmake --preset asan
       - name: Build
@@ -131,8 +137,10 @@ jobs:
       COVERAGE_MIN_LINES: 80
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install Ninja and LLVM tools
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build llvm-18
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: linux-clang-coverage
+          packages: llvm-18
       - name: Configure
         run: cmake --preset coverage
       - name: Build
@@ -161,3 +169,133 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           awk -v p="$pct" -v m="$COVERAGE_MIN_LINES" 'BEGIN { exit (p + 0 < m + 0) }' \
             || { echo "::error::Line coverage ${pct} % is below ${COVERAGE_MIN_LINES} %"; exit 1; }
+
+  clang-tidy:
+    name: clang-tidy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CC: clang-18
+      CXX: clang++-18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: linux-clang-debug
+          packages: clang-tidy-18
+      - name: Configure (compile_commands.json)
+        run: cmake --preset debug
+      - name: Run clang-tidy
+        run: |
+          # On main every source file is checked; on other branches the files changed against main.
+          if [ "$GITHUB_REF" = refs/heads/main ]; then
+            git ls-files -z -- '*.cpp' > files.txt
+          else
+            git diff -z --name-only --diff-filter=ACMR origin/main...HEAD -- '*.cpp' > files.txt
+          fi
+          if [ ! -s files.txt ]; then
+            echo "No C++ sources changed against main." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          xargs -0 -n 1 -P "$(nproc)" clang-tidy-18 -p build/debug --quiet < files.txt
+
+  # -------------------------------------------------------------------------
+  # Pushes to main only (run after merge; a red main blocks further merges)
+  # -------------------------------------------------------------------------
+  tsan:
+    name: TSan (linux-clang)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CC: clang-18
+      CXX: clang++-18
+      TSAN_OPTIONS: halt_on_error=1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: linux-clang-tsan
+      - name: Reduce ASLR entropy (TSan cannot map memory with the 24.04 default)
+        run: sudo sysctl vm.mmap_rnd_bits=28
+      - name: Configure
+        run: cmake --preset tsan
+      - name: Build
+        run: cmake --build --preset tsan
+      - name: Test
+        run: ctest --preset tsan
+
+  presets:
+    name: presets (${{ matrix.name }})
+    if: github.ref == 'refs/heads/main'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Primary matrix
+          - { name: linux-gcc, os: ubuntu-24.04, cc: gcc-14, cxx: g++-14 }
+          - { name: linux-clang, os: ubuntu-24.04, cc: clang-18, cxx: clang++-18 }
+          - { name: windows-msvc, os: windows-2025-vs2026, cc: cl, cxx: cl }
+          - { name: macos-appleclang, os: macos-15, cc: clang, cxx: clang++ }
+          # Extended matrix
+          - { name: windows-msvc2022, os: windows-2022, cc: cl, cxx: cl }
+          - { name: linux-arm-gcc, os: ubuntu-24.04-arm, cc: gcc-14, cxx: g++-14, packages: g++-14 }
+          - { name: macos26-appleclang, os: macos-26, cc: clang, cxx: clang++ }
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: ${{ matrix.name }}-presets
+          packages: ${{ matrix.packages }}
+      - name: Build and test every preset the toolchain supports
+        env:
+          # LeakSanitizer is not supported on macOS arm64.
+          ASAN_OPTIONS: ${{ runner.os == 'Linux' && 'detect_leaks=1:abort_on_error=1' || 'abort_on_error=1' }}
+        run: |
+          # tsan and coverage run on Linux Clang in their own jobs; MSVC has no asan preset.
+          presets="debug release relwithdebinfo"
+          [ "$RUNNER_OS" != Windows ] && presets="$presets asan"
+          for p in $presets; do
+            echo "::group::$p"
+            cmake --preset "$p"
+            cmake --build --preset "$p"
+            ctest --preset "$p"
+            echo "::endgroup::"
+            echo "- \`$p\` built and tested" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+  bench:
+    name: bench (linux-clang)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CC: clang-18
+      CXX: clang++-18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: linux-clang-release
+      - name: Configure
+        run: cmake --preset release
+      - name: Build
+        run: cmake --build --preset release --target wg_bench
+      - name: Run benchmarks
+        # The baseline comparison (> 10 % slower on two consecutive pushes fails) arrives with the
+        # first kernel benchmarks.
+        run: build/release/bench/wg_bench --json wg_bench.json
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bench-linux-clang
+          path: wg_bench.json
+          retention-days: ${{ env.RETENTION_DAYS }}

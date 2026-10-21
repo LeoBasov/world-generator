@@ -1,0 +1,74 @@
+# Golden-hash update on a pushed golden/** branch (plan sections 6.8 and 10.3): every matrix runner
+# regenerates its hash file tests/golden/hashes/<toolchain key>.json and uploads it as an artifact,
+# which the developer commits on that branch. Reference PNGs join once wgcli export exists (A10).
+name: golden-update
+
+on:
+  push:
+    branches: ["golden/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  regenerate:
+    name: golden hashes (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-gcc, os: ubuntu-24.04, cc: gcc-14, cxx: g++-14 }
+          - { name: linux-clang, os: ubuntu-24.04, cc: clang-18, cxx: clang++-18 }
+          - { name: windows-msvc, os: windows-2025-vs2026, cc: cl, cxx: cl }
+          - { name: macos-appleclang, os: macos-15, cc: clang, cxx: clang++ }
+          - { name: windows-msvc2022, os: windows-2022, cc: cl, cxx: cl }
+          - { name: linux-arm-gcc, os: ubuntu-24.04-arm, cc: gcc-14, cxx: g++-14, packages: g++-14 }
+          - { name: macos26-appleclang, os: macos-26, cc: clang, cxx: clang++ }
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: ${{ matrix.name }}-release
+          packages: ${{ matrix.packages }}
+
+      - name: Configure
+        run: cmake --preset release
+      - name: Build
+        run: cmake --build --preset release --target wgcli
+
+      - name: Regenerate hashes
+        run: |
+          key=$(bash tools/ci/toolchain_key.sh build/release)
+          echo "Toolchain key: \`$key\`" >> "$GITHUB_STEP_SUMMARY"
+          if [ ! -f tests/golden/seeds.json ]; then
+            echo "::notice::tests/golden/seeds.json does not exist yet; nothing to regenerate."
+            echo "No golden seed list yet (arrives with wgcli hash in A10)." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          wgcli=build/release/tools/wgcli/wgcli
+          [ -f "$wgcli.exe" ] && wgcli="$wgcli.exe"
+          mkdir -p tests/golden/hashes
+          # Command line finalised with wgcli hash in A10.
+          "$wgcli" hash --per-stage --seeds tests/golden/seeds.json \
+            --out "tests/golden/hashes/$key.json"
+
+      - name: Upload hashes
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: golden-${{ matrix.name }}
+          path: tests/golden/hashes/
+          retention-days: 14
+          if-no-files-found: warn

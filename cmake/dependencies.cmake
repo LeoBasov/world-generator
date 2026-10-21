@@ -15,3 +15,13 @@ if(WG_BUILD_TESTS)
   # Provides doctest_discover_tests().
   list(APPEND CMAKE_MODULE_PATH "${doctest_SOURCE_DIR}/scripts/cmake")
 endif()
+
+if(WG_BUILD_BENCH)
+  FetchContent_Declare(
+    nanobench
+    GIT_REPOSITORY https://github.com/martinus/nanobench.git
+    GIT_TAG v4.6.0
+    GIT_SHALLOW TRUE
+    SYSTEM)
+  FetchContent_MakeAvailable(nanobench)  # provides nanobench::nanobench
+endif()

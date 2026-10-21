@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository is `worldgen-core`, Phase 1 of the world generator: an engine-independent C++20 library (`worldgen_core`) plus the `wgcli` tool. The specification is the project plan doc "World Generator – Implementation Project Plan" (https://claude.ai/artifact/QRYJWfqWmhjwVwjr3fb97t). Work is organised as work packages A01–A32. Read the plan section for a package before implementing it. Its acceptance tests define "done".
 
-Current state: A01 skeleton only. That is the folder tree, CMake, a placeholder `wg::core::version()`, a placeholder `wgcli`, the doctest runner and `ci.yml`. Empty module folders hold `.gitkeep` files.
+Current state: A01 done. That is the folder tree, CMake, a placeholder `wg::core::version()`, a placeholder `wgcli`, the doctest runner, the nanobench runner `wg_bench`, the example `wg_example` and the three workflows. Empty module folders hold `.gitkeep` files.
 
 ## Build and test
 
@@ -44,10 +44,10 @@ Format check (CI uses clang-format 18): `clang-format --dry-run --Werror <files>
 
 ## CI
 
-`.github/workflows/ci.yml` runs on pushes to `main` and on every PR. Jobs:
-- clang-format check
-- release build and test on ubuntu-24.04 (GCC 14, Clang 18), windows-2025-vs2026 (MSVC) and macos-15 (Apple Clang)
-- ASan+UBSan
-- llvm-cov coverage with an 80 % line gate
+All workflows are triggered only by `git push` (no `pull_request`, schedule or manual triggers). Shared setup (Ninja, MSVC env, ccache/sccache, FetchContent cache) lives in `.github/actions/setup-build`.
+- `ci.yml`, every push to any branch: clang-format, release build and test on ubuntu-24.04 (GCC 14, Clang 18), windows-2025-vs2026 (MSVC) and macos-15 (Apple Clang), ASan+UBSan, llvm-cov coverage with an 80 % line gate, clang-tidy on `.cpp` files changed against `main`. These are the required checks in `.github/rulesets/main.json`; renaming a job means updating the ruleset.
+- `ci.yml`, pushes to `main` only: TSan, every preset on the primary plus extended matrix (windows-2022, ubuntu-24.04-arm, macos-26), `wg_bench` run.
+- `release.yml`, tags `v*.*.*`: packages, Doxygen (`docs/Doxyfile`) to Pages, GitHub Release. The tag must match the CMake project version and have a `CHANGELOG.md` section.
+- `golden-update.yml`, branches `golden/**`: per-toolchain hash files (`tools/ci/toolchain_key.sh`) as artifacts. The hash step activates once `tests/golden/seeds.json` exists (A10).
 
-Runner labels and action SHAs are pinned. Keep them pinned, because golden hashes depend on compiler versions. `nightly.yml`, `release.yml` and `golden-update.yml` are not written yet.
+Runner labels and action SHAs are pinned. Keep them pinned, because golden hashes depend on compiler versions. Update pins by hand (no Dependabot); resolve SHAs with `git ls-remote git@github.com:<owner>/<repo>.git`.
