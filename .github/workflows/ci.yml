@@ -265,12 +265,15 @@ jobs:
           - { name: macos-appleclang, os: macos-15, cc: clang, cxx: clang++ }
           # Extended matrix
           - { name: windows-msvc2022, os: windows-2022, cc: cl, cxx: cl }
-          - { name: linux-arm-gcc, os: ubuntu-24.04-arm, cc: gcc-14, cxx: g++-14, packages: g++-14 }
+          # No asan here: ASan + UBSan on the ARM runner take about 20 minutes (the 1e6-sample
+          # statistical tests), and the x86 Linux jobs already cover the sanitizers.
+          - { name: linux-arm-gcc, os: ubuntu-24.04-arm, cc: gcc-14, cxx: g++-14, packages: g++-14, skip-asan: true }
           - { name: macos26-appleclang, os: macos-26, cc: clang, cxx: clang++ }
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
       UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+      SKIP_ASAN: ${{ matrix.skip-asan }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-build
@@ -284,7 +287,7 @@ jobs:
         run: |
           # tsan and coverage run on Linux Clang in their own jobs; MSVC has no asan preset.
           presets="debug release relwithdebinfo"
-          [ "$RUNNER_OS" != Windows ] && presets="$presets asan"
+          [ "$RUNNER_OS" != Windows ] && [ "$SKIP_ASAN" != true ] && presets="$presets asan"
           for p in $presets; do
             echo "::group::$p"
             cmake --preset "$p"
