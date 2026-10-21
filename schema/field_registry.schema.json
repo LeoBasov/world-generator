@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LeoBasov/world-generator/schema/field_registry.schema.json",
+  "title": "worldgen-core field registry",
+  "description": "Raster fields exchanged between pipeline stages (plan section 4.1). Source of include/wg/generated/field_ids.hpp; regenerate with tools/codegen/gen_field_ids.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "fields"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/field" }
+    }
+  },
+  "$defs": {
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "dtype", "unit", "scale", "si_mapping", "description"],
+      "properties": {
+        "id": {
+          "description": "Numeric id; equals the array position. Ids are append-only.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "name": {
+          "description": "Stable field name; at most 32 bytes because world files store it in a 32-byte slot.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,31}$"
+        },
+        "dtype": { "enum": ["u8", "u16", "i32", "f32"] },
+        "unit": {
+          "description": "Short unit symbol of the stored value; empty for dimensionless or label fields.",
+          "type": "string"
+        },
+        "scale": {
+          "description": "Meaning of the stored value (the 'Scale and units' column).",
+          "type": "string"
+        },
+        "si_mapping": {
+          "description": "Mapping from the stored value to SI units; empty if none.",
+          "type": "string"
+        },
+        "description": { "type": "string", "minLength": 1 },
+        "range": { "$ref": "#/$defs/range" },
+        "enum": {
+          "description": "Labels of an enumerated field, in value order starting at 0.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+        }
+      }
+    },
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "min_exclusive": {
+          "description": "True if the value must be strictly greater than min.",
+          "type": "boolean"
+        },
+        "values": {
+          "description": "The only values the field may take.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "number" }
+        },
+        "note": {
+          "description": "Bound that depends on the grid or parameters, e.g. '>= dx^2'.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "dependentRequired": { "min_exclusive": ["min"] }
+    }
+  }
+}

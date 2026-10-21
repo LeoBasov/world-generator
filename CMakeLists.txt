@@ -80,6 +80,18 @@ if(WG_BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
+# Regenerate committed sources (plan section 4). Not part of ALL: the generated header is
+# committed, so a normal build never needs Python. Requires tools/codegen/requirements.txt.
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+  add_custom_target(
+    wg_codegen
+    COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tools/codegen/gen_field_ids.py"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    COMMENT "Generating include/wg/generated/field_ids.hpp"
+    VERBATIM)
+endif()
+
 # ---------------------------------------------------------------------------
 # Install and CMake package: find_package(worldgen_core)
 # ---------------------------------------------------------------------------
@@ -92,6 +104,7 @@ install(
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY include/wg DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY schema/ DESTINATION ${CMAKE_INSTALL_DATADIR}/worldgen_core/schema)
 install(
   EXPORT worldgen_coreTargets
   NAMESPACE worldgen_core::

@@ -1,0 +1,2 @@
+# Python packages for tools/codegen (pinned; jsonschema 4.23 supports Python 3.8 to 3.13).
+jsonschema==4.23.0

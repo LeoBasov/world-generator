@@ -1,0 +1,281 @@
+{
+  "$schema": "./field_registry.schema.json",
+  "schema_version": 1,
+  "fields": [
+    {
+      "id": 0,
+      "name": "latitude",
+      "dtype": "f32",
+      "unit": "rad",
+      "scale": "rad",
+      "si_mapping": "phi from pole option (R5.3)",
+      "description": "Latitude of the cell.",
+      "range": { "min": 0, "max": 1.5707963267948966 }
+    },
+    {
+      "id": 1,
+      "name": "elevation",
+      "dtype": "f32",
+      "unit": "eu",
+      "scale": "elevation units",
+      "si_mapping": "height above sea level = (z - 100) * h_u [m]",
+      "description": "Surface elevation; sea level at 100.",
+      "range": { "min": 0, "max": 400 }
+    },
+    {
+      "id": 2,
+      "name": "rainfall",
+      "dtype": "f32",
+      "unit": "",
+      "scale": "index",
+      "si_mapping": "P_mm = 30 * P [mm/yr]",
+      "description": "Annual rainfall index.",
+      "range": { "min": 0, "max": 100 }
+    },
+    {
+      "id": 3,
+      "name": "temperature",
+      "dtype": "f32",
+      "unit": "",
+      "scale": "game scale (peak summer)",
+      "si_mapping": "degC via R5.2 table",
+      "description": "Peak-summer temperature on the game scale.",
+      "range": { "min": -1000, "max": 1000 }
+    },
+    {
+      "id": 4,
+      "name": "drainage",
+      "dtype": "f32",
+      "unit": "",
+      "scale": "index",
+      "si_mapping": "runoff coefficient r = 1 - D/100",
+      "description": "Drainage index.",
+      "range": { "min": 0, "max": 100 }
+    },
+    {
+      "id": 5,
+      "name": "volcanism",
+      "dtype": "f32",
+      "unit": "",
+      "scale": "index",
+      "si_mapping": "",
+      "description": "Volcanism index.",
+      "range": { "min": 0, "max": 100 }
+    },
+    {
+      "id": 6,
+      "name": "savagery",
+      "dtype": "f32",
+      "unit": "",
+      "scale": "index",
+      "si_mapping": "non-physical",
+      "description": "Savagery index (game value).",
+      "range": { "min": 0, "max": 100 }
+    },
+    {
+      "id": 7,
+      "name": "vegetation",
+      "dtype": "f32",
+      "unit": "",
+      "scale": "NPP / 3000",
+      "si_mapping": "NPP [g/m2/yr]",
+      "description": "Net primary productivity, normalised.",
+      "range": { "min": 0, "max": 1 }
+    },
+    {
+      "id": 8,
+      "name": "salinity",
+      "dtype": "u8",
+      "unit": "",
+      "scale": "class",
+      "si_mapping": "",
+      "description": "Salinity class.",
+      "range": { "min": 0, "max": 100, "values": [0, 33, 66, 100] }
+    },
+    {
+      "id": 9,
+      "name": "flow_receiver",
+      "dtype": "i32",
+      "unit": "",
+      "scale": "cell index, -1 = sink",
+      "si_mapping": "",
+      "description": "Index of the downstream receiver cell.",
+      "range": { "min": -1, "note": "< cell count" }
+    },
+    {
+      "id": 10,
+      "name": "flow_accum",
+      "dtype": "f32",
+      "unit": "m2",
+      "scale": "upstream area A",
+      "si_mapping": "m2",
+      "description": "Upstream drainage area.",
+      "range": { "note": ">= dx^2" }
+    },
+    {
+      "id": 11,
+      "name": "discharge",
+      "dtype": "f32",
+      "unit": "m3/yr",
+      "scale": "sum of r * P * a (R6.5)",
+      "si_mapping": "m3/yr with P_mm",
+      "description": "Water discharge.",
+      "range": { "min": 0 }
+    },
+    {
+      "id": 12,
+      "name": "water",
+      "dtype": "u8",
+      "unit": "",
+      "scale": "enum",
+      "si_mapping": "",
+      "description": "Water class of the cell.",
+      "enum": ["land", "ocean", "lake", "river"]
+    },
+    {
+      "id": 13,
+      "name": "river_class",
+      "dtype": "u8",
+      "unit": "",
+      "scale": "enum none, brook ... major (R6.2)",
+      "si_mapping": "width w = a_w * Q^b [m]",
+      "description": "River size class; 0 = none.",
+      "range": { "min": 0, "max": 5 }
+    },
+    {
+      "id": 14,
+      "name": "lake_id",
+      "dtype": "i32",
+      "unit": "",
+      "scale": "label, -1 = none",
+      "si_mapping": "",
+      "description": "Lake label.",
+      "range": { "min": -1 }
+    },
+    {
+      "id": 15,
+      "name": "biome",
+      "dtype": "u16",
+      "unit": "",
+      "scale": "id in biome table",
+      "si_mapping": "",
+      "description": "Biome id."
+    },
+    {
+      "id": 16,
+      "name": "region_id",
+      "dtype": "i32",
+      "unit": "",
+      "scale": "label",
+      "si_mapping": "",
+      "description": "Region label."
+    },
+    {
+      "id": 17,
+      "name": "plate_id",
+      "dtype": "i32",
+      "unit": "",
+      "scale": "label",
+      "si_mapping": "",
+      "description": "Tectonic plate label."
+    },
+    {
+      "id": 18,
+      "name": "uplift",
+      "dtype": "f32",
+      "unit": "m/yr",
+      "scale": "U",
+      "si_mapping": "m/yr",
+      "description": "Tectonic uplift rate.",
+      "range": { "note": ">= -U_max" }
+    },
+    {
+      "id": 19,
+      "name": "erodibility",
+      "dtype": "f32",
+      "unit": "m^(1-2m)/yr",
+      "scale": "K",
+      "si_mapping": "m^(1-2m)/yr",
+      "description": "Stream-power erodibility.",
+      "range": { "min": 0, "min_exclusive": true }
+    },
+    {
+      "id": 20,
+      "name": "wind_u",
+      "dtype": "f32",
+      "unit": "",
+      "scale": "unit vector",
+      "si_mapping": "direction only",
+      "description": "Prevailing wind direction, x component.",
+      "range": { "min": -1, "max": 1 }
+    },
+    {
+      "id": 21,
+      "name": "wind_v",
+      "dtype": "f32",
+      "unit": "",
+      "scale": "unit vector",
+      "si_mapping": "direction only",
+      "description": "Prevailing wind direction, y component.",
+      "range": { "min": -1, "max": 1 }
+    },
+    {
+      "id": 22,
+      "name": "moisture",
+      "dtype": "f32",
+      "unit": "kg/kg",
+      "scale": "q",
+      "si_mapping": "kg/kg (scaled)",
+      "description": "Atmospheric moisture.",
+      "range": { "min": 0, "note": "<= q_max" }
+    },
+    {
+      "id": 23,
+      "name": "seasonal_amp",
+      "dtype": "f32",
+      "unit": "K",
+      "scale": "A_s",
+      "si_mapping": "K",
+      "description": "Seasonal temperature amplitude.",
+      "range": { "min": 0 }
+    },
+    {
+      "id": 24,
+      "name": "wetness",
+      "dtype": "f32",
+      "unit": "ln(m)",
+      "scale": "TWI",
+      "si_mapping": "ln(m)",
+      "description": "Topographic wetness index."
+    },
+    {
+      "id": 25,
+      "name": "soil_depth",
+      "dtype": "f32",
+      "unit": "m",
+      "scale": "h",
+      "si_mapping": "m",
+      "description": "Soil depth.",
+      "range": { "min": 0 }
+    },
+    {
+      "id": 26,
+      "name": "geo_region",
+      "dtype": "i32",
+      "unit": "",
+      "scale": "label",
+      "si_mapping": "",
+      "description": "Geological region label."
+    },
+    {
+      "id": 27,
+      "name": "aquifer",
+      "dtype": "u8",
+      "unit": "",
+      "scale": "enum",
+      "si_mapping": "",
+      "description": "Aquifer class.",
+      "enum": ["none", "light", "heavy"]
+    }
+  ]
+}
