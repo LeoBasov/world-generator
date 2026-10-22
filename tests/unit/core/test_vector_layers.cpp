@@ -46,3 +46,21 @@ TEST_CASE("core.vector_layers clear empties every layer") {
   layers.clear();
   CHECK(layers.empty());
 }
+
+TEST_CASE("core.vector_layers compare member-wise, nested structs included") {
+  VectorLayers a;
+  a.plates.push_back(wg::core::Plate{.id = 1});
+  a.plates[0].boundaries.push_back(wg::core::PlateBoundary{.other_plate = 2});
+  a.geo_columns.push_back(wg::core::GeoColumn{.geo_region = 3});
+  a.geo_columns[0].layers.push_back(wg::core::RockLayer{.rock_id = 4, .thickness_m = 1.0F});
+  VectorLayers b = a;
+  CHECK(a == b);
+  b.plates[0].boundaries[0].shear = 0.5;
+  CHECK(a != b);
+  b = a;
+  b.geo_columns[0].layers[0].thickness_m = 2.0F;
+  CHECK(a != b);
+  b = a;
+  b.river_graph.cell.push_back(0);
+  CHECK(a != b);
+}

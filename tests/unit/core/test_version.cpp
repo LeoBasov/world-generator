@@ -17,3 +17,10 @@ TEST_CASE("core.version_string is major.minor.patch") {
       std::to_string(v.major) + "." + std::to_string(v.minor) + "." + std::to_string(v.patch);
   CHECK(wg::core::version_string() == expected);
 }
+
+TEST_CASE("core.version compares all three parts") {
+  const wg::core::Version v{.major = 1, .minor = 2, .patch = 3};
+  CHECK(v == wg::core::Version{.major = 1, .minor = 2, .patch = 3});
+  CHECK(v != wg::core::Version{.major = 1, .minor = 2, .patch = 4});
+  CHECK(v != wg::core::Version{.major = 0, .minor = 2, .patch = 3});
+}

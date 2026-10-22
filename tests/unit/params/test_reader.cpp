@@ -88,6 +88,18 @@ TEST_CASE("params.reader object reader type checks") {
   CHECK(issues[5].message == "expected 3 elements, got 2");
 }
 
+TEST_CASE("params.reader unsigned 64-bit integers keep every bit") {
+  const Json j = parse(R"({"max": 18446744073709551615, "neg": -3, "f": 1.5})");
+  std::vector<ValidationIssue> issues;
+  ObjectReader r(j, "$", issues);
+  CHECK(r.uint64("max") == 18446744073709551615ULL);
+  CHECK(!r.uint64("neg"));
+  CHECK(!r.uint64("f"));
+  REQUIRE(issues.size() == 2);
+  CHECK(issues[0] == ValidationIssue{Severity::error, "$.neg", "-3 is below the minimum 0"});
+  CHECK(issues[1] == ValidationIssue{Severity::error, "$.f", "expected integer, got number"});
+}
+
 TEST_CASE("params.reader intervals") {
   const Json j = parse(R"({"ok": [2, 5], "rev": [5, 2], "out": [0, 200]})");
   std::vector<ValidationIssue> issues;

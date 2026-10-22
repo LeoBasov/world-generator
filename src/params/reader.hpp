@@ -47,6 +47,8 @@ class ObjectReader {
   std::optional<double> number(std::string_view key, double lo, double hi, bool required = true);
   std::optional<std::int64_t> integer(std::string_view key, std::int64_t lo, std::int64_t hi,
                                       bool required = true);
+  /// An unsigned 64-bit integer (seeds), read without a detour through double.
+  std::optional<std::uint64_t> uint64(std::string_view key, bool required = true);
   std::optional<bool> boolean(std::string_view key, bool required = true);
   /// One of the labels.
   std::optional<std::string> label(std::string_view key,

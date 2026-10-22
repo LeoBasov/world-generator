@@ -40,6 +40,61 @@ FetchContent_MakeAvailable(xxhash)
 add_library(wg_xxhash INTERFACE)
 target_include_directories(wg_xxhash SYSTEM INTERFACE "${xxhash_SOURCE_DIR}")
 
+# zstd for world-file chunks (A09). The repository root has no CMakeLists.txt (its CMake build
+# is in build/cmake), so this only downloads it; the library sources are compiled as the object library
+# wg_zstd_objects, whose objects go into worldgen_core, so the installed archive needs no extra
+# package. Single-threaded, no assembly (portable and identical output on every runner).
+FetchContent_Declare(
+  zstd
+  GIT_REPOSITORY https://github.com/facebook/zstd.git
+  GIT_TAG v1.5.7
+  GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(zstd)
+file(GLOB WG_ZSTD_SOURCES CONFIGURE_DEPENDS "${zstd_SOURCE_DIR}/lib/common/*.c"
+     "${zstd_SOURCE_DIR}/lib/compress/*.c" "${zstd_SOURCE_DIR}/lib/decompress/*.c")
+add_library(wg_zstd_objects OBJECT ${WG_ZSTD_SOURCES})
+target_compile_definitions(wg_zstd_objects PRIVATE ZSTD_DISABLE_ASM=1 XXH_NAMESPACE=ZSTD_)
+set_target_properties(wg_zstd_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_library(wg_zstd INTERFACE)
+target_include_directories(wg_zstd SYSTEM INTERFACE "${zstd_SOURCE_DIR}/lib")
+
+# lodepng for 16-bit PNG export (A09). No tags upstream, so it is pinned by commit; no CMake
+# build either, so lodepng.cpp becomes the object library wg_lodepng_objects (as zstd above).
+FetchContent_Declare(
+  lodepng
+  GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
+  GIT_TAG e584a8490db1b76b81bf298c11c09d3b55d9c270)
+FetchContent_MakeAvailable(lodepng)
+add_library(wg_lodepng_objects OBJECT "${lodepng_SOURCE_DIR}/lodepng.cpp")
+target_compile_definitions(wg_lodepng_objects PUBLIC LODEPNG_NO_COMPILE_DISK)
+set_target_properties(wg_lodepng_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_library(wg_lodepng INTERFACE)
+target_include_directories(wg_lodepng SYSTEM INTERFACE "${lodepng_SOURCE_DIR}")
+target_compile_definitions(wg_lodepng INTERFACE LODEPNG_NO_COMPILE_DISK)
+
+# tinyexr for EXR export (A09), only with WG_WITH_EXR. Uses its bundled miniz; the library
+# sees WG_HAVE_EXR. Compiled like zstd above.
+if(WG_WITH_EXR)
+  FetchContent_Declare(
+    tinyexr
+    GIT_REPOSITORY https://github.com/syoyo/tinyexr.git
+    GIT_TAG v1.0.9
+    GIT_SHALLOW TRUE
+    SOURCE_SUBDIR no-cmake)  # a directory without CMakeLists.txt: download only
+  FetchContent_MakeAvailable(tinyexr)
+  set(WG_TINYEXR_DEFINITIONS TINYEXR_USE_MINIZ=1 TINYEXR_USE_OPENMP=0 TINYEXR_USE_THREAD=0)
+  add_library(wg_tinyexr_objects OBJECT "${tinyexr_SOURCE_DIR}/tinyexr.cc"
+                                        "${tinyexr_SOURCE_DIR}/deps/miniz/miniz.c")
+  target_include_directories(wg_tinyexr_objects PRIVATE "${tinyexr_SOURCE_DIR}"
+                                                        "${tinyexr_SOURCE_DIR}/deps/miniz")
+  target_compile_definitions(wg_tinyexr_objects PRIVATE ${WG_TINYEXR_DEFINITIONS})
+  set_target_properties(wg_tinyexr_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  add_library(wg_tinyexr INTERFACE)
+  target_include_directories(wg_tinyexr SYSTEM INTERFACE "${tinyexr_SOURCE_DIR}"
+                                                         "${tinyexr_SOURCE_DIR}/deps/miniz")
+  target_compile_definitions(wg_tinyexr INTERFACE ${WG_TINYEXR_DEFINITIONS} WG_HAVE_EXR)
+endif()
+
 if(WG_BUILD_TESTS)
   FetchContent_Declare(
     doctest

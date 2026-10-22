@@ -79,3 +79,16 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   repair hook, cancellation, the `SnapshotHook` and per-stage metrics, returning `RunOutput` or
   a `FailureReport`. ADR 0006 records the design. CI `lint` also validates the fixture profiles
   in `tests/fixtures/profiles/`.
+- World file and export (A09) in `wg::io`: the `.wgw` writer `write_world` /
+  `write_world_file` (atomic rename) and the lazy `WorldReader` (header, table and metadata on
+  open; one chunk per `read_field`; `read_into`, also into adopted buffers) with
+  `read_world` / `read_world_file` / `read_world_buffer`; `ByteSource` with `MemorySource` and
+  `FileSource`; per-chunk zstd compression and XXH3 checksums; format and metadata version
+  checks; `SnapshotWriter`, the snapshot hook with the policies none, final and all; PNG16
+  export (`encode_png16`, `png16_value`), optional EXR export (`encode_exr`, CMake option
+  `WG_WITH_EXR`, built and tested on the linux-gcc CI job) and the vector layers as JSON
+  (`layers_to_json`). The format is specified in `docs/file_format.md`; ADR 0007 records the
+  decisions. New dependencies zstd v1.5.7, lodepng (pinned commit) and, with `WG_WITH_EXR`,
+  tinyexr v1.0.9, all compiled into the library; the project now also enables C.
+- `operator==` for `Version`, `RejectionRecord`, `Provenance` and the vector-layer structs.
+- World-file benchmarks in `wg_bench`.

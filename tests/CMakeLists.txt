@@ -8,6 +8,8 @@ target_link_libraries(wg_tests PRIVATE worldgen_core::worldgen_core doctest::doc
 # from src/ ("io/json.hpp"), which need nlohmann/json.
 target_include_directories(wg_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/src")
 target_link_libraries(wg_tests PRIVATE nlohmann_json::nlohmann_json)
+# Export tests decode PNG and EXR images with the codecs compiled into worldgen_core.
+target_link_libraries(wg_tests PRIVATE wg_lodepng $<$<BOOL:${WG_WITH_EXR}>:wg_tinyexr>)
 # DOCTEST_CONFIG_USE_STD_HEADERS: include <ostream> instead of doctest's forward declarations;
 # MSVC needs the complete std::ostream to stringify std types such as std::string_view.
 target_compile_definitions(

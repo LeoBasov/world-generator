@@ -16,6 +16,8 @@ struct RejectionRecord {
   std::string check_id;  ///< R11 check that failed
   double measured = 0.0;
   double required = 0.0;
+
+  friend bool operator==(const RejectionRecord&, const RejectionRecord&) = default;
 };
 
 /// How a world was made; stored in the metadata chunk of every world file (plan section 6.5).
@@ -36,6 +38,8 @@ struct Provenance {
     }
     return completed_stages.back();
   }
+
+  friend bool operator==(const Provenance&, const Provenance&) = default;
 };
 
 }  // namespace wg::core
