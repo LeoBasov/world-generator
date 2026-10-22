@@ -9,6 +9,8 @@ struct Version {
   int major;
   int minor;
   int patch;
+
+  friend bool operator==(const Version&, const Version&) = default;
 };
 
 /// Version of the linked worldgen_core library.

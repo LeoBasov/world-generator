@@ -4,7 +4,7 @@ project(
   worldgen_core
   VERSION 0.1.0
   DESCRIPTION "Engine-independent world generation library"
-  LANGUAGES CXX)
+  LANGUAGES CXX C)  # C for the zstd and miniz sources
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -57,8 +57,13 @@ add_library(
   src/core/thread_pool.cpp
   src/core/version.cpp
   src/core/world_state.cpp
+  src/io/byte_source.cpp
+  src/io/export.cpp
   src/io/hash.cpp
   src/io/json.cpp
+  src/io/layers_json.cpp
+  src/io/snapshot.cpp
+  src/io/world_file.cpp
   src/numerics/differences.cpp
   src/numerics/distance.cpp
   src/numerics/fft.cpp
@@ -89,9 +94,17 @@ target_compile_features(worldgen_core PUBLIC cxx_std_20)
 target_link_libraries(worldgen_core PUBLIC $<BUILD_INTERFACE:tl::expected>)
 # Internal headers (src/io/json.hpp, ...) are included as "io/json.hpp"; never installed.
 target_include_directories(worldgen_core PRIVATE ${PROJECT_SOURCE_DIR}/src)
-# nlohmann/json and xxHash are implementation details: no public header includes them.
-target_link_libraries(worldgen_core PRIVATE $<BUILD_INTERFACE:nlohmann_json::nlohmann_json>
-                                            $<BUILD_INTERFACE:wg_xxhash>)
+# nlohmann/json, xxHash, zstd, lodepng and tinyexr are implementation details: no public header
+# includes them. The compiled ones are object libraries whose objects become part of the archive.
+target_link_libraries(
+  worldgen_core PRIVATE $<BUILD_INTERFACE:nlohmann_json::nlohmann_json> $<BUILD_INTERFACE:wg_xxhash>
+                        $<BUILD_INTERFACE:wg_zstd> $<BUILD_INTERFACE:wg_lodepng>)
+target_sources(worldgen_core PRIVATE $<TARGET_OBJECTS:wg_zstd_objects>
+                                     $<TARGET_OBJECTS:wg_lodepng_objects>)
+if(WG_WITH_EXR)
+  target_link_libraries(worldgen_core PRIVATE $<BUILD_INTERFACE:wg_tinyexr>)
+  target_sources(worldgen_core PRIVATE $<TARGET_OBJECTS:wg_tinyexr_objects>)
+endif()
 # ThreadPool (A05) uses std::thread; consumers of the static library need the thread library too.
 target_link_libraries(worldgen_core PUBLIC Threads::Threads)
 target_compile_definitions(

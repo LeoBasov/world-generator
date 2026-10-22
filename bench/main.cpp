@@ -6,8 +6,10 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <nanobench.h>
@@ -119,6 +121,64 @@ void bench_numerics_serial_only(ankerl::nanobench::Bench& bench, NumericsInputs&
   });
 }
 
+// World file (A09): write and read a 257 x 257 world with four fields (two smooth, one noise,
+// one categorical), with and without zstd.
+std::optional<wg::core::WorldState> make_bench_world(const NumericsInputs& in,
+                                                     const wg::params::GenParams& p) {
+  auto created = wg::core::WorldState::create(in.grid);
+  if (!created) {
+    return std::nullopt;
+  }
+  wg::core::WorldState state = std::move(*created);
+  const auto fill = [&](wg::core::FieldId id, auto value) {
+    auto view = state.write<float>(id);
+    for (std::size_t i = 0; view && i < view->data.size(); ++i) {
+      view->data[i] = value(i);
+    }
+  };
+  const auto n = static_cast<std::size_t>(in.grid.n);
+  fill(wg::core::FieldId::elevation, [&](std::size_t i) { return in.z[i] * 400.0F; });
+  fill(wg::core::FieldId::latitude, [&](std::size_t i) {
+    const std::size_t row = i / n;
+    return static_cast<float>(row) * 0.01F;
+  });
+  fill(wg::core::FieldId::rainfall,
+       [&](std::size_t i) { return static_cast<float>(i % n) * 0.4F; });
+  if (auto water = state.write<std::uint8_t>(wg::core::FieldId::water)) {
+    for (std::size_t i = 0; i < water->data.size(); ++i) {
+      water->data[i] = in.mask[i];
+    }
+  }
+  state.provenance().params_hash = wg::params::params_hash(p);
+  return state;
+}
+
+void bench_world_file(ankerl::nanobench::Bench& bench, const NumericsInputs& in) {
+  wg::params::GenParams params;
+  params.grid.size = in.grid.n;
+  params.grid.dx_m = in.grid.dx_m;
+  params.grid.hu_m = in.grid.hu_m;
+  const std::optional<wg::core::WorldState> world = make_bench_world(in, params);
+  if (!world) {
+    return;
+  }
+  const wg::core::WorldState& state = *world;
+  for (const wg::io::Codec codec : {wg::io::Codec::zstd, wg::io::Codec::raw}) {
+    const std::string name = codec == wg::io::Codec::zstd ? "zstd" : "raw";
+    const wg::io::WriteOptions options{.codec = codec};
+    bench.run("io.write_world(" + name + ")", [&] {
+      ankerl::nanobench::doNotOptimizeAway(wg::io::write_world(state, params, options).has_value());
+    });
+    const auto file = wg::io::write_world(state, params, options);
+    if (!file) {
+      continue;
+    }
+    bench.run("io.read_world(" + name + ")", [&] {
+      ankerl::nanobench::doNotOptimizeAway(wg::io::read_world_buffer(*file).has_value());
+    });
+  }
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -155,6 +215,7 @@ int main(int argc, char** argv) {
     bench_numerics(bench, **pool, "(8 threads)", numerics);
   }
   bench_numerics_serial_only(bench, numerics);
+  bench_world_file(bench, numerics);
 
   if (!json_path.empty()) {
     std::ofstream out{json_path};

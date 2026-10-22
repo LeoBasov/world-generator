@@ -125,6 +125,23 @@ std::optional<std::int64_t> ObjectReader::integer(std::string_view key, std::int
   return static_cast<std::int64_t>(*d);
 }
 
+std::optional<std::uint64_t> ObjectReader::uint64(std::string_view key, bool required) {
+  const io::Json* v = find(key, required);
+  if (v == nullptr) {
+    return std::nullopt;
+  }
+  if (v->is_number_unsigned()) {
+    return v->get<std::uint64_t>();
+  }
+  if (v->is_number_integer()) {
+    add_error(issues_, child(key),
+              std::to_string(v->get<std::int64_t>()) + " is below the minimum 0");
+  } else {
+    add_type_error(issues_, child(key), "integer", *v);
+  }
+  return std::nullopt;
+}
+
 std::optional<bool> ObjectReader::boolean(std::string_view key, bool required) {
   const io::Json* v = find(key, required);
   if (v == nullptr) {

@@ -20,12 +20,16 @@ struct Peak {
   float height_eu = 0.0F;
   /// Radius l of the bump [cells].
   float radius_cells = 0.0F;
+
+  friend bool operator==(const Peak&, const Peak&) = default;
 };
 
 /// Volcano placed by terrain shaping (C5, P1).
 struct Volcano {
   std::int64_t cell = kNoCell;
   bool magma_connected = false;
+
+  friend bool operator==(const Volcano&, const Volcano&) = default;
 };
 
 /// River network (C6, P6): a forest of nodes with downstream edges, stored as a struct of
@@ -60,6 +64,8 @@ struct RiverGraph {
     order.clear();
     name_id.clear();
   }
+
+  friend bool operator==(const RiverGraph&, const RiverGraph&) = default;
 };
 
 /// Lake (C6, P4); id matches the lake_id field.
@@ -69,6 +75,8 @@ struct Lake {
   float spill_elevation_eu = 0.0F;
   std::int64_t outlet_cell = kNoCell;
   std::uint8_t salinity_class = 0;
+
+  friend bool operator==(const Lake&, const Lake&) = default;
 };
 
 /// Named region (C9, P10); id matches the region_id field.
@@ -84,6 +92,8 @@ struct Region {
   std::vector<std::uint16_t> biomes;
   std::uint8_t size_class = 0;
   std::int32_t name_id = -1;
+
+  friend bool operator==(const Region&, const Region&) = default;
 };
 
 enum class PlateType : std::uint8_t { continental, oceanic };
@@ -98,6 +108,8 @@ struct PlateBoundary {
   double convergence = 0.0;
   /// Shear rate s = |dv x n|.
   double shear = 0.0;
+
+  friend bool operator==(const PlateBoundary&, const PlateBoundary&) = default;
 };
 
 /// Tectonic plate (P1); id matches the plate_id field.
@@ -113,18 +125,24 @@ struct Plate {
   /// Angular velocity w_k.
   double omega = 0.0;
   std::vector<PlateBoundary> boundaries;
+
+  friend bool operator==(const Plate&, const Plate&) = default;
 };
 
 struct RockLayer {
   /// Rock table id.
   std::uint16_t rock_id = 0;
   float thickness_m = 0.0F;
+
+  friend bool operator==(const RockLayer&, const RockLayer&) = default;
 };
 
 struct SoilLayer {
   /// Soil table id.
   std::uint16_t soil_id = 0;
   float thickness_m = 0.0F;
+
+  friend bool operator==(const SoilLayer&, const SoilLayer&) = default;
 };
 
 /// Stone column of one geological region (C10, P3), top to bottom; geo_region matches the
@@ -135,6 +153,8 @@ struct GeoColumn {
   std::vector<SoilLayer> soil_layers;
   /// Cavern layers present, ascending.
   std::vector<std::uint8_t> cavern_levels;
+
+  friend bool operator==(const GeoColumn&, const GeoColumn&) = default;
 };
 
 enum class InclusionType : std::uint8_t { vein, cluster, cluster_small, cluster_one };
@@ -147,6 +167,8 @@ struct MineralDeposit {
   std::uint16_t host_layer = 0;
   InclusionType inclusion = InclusionType::vein;
   std::int64_t cell = kNoCell;
+
+  friend bool operator==(const MineralDeposit&, const MineralDeposit&) = default;
 };
 
 /// All vector layers of a world.
@@ -174,6 +196,8 @@ struct VectorLayers {
     geo_columns.clear();
     minerals.clear();
   }
+
+  friend bool operator==(const VectorLayers&, const VectorLayers&) = default;
 };
 
 }  // namespace wg::core

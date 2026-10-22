@@ -23,3 +23,17 @@ TEST_CASE("core.provenance records rejections") {
   CHECK(p.rejections.front().check_id == "PEAK_NUMBER_MIN");
   CHECK(p.attempt == 0);
 }
+
+TEST_CASE("core.provenance compares member-wise") {
+  Provenance a;
+  a.profile = "classic";
+  a.rejections.push_back(wg::core::RejectionRecord{
+      .attempt = 0, .stage = "c03_fit", .check_id = "X", .measured = 0.0, .required = 1.0});
+  Provenance b = a;
+  CHECK(a == b);
+  b.rejections[0].measured = 1.0;
+  CHECK(a != b);
+  b = a;
+  b.library_version.patch += 1;
+  CHECK(a != b);
+}

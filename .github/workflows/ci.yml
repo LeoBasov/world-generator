@@ -83,6 +83,8 @@ jobs:
             os: ubuntu-24.04
             cc: gcc-14
             cxx: g++-14
+            # One primary job builds and tests the optional EXR export (A09).
+            cmake-args: -DWG_WITH_EXR=ON
           - name: linux-clang
             os: ubuntu-24.04
             cc: clang-18
@@ -105,7 +107,7 @@ jobs:
           cache-key: ${{ matrix.name }}-release
 
       - name: Configure
-        run: cmake --preset release
+        run: cmake --preset release ${{ matrix.cmake-args }}
       - name: Build
         run: cmake --build --preset release
       - name: Test
