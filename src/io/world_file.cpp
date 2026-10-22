@@ -68,7 +68,7 @@ std::optional<std::uint64_t> parse_hex64(std::string_view s) {
     if (c >= '0' && c <= '9') {
       d = static_cast<std::uint64_t>(c - '0');
     } else if (c >= 'a' && c <= 'f') {
-      d = static_cast<std::uint64_t>(c - 'a' + 10);
+      d = static_cast<std::uint64_t>(c - 'a') + 10U;
     } else {
       return std::nullopt;
     }
@@ -239,8 +239,9 @@ core::Expected<std::string> encode_metadata(const core::WorldState& state,
   if (!provenance) {
     return core::make_error(std::move(provenance.error()));
   }
-  core::Expected<std::string> params_text =
-      params::to_json(params::ParamsDocument{.params = params});
+  params::ParamsDocument document;
+  document.params = params;
+  core::Expected<std::string> params_text = params::to_json(document);
   if (!params_text) {
     return core::make_error(std::move(params_text.error()));
   }

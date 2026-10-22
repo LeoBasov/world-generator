@@ -138,8 +138,10 @@ std::optional<wg::core::WorldState> make_bench_world(const NumericsInputs& in,
   };
   const auto n = static_cast<std::size_t>(in.grid.n);
   fill(wg::core::FieldId::elevation, [&](std::size_t i) { return in.z[i] * 400.0F; });
-  fill(wg::core::FieldId::latitude,
-       [&](std::size_t i) { return static_cast<float>(i / n) * 0.01F; });
+  fill(wg::core::FieldId::latitude, [&](std::size_t i) {
+    const std::size_t row = i / n;
+    return static_cast<float>(row) * 0.01F;
+  });
   fill(wg::core::FieldId::rainfall,
        [&](std::size_t i) { return static_cast<float>(i % n) * 0.4F; });
   if (auto water = state.write<std::uint8_t>(wg::core::FieldId::water)) {

@@ -27,7 +27,8 @@ TEST_CASE("core.provenance records rejections") {
 TEST_CASE("core.provenance compares member-wise") {
   Provenance a;
   a.profile = "classic";
-  a.rejections.push_back(wg::core::RejectionRecord{.attempt = 0, .stage = "c03_fit"});
+  a.rejections.push_back(wg::core::RejectionRecord{
+      .attempt = 0, .stage = "c03_fit", .check_id = "X", .measured = 0.0, .required = 1.0});
   Provenance b = a;
   CHECK(a == b);
   b.rejections[0].measured = 1.0;
