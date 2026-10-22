@@ -21,7 +21,9 @@ using wg::params::ParamKind;
 // The descriptor table is usable at compile time.
 static_assert(kParamCount == kParamDescriptors.size());
 static_assert(wg::params::kParamsSchemaVersion == 1);
-static_assert(find_param("$.grid.size") != nullptr);
+// Dereferencing proves the lookup found a descriptor: GCC cannot constant-evaluate a comparison
+// of an array element's address with nullptr under -fsanitize=address,undefined (asan preset).
+static_assert(find_param("$.grid.size")->path == "$.grid.size");
 static_assert(find_param("$.grid.size")->kind == ParamKind::integer);
 static_assert(find_param("$.no.such") == nullptr);
 
