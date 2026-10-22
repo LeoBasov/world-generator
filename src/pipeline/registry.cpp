@@ -92,7 +92,7 @@ core::Expected<std::unique_ptr<Stage>> StageRegistry::create(std::string_view id
         core::StatusCode::internal,
         "stage " + std::string(id) + ": factory made a stage with id " + std::string(stage->id()));
   }
-  return core::Expected<std::unique_ptr<Stage>>(std::move(stage));
+  return {std::move(stage)};
 }
 
 }  // namespace wg::pipeline

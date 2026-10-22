@@ -331,8 +331,9 @@ core::Expected<Pipeline> Pipeline::create(const Profile& profile, const StageReg
     for (auto it = profile.stages.begin(); it != profile.stages.end(); ++it) {
       const std::string& id = *it;
       if (std::find(profile.stages.begin(), it, id) != it) {
-        return core::make_error(StatusCode::invalid_argument,
-                                prefix + "stage " + id + " is listed twice");
+        std::string message = prefix;
+        message += "stage " + id + " is listed twice";
+        return core::make_error(StatusCode::invalid_argument, message);
       }
       core::Expected<std::unique_ptr<Stage>> stage = registry.create(id);
       if (!stage) {
@@ -341,14 +342,16 @@ core::Expected<Pipeline> Pipeline::create(const Profile& profile, const StageReg
       }
       const FieldSet missing = (*stage)->inputs().minus(available);
       if (!missing.empty()) {
-        return core::make_error(StatusCode::failed_precondition,
-                                prefix + "stage " + id + " reads " + to_string(missing) +
-                                    ", which no earlier stage produces");
+        std::string message = prefix;
+        message += "stage " + id;
+        message += " reads " + to_string(missing);
+        message += ", which no earlier stage produces";
+        return core::make_error(StatusCode::failed_precondition, message);
       }
       available |= (*stage)->outputs();
       p.stages_.push_back(std::move(*stage));
     }
-    return core::Expected<Pipeline>(std::move(p));
+    return {std::move(p)};
   } catch (...) {
     return core::make_error(StatusCode::out_of_memory, "cannot create the pipeline");
   }

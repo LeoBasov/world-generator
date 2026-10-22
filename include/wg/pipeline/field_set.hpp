@@ -83,7 +83,7 @@ class FieldSet {
   [[nodiscard]] constexpr bool empty() const noexcept { return size() == 0; }
 
   [[nodiscard]] constexpr std::size_t size() const noexcept {
-    std::size_t n = static_cast<std::size_t>(std::popcount(layers_));
+    auto n = static_cast<std::size_t>(std::popcount(layers_));
     for (const std::uint64_t w : fields_) {
       n += static_cast<std::size_t>(std::popcount(w));
     }
