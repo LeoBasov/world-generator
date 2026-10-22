@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LeoBasov/world-generator/schema/profile.schema.json",
+  "title": "worldgen-core profile",
+  "description": "Ordered stage ids of one generation method (plan sections 2 and 8, A08). Pipeline::create checks that every stage exists and reads only fields produced by earlier stages (R2).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "name",
+    "stages"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "name": {
+      "description": "Profile id, written into the provenance of every world.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "stages": {
+      "description": "Stage ids in run order; a stage id equals its source file stem and keys the RNG.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      }
+    }
+  }
+}

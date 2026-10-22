@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schema/profile.schema.json",
+  "schema_version": 1,
+  "name": "mock",
+  "description": "Three mock stages for the pipeline tests (A08) and the wgcli integration tests (A10).",
+  "stages": ["m01_seed", "m02_shape", "m03_verify"]
+}

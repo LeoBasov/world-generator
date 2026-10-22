@@ -43,7 +43,8 @@ class ProgressSink {
  public:
   virtual ~ProgressSink() = default;
 
-  /// fraction in [0, 1] of the work in scope (a stage id) is done; non-decreasing per scope.
+  /// fraction in [0, 1] of the work in scope (a stage id, or "pipeline") is done;
+  /// non-decreasing per scope within one pipeline attempt, restarting at 0 with a new attempt.
   virtual void report(std::string_view scope, double fraction) noexcept = 0;
 
  protected:
