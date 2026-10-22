@@ -61,6 +61,8 @@ jobs:
           # Every data/**/*.json against the JSON Schema it names (A07); the C++ loaders check
           # the rules JSON Schema cannot express.
           python tools/data/validate_data.py
+          # Fixture profiles of the tests (A08) follow schema/profile.schema.json.
+          python tools/data/validate_data.py tests/fixtures/profiles/*.json
           python -m unittest discover -s tools/data/tests -v
       - name: Check RNG known-answer vectors
         run: |

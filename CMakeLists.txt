@@ -73,7 +73,12 @@ add_library(
   src/params/params.cpp
   src/params/reader.cpp
   src/params/tables.cpp
-  src/params/validation.cpp)
+  src/params/validation.cpp
+  src/pipeline/field_set.cpp
+  src/pipeline/pipeline.cpp
+  src/pipeline/profile.cpp
+  src/pipeline/registry.cpp
+  src/pipeline/stage.cpp)
 add_library(worldgen_core::worldgen_core ALIAS worldgen_core)
 
 target_include_directories(

@@ -71,3 +71,11 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   library). Data files are installed to `share/worldgen_core/data`.
 - CI `lint` validates every data file against its schema (`tools/data/validate_data.py`).
 - Shared test fixtures `tests/support/fixtures.hpp` and numerics benchmarks in `wg_bench`.
+- Pipeline framework (A08) in `wg::pipeline`: `Stage` with `StageContext`, `StageResult` and
+  `StageMetrics`; `FieldSet` over raster fields and the new `LayerId` vector layers;
+  `StageRegistry`; `Profile` with `load_profile` / `load_profile_file` and
+  `schema/profile.schema.json`; `Pipeline::create`, which checks the causal order of a profile
+  (R2), and `Pipeline::run`, the attempt loop with per-attempt keys, rejection records, the
+  repair hook, cancellation, the `SnapshotHook` and per-stage metrics, returning `RunOutput` or
+  a `FailureReport`. ADR 0006 records the design. CI `lint` also validates the fixture profiles
+  in `tests/fixtures/profiles/`.
