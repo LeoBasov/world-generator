@@ -18,3 +18,7 @@ Presets: `debug`, `release`, `relwithdebinfo`, `asan` (ASan + UBSan), `tsan`, `c
 Targets: `worldgen_core`, `wgcli`, `wg_tests`, `wg_bench`, `wg_example`.
 Install with `cmake --install build/<preset> --prefix <dir>`, then use
 `find_package(worldgen_core)`.
+
+See [docs/building.md](docs/building.md) for the full build guide: options, manual configure
+with Make, dependencies, generated sources, platform notes (Windows, WSL, macOS) and
+troubleshooting.
