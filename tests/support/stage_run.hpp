@@ -30,11 +30,13 @@ inline std::unique_ptr<wg::pipeline::Stage> make_classic_stage(std::string_view 
   return std::move(*stage);
 }
 
-/// Runs stage on state with key stage_key(seed, id, 0).
-inline wg::pipeline::StageResult run_stage(
-    wg::pipeline::Stage& stage, wg::core::WorldState& state, const wg::params::GenParams& params,
-    std::uint64_t seed, wg::core::Executor& exec,
-    const wg::core::CancelFlag& cancel = wg::pipeline::never_cancelled()) {
+/// Calls f(stage, ctx) with the context Pipeline::run gives stage on state in attempt 0 (key
+/// stage_key(seed, id, 0)).
+template <class F>
+wg::pipeline::StageResult with_context(wg::pipeline::Stage& stage, wg::core::WorldState& state,
+                                       const wg::params::GenParams& params, std::uint64_t seed,
+                                       wg::core::Executor& exec, const wg::core::CancelFlag& cancel,
+                                       const F& f) {
   wg::pipeline::StageContext ctx{.state = state,
                                  .params = params,
                                  .tables = nullptr,
@@ -44,7 +46,34 @@ inline wg::pipeline::StageResult run_stage(
                                  .log = wg::core::null_log_sink(),
                                  .progress = wg::core::null_progress_sink(),
                                  .cancel = cancel};
-  return stage.run(ctx);
+  return f(stage, ctx);
+}
+
+/// Runs stage on state with key stage_key(seed, id, 0).
+inline wg::pipeline::StageResult run_stage(
+    wg::pipeline::Stage& stage, wg::core::WorldState& state, const wg::params::GenParams& params,
+    std::uint64_t seed, wg::core::Executor& exec,
+    const wg::core::CancelFlag& cancel = wg::pipeline::never_cancelled()) {
+  return with_context(
+      stage, state, params, seed, exec, cancel,
+      [](wg::pipeline::Stage& s, wg::pipeline::StageContext& ctx) { return s.run(ctx); });
+}
+
+/// Like run_stage, then like the runner (R8): a reject gets one call of the repair hook, whose
+/// result is returned.
+inline wg::pipeline::StageResult run_stage_with_repair(wg::pipeline::Stage& stage,
+                                                       wg::core::WorldState& state,
+                                                       const wg::params::GenParams& params,
+                                                       std::uint64_t seed,
+                                                       wg::core::Executor& exec) {
+  return with_context(stage, state, params, seed, exec, wg::pipeline::never_cancelled(),
+                      [](wg::pipeline::Stage& s, wg::pipeline::StageContext& ctx) {
+                        wg::pipeline::StageResult r = s.run(ctx);
+                        if (r.kind == wg::pipeline::StageResult::Kind::reject) {
+                          r = s.repair(ctx, r);
+                        }
+                        return r;
+                      });
 }
 
 }  // namespace wg::test

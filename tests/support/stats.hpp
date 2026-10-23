@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <numeric>
 #include <span>
 #include <vector>
 
@@ -25,6 +26,44 @@ double ks_statistic(std::vector<double>& samples, Cdf cdf) {
     d = std::max({d, f - (static_cast<double>(i) / n), (static_cast<double>(i + 1) / n) - f});
   }
   return d;
+}
+
+/// Ranks 1 ... n of the values; equal values share their average rank.
+inline std::vector<double> average_ranks(std::span<const double> v) {
+  std::vector<std::size_t> order(v.size());
+  std::iota(order.begin(), order.end(), std::size_t{0});
+  std::stable_sort(order.begin(), order.end(),
+                   [&](std::size_t a, std::size_t b) { return v[a] < v[b]; });
+  std::vector<double> ranks(v.size());
+  for (std::size_t i = 0; i < order.size();) {
+    std::size_t j = i;
+    while (j + 1 < order.size() && v[order[j + 1]] == v[order[i]]) {
+      ++j;
+    }
+    const double rank = (static_cast<double>(i + j) / 2.0) + 1.0;
+    for (std::size_t k = i; k <= j; ++k) {
+      ranks[order[k]] = rank;
+    }
+    i = j + 1;
+  }
+  return ranks;
+}
+
+/// Spearman rank correlation of a and b (same size >= 2): the Pearson correlation of their
+/// average ranks.
+inline double spearman(std::span<const double> a, std::span<const double> b) {
+  const std::vector<double> ra = average_ranks(a);
+  const std::vector<double> rb = average_ranks(b);
+  const double mean = (static_cast<double>(ra.size()) + 1.0) / 2.0;
+  double sab = 0.0;
+  double saa = 0.0;
+  double sbb = 0.0;
+  for (std::size_t i = 0; i < ra.size(); ++i) {
+    sab += (ra[i] - mean) * (rb[i] - mean);
+    saa += (ra[i] - mean) * (ra[i] - mean);
+    sbb += (rb[i] - mean) * (rb[i] - mean);
+  }
+  return sab / std::sqrt(saa * sbb);
 }
 
 /// Two-sample Kolmogorov-Smirnov statistic D = sup |F_a - F_b| (both sorted in place).

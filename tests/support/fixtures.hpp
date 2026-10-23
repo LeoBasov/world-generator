@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
@@ -33,6 +34,16 @@ std::vector<float> make_field(const wg::core::Grid& grid, const F& f) {
 /// Ramp z = z0 + g * x, rising to the east.
 inline std::vector<float> ramp(const wg::core::Grid& grid, double z0, double g) {
   return make_field(grid, [=](std::int32_t x, std::int32_t /*y*/) { return z0 + (g * x); });
+}
+
+/// Cone z = z0 - g * r with r the distance in cells from (cx, cy).
+inline std::vector<float> cone(const wg::core::Grid& grid, double z0, double g, std::int32_t cx,
+                               std::int32_t cy) {
+  return make_field(grid, [=](std::int32_t x, std::int32_t y) {
+    const double ddx = x - cx;
+    const double ddy = y - cy;
+    return z0 - (g * std::sqrt((ddx * ddx) + (ddy * ddy)));
+  });
 }
 
 /// Mask with each cell set with probability density.

@@ -46,17 +46,9 @@ core::RngKey field_key(const StageContext& ctx, FieldId id) noexcept {
   return ctx.key.derive(core::field_info(id).name);
 }
 
-core::Expected<std::span<float>> field(StageContext& ctx, FieldId id) noexcept {
-  core::Expected<core::FieldView<float>> view = ctx.state.write<float>(id);
-  if (!view) {
-    return core::make_error(std::move(view.error()));
-  }
-  return view->data;
-}
-
 // Elevation without clamping, the peak candidates on those raw values, then the clamp.
 core::Status seed_elevation(StageContext& ctx) noexcept {
-  core::Expected<std::span<float>> z = field(ctx, FieldId::elevation);
+  core::Expected<std::span<float>> z = write_float(ctx, FieldId::elevation);
   if (!z) {
     return std::move(z.error());
   }
@@ -88,7 +80,7 @@ core::Status seed_temperature(StageContext& ctx) noexcept {
   if (!phi) {
     return std::move(phi.error());
   }
-  core::Expected<std::span<float>> t = field(ctx, FieldId::temperature);
+  core::Expected<std::span<float>> t = write_float(ctx, FieldId::temperature);
   if (!t) {
     return std::move(t.error());
   }
@@ -143,7 +135,7 @@ class C02Seed final : public pipeline::Stage {
       if (!status.ok()) {
         break;
       }
-      core::Expected<std::span<float>> out = field(ctx, f.id);
+      core::Expected<std::span<float>> out = write_float(ctx, f.id);
       if (!out) {
         return failed(std::move(out.error()));
       }

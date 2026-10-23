@@ -116,3 +116,14 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   new `fractal::generate_unclamped_field`). `wg::stages::add_classic_stages` registers them, and
   wgcli's registry includes them. The test profile is `tests/fixtures/profiles/classic_seed.json`.
   ADR 0010 records the conventions.
+- Elevation post-processing (A13) in `wg::terrain`: hypsometric remap z' = G^-1(F(z)) onto a
+  five-knot target curve (`hypsometric_remap`), edge-ocean counting and repair
+  (`count_ocean_edges`, `enforce_edge_oceans`), Gaussian peak and volcano bumps
+  (`add_gaussian_bump`), band-limited plains smoothing (`plains_smooth`), volcano placement
+  (`place_volcanoes`) and the downstream river constraint (`enforce_river_descent`). Classic
+  stages `c03_fit` (remap, edge-ocean and PEAK_NUMBER_MIN checks, edge-ocean repair),
+  `c05_shape` (plains, volcanoes, VOLCANO_MIN) and `c07_smooth` (bumps, land smoothing, river
+  descent). New parameters `elevation_post.hypsometry_enabled`, `hypsometry_z`,
+  `hypsometry_cdf`, `edge_ocean_width`, `final_alpha` and `final_iterations`, so every
+  parameter hash changes. The test profile `classic_seed.json` now runs c01, c02, c03 and c05.
+  ADR 0011 records the rules.
