@@ -2,9 +2,9 @@
 
 #include <doctest/doctest.h>
 
+#include <bit>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <vector>
 
 #include "support/fixtures.hpp"
@@ -79,7 +79,7 @@ TEST_CASE("terrain.plains_smooth leaves cells outside the band bit-identical (A1
       const double v = before[k];
       if (v <= p.z_lo - p.taper || v >= p.z_hi + p.taper) {
         ++outside;
-        CHECK(std::memcmp(&z[k], &before[k], sizeof(float)) == 0);
+        CHECK(std::bit_cast<std::uint32_t>(z[k]) == std::bit_cast<std::uint32_t>(before[k]));
       } else if (z[k] != before[k]) {
         ++changed;
       }
