@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LeoBasov/world-generator/schema/golden_seeds.schema.json",
+  "title": "worldgen-core golden seed list",
+  "description": "Cases and seeds whose hashes the golden tests compare (plan section 10.3), read by wgcli hash --seeds (A10, docs/cli.md). Profile and params are paths relative to this file or names in the data directory.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "cases"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "profile",
+          "seeds"
+        ],
+        "properties": {
+          "name": {
+            "description": "Case id in the hash files.",
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "profile": {
+            "description": "Profile file relative to this file, or a name in <data>/profiles.",
+            "type": "string",
+            "minLength": 1
+          },
+          "params": {
+            "description": "Params file relative to this file, or a preset name in <data>/presets; defaults if absent.",
+            "type": "string",
+            "minLength": 1
+          },
+          "size": {
+            "description": "Grid size N = 2^k + 1; overrides grid.size of the params.",
+            "type": "integer",
+            "minimum": 3
+          },
+          "seeds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551615
+            }
+          }
+        }
+      }
+    }
+  }
+}

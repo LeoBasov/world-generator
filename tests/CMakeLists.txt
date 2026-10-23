@@ -1,6 +1,10 @@
-# One doctest runner for all unit tests (plan section 6.2).
-# Test files mirror src/ under tests/unit/.
-file(GLOB_RECURSE WG_UNIT_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp")
+# One doctest runner for all unit and integration tests (plan section 6.2).
+# Test files mirror src/ under tests/unit/; tests/integration/ holds profile runs (A10: wgcli).
+file(GLOB_RECURSE WG_UNIT_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp"
+     "${CMAKE_CURRENT_SOURCE_DIR}/integration/*.cpp")
+if(NOT WG_BUILD_CLI)
+  list(FILTER WG_UNIT_TEST_SOURCES EXCLUDE REGEX "/wgcli/")
+endif()
 
 add_executable(wg_tests main.cpp ${WG_UNIT_TEST_SOURCES})
 target_link_libraries(wg_tests PRIVATE worldgen_core::worldgen_core doctest::doctest wg_build_flags)
@@ -10,6 +14,10 @@ target_include_directories(wg_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${PRO
 target_link_libraries(wg_tests PRIVATE nlohmann_json::nlohmann_json)
 # Export tests decode PNG and EXR images with the codecs compiled into worldgen_core.
 target_link_libraries(wg_tests PRIVATE wg_lodepng $<$<BOOL:${WG_WITH_EXR}>:wg_tinyexr>)
+# wgcli tests run the commands in-process through wgcli_app (tools/wgcli/cli.hpp).
+if(WG_BUILD_CLI)
+  target_link_libraries(wg_tests PRIVATE wgcli_app)
+endif()
 # DOCTEST_CONFIG_USE_STD_HEADERS: include <ostream> instead of doctest's forward declarations;
 # MSVC needs the complete std::ostream to stringify std types such as std::string_view.
 target_compile_definitions(
@@ -22,3 +30,11 @@ target_compile_definitions(
 # Register every TEST_CASE as its own CTest test, so `ctest -R <name>` runs one.
 include(doctest)
 doctest_discover_tests(wg_tests)
+
+# The real wgcli executable: exit codes of plan section 6.7 (the commands themselves are tested
+# in-process above).
+if(WG_BUILD_CLI)
+  add_test(NAME wgcli.binary.exit_codes
+           COMMAND "${CMAKE_COMMAND}" -DWGCLI=$<TARGET_FILE:wgcli>
+                   -P "${CMAKE_CURRENT_SOURCE_DIR}/integration/wgcli/exit_codes.cmake")
+endif()
