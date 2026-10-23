@@ -121,6 +121,27 @@ TEST_CASE("params.validation ordered pairs") {
   CHECK(only_issue(w).path == "$.geology.CAVERN_LAYER_WATER_MIN[2]");
 }
 
+TEST_CASE("params.validation hypsometry knots") {
+  GenParams p;
+  p.elevation_post.hypsometry_z = {0.0, 1.0, 2.0, 3.0, 400.0};
+  p.elevation_post.hypsometry_cdf = {0.0, 0.0, 0.5, 0.5, 1.0};
+  CHECK(clean(p));
+
+  GenParams z = p;
+  z.elevation_post.hypsometry_z[2] = 1.0;
+  CHECK(only_issue(z).path == "$.elevation_post.hypsometry_z[2]");
+
+  GenParams c = p;
+  c.elevation_post.hypsometry_cdf[3] = 0.4;
+  CHECK(only_issue(c).path == "$.elevation_post.hypsometry_cdf[3]");
+
+  GenParams ends = p;
+  ends.elevation_post.hypsometry_cdf[4] = 0.9;
+  CHECK(only_issue(ends).path == "$.elevation_post.hypsometry_cdf");
+  ends.elevation_post.hypsometry_cdf = {0.1, 0.2, 0.5, 0.6, 1.0};
+  CHECK(only_issue(ends).path == "$.elevation_post.hypsometry_cdf");
+}
+
 TEST_CASE("params.validation square counts must fit the grid") {
   GenParams p;
   p.grid.size = 17;  // 289 squares

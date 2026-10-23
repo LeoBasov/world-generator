@@ -89,7 +89,16 @@ add_library(
   src/pipeline/stage.cpp
   src/stages/classic/c01_allocate.cpp
   src/stages/classic/c02_seed.cpp
-  src/stages/classic/classic.cpp)
+  src/stages/classic/c03_fit.cpp
+  src/stages/classic/c05_shape.cpp
+  src/stages/classic/c07_smooth.cpp
+  src/stages/classic/classic.cpp
+  src/terrain/bumps.cpp
+  src/terrain/edge_ocean.cpp
+  src/terrain/hypsometry.cpp
+  src/terrain/plains.cpp
+  src/terrain/river_descent.cpp
+  src/terrain/volcanoes.cpp)
 add_library(worldgen_core::worldgen_core ALIAS worldgen_core)
 
 target_include_directories(

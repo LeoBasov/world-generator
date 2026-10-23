@@ -133,6 +133,38 @@
           "description": "Width of the local elevation bump around a volcano.",
           "type": "number", "minimum": 0.1, "maximum": 64, "default": 2,
           "x-unit": "tiles", "x-report": "R4.5"
+        },
+        "hypsometry_enabled": {
+          "description": "Remap elevation onto the target hypsometry G in stage C3.",
+          "type": "boolean", "default": true,
+          "x-report": "R4.1"
+        },
+        "hypsometry_z": {
+          "description": "Elevations of the five knots of the target hypsometric curve G, strictly ascending.",
+          "type": "array", "minItems": 5, "maxItems": 5, "default": [1, 100, 200, 300, 400],
+          "items": {"type": "number", "minimum": 0, "maximum": 400},
+          "x-unit": "eu", "x-report": "R4.1"
+        },
+        "hypsometry_cdf": {
+          "description": "Cumulative area fractions G(z) at the knots, non-decreasing from 0 to 1.",
+          "type": "array", "minItems": 5, "maxItems": 5, "default": [0, 0.3, 0.65, 0.9, 1],
+          "items": {"type": "number", "minimum": 0, "maximum": 1},
+          "x-unit": "", "x-report": "R4.1"
+        },
+        "edge_ocean_width": {
+          "description": "Width over which the edge-ocean repair lowers elevation from below sea level back to the field.",
+          "type": "number", "minimum": 1, "maximum": 64, "default": 8,
+          "x-unit": "tiles", "x-report": "R4.1"
+        },
+        "final_alpha": {
+          "description": "Step weight alpha of the final land smoothing (S7), in (0, 0.25].",
+          "type": "number", "minimum": 0.01, "maximum": 0.25, "default": 0.125,
+          "x-unit": "", "x-report": "R2"
+        },
+        "final_iterations": {
+          "description": "Number of final land smoothing steps (S7).",
+          "type": "integer", "minimum": 0, "maximum": 1000, "default": 4,
+          "x-unit": "", "x-report": "R2"
         }
       }
     },

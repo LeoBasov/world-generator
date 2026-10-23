@@ -10,6 +10,9 @@ namespace wg::stages {
 //
 //   c01_allocate  reads nothing     writes latitude                                (A12)
 //   c02_seed      reads latitude    writes the six primary fields, peaks           (A12)
+//   c03_fit       reads elevation, peaks         writes elevation, peaks           (A13)
+//   c05_shape     reads elevation, volcanism     writes elevation, volcanoes       (A13)
+//   c07_smooth    reads elevation, river_graph, peaks, volcanoes  writes elevation (A13)
 
 /// Adds every classic stage implemented so far to registry. Errors as StageRegistry::add
 /// (already_exists if a stage is registered twice), out_of_memory.

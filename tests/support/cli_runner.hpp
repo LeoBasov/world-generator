@@ -40,7 +40,7 @@ inline std::string mock_profile() {
       .generic_string();
 }
 
-/// The classic_seed profile of tests/fixtures/profiles/classic_seed.json (c01, c02).
+/// The classic_seed profile of tests/fixtures/profiles/classic_seed.json (c01, c02, c03, c05).
 inline std::string classic_seed_profile() {
   return (std::filesystem::path(WG_TEST_SOURCE_DIR) / "tests/fixtures/profiles/classic_seed.json")
       .generic_string();
