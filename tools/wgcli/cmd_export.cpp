@@ -128,7 +128,11 @@ int run_export(const ParsedArgs& args, const Io& io) {
       if (!values) {
         return fail(io, values.error());
       }
-      const std::filesystem::path map_file = dir / (name + "_" + colormap_name + ".png");
+      std::string map_name = name;
+      map_name += "_";
+      map_name += colormap_name;
+      map_name += ".png";
+      const std::filesystem::path map_file = dir / map_name;
       if (core::Status s =
               write_colormap_png(map_file, reader->grid().n, *values, png->lo, png->hi, *colormap);
           !s.ok()) {
