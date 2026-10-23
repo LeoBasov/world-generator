@@ -23,6 +23,7 @@
 #include "wg/core/vector_layers.hpp"
 #include "wg/core/version.hpp"
 #include "wg/core/world_state.hpp"
+#include "wg/fractal/fractal.hpp"
 #include "wg/generated/field_ids.hpp"
 #include "wg/generated/gen_params.hpp"
 #include "wg/io/byte_source.hpp"

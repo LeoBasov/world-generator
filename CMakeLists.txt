@@ -57,6 +57,7 @@ add_library(
   src/core/thread_pool.cpp
   src/core/version.cpp
   src/core/world_state.cpp
+  src/fractal/fractal.cpp
   src/io/byte_source.cpp
   src/io/export.cpp
   src/io/hash.cpp

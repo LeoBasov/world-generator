@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+#include "support/stats.hpp"
 #include "unit/core/rng_kat.inc"
 #include "wg/core/detmath.hpp"
 #include "wg/core/rng.hpp"
@@ -24,6 +25,10 @@ using wg::core::RngStream;
 using wg::core::stage_key;
 using wg::core::StatusCode;
 using wg::core::WeightedBins;
+using wg::test::chi2_critical;
+using wg::test::chi2_statistic;
+using wg::test::ks_critical;
+using wg::test::ks_statistic;
 
 namespace kat = wg::test::kat;
 
@@ -40,40 +45,6 @@ std::uint64_t bits(double x) { return std::bit_cast<std::uint64_t>(x); }
 double from_bits(std::uint64_t b) { return std::bit_cast<double>(b); }
 
 double normal_cdf(double z) { return 0.5 * std::erfc(-z / std::numbers::sqrt2); }
-
-/// Critical Kolmogorov-Smirnov statistic at alpha = 0.01 (asymptotic, large n).
-double ks_critical(std::size_t n) { return 1.62762 / std::sqrt(static_cast<double>(n)); }
-
-/// Kolmogorov-Smirnov statistic D = sup |F_n - F| of the samples (sorted in place).
-template <class Cdf>
-double ks_statistic(std::vector<double>& samples, Cdf cdf) {
-  std::sort(samples.begin(), samples.end());
-  const auto n = static_cast<double>(samples.size());
-  double d = 0.0;
-  for (std::size_t i = 0; i < samples.size(); ++i) {
-    const double f = cdf(samples[i]);
-    d = std::max({d, f - (static_cast<double>(i) / n), (static_cast<double>(i + 1) / n) - f});
-  }
-  return d;
-}
-
-/// Upper 1 % quantile of chi^2 with df degrees of freedom (Wilson-Hilferty approximation).
-double chi2_critical(std::size_t df) {
-  constexpr double kZ99 = 2.3263478740408408;  // Phi^-1(0.99)
-  const auto k = static_cast<double>(df);
-  const double c = 1.0 - (2.0 / (9.0 * k)) + (kZ99 * std::sqrt(2.0 / (9.0 * k)));
-  return k * c * c * c;
-}
-
-/// Pearson chi^2 of observed counts against expected counts.
-double chi2_statistic(std::span<const double> expected, std::span<const double> observed) {
-  double chi2 = 0.0;
-  for (std::size_t i = 0; i < expected.size(); ++i) {
-    const double diff = observed[i] - expected[i];
-    chi2 += diff * diff / expected[i];
-  }
-  return chi2;
-}
 
 /// Chi^2 statistic and degrees of freedom of a Poisson sample, merging neighbouring values until
 /// each bin expects at least 5 counts.

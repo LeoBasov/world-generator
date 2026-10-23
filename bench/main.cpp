@@ -121,6 +121,22 @@ void bench_numerics_serial_only(ankerl::nanobench::Bench& bench, NumericsInputs&
   });
 }
 
+// Fractal field (A11): one primary field with the default elevation parameters, at the classic
+// size and at a physical-profile simulation size.
+void bench_fractal(ankerl::nanobench::Bench& bench, wg::core::Executor& exec,
+                   const std::string& suffix) {
+  const wg::params::FieldGenParams params = wg::params::FieldsParams{}.elevation;
+  const wg::core::RngKey key = wg::core::stage_key(1, "bench.fractal", 0);
+  for (const std::int32_t n : {257, 1025}) {
+    const wg::core::Grid grid{.n = n, .dx_m = 100.0, .hu_m = 1.0};
+    std::vector<float> z(static_cast<std::size_t>(grid.cells()));
+    bench.run("fractal.generate_field(" + std::to_string(n) + ")" + suffix, [&] {
+      ankerl::nanobench::doNotOptimizeAway(
+          wg::fractal::generate_field(grid, params, key, {}, z, exec).ok());
+    });
+  }
+}
+
 // World file (A09): write and read a 257 x 257 world with four fields (two smooth, one noise,
 // one categorical), with and without zstd.
 std::optional<wg::core::WorldState> make_bench_world(const NumericsInputs& in,
@@ -215,6 +231,10 @@ int main(int argc, char** argv) {
     bench_numerics(bench, **pool, "(8 threads)", numerics);
   }
   bench_numerics_serial_only(bench, numerics);
+  bench_fractal(bench, serial, "(serial)");
+  if (pool) {
+    bench_fractal(bench, **pool, "(8 threads)");
+  }
   bench_world_file(bench, numerics);
 
   if (!json_path.empty()) {

@@ -103,3 +103,9 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Reference in `docs/cli.md`, kept equal to the `--help` output by the test `wgcli.docs` and
   `tools/wgcli/sync_cli_doc.py`. World and stage hashes are defined in ADR 0008; the golden
   seed list format in `schema/golden_seeds.schema.json`.
+- Fractal field generator (A11) in `wg::fractal`: `control_grid`, weighted control values
+  (`sample_controls`) with the edge-pinning hook (`pin_edges`), anisotropic midpoint
+  displacement (`diamond_square`) with sigma_k = c (V / 3200) (max - min) 2^(-kH) per axis,
+  `clamp_field` and `generate_field`. Results are bit-identical for any thread count and
+  platform. ADR 0009 records the scheme, the RNG layout and the decision for a bounded map.
+  Fractal benchmarks in `wg_bench`; shared statistics helpers `tests/support/stats.hpp`.
