@@ -93,9 +93,18 @@ inline constexpr std::uint8_t kAllEdges = kEdgeNorth | kEdgeEast | kEdgeSouth | 
 [[nodiscard]] core::Status clamp_field(std::span<float> z, double lo, double hi,
                                        core::Executor& exec) noexcept;
 
-/// One primary field: control grid of params.mesh, sample_controls, diamond_square and
-/// clamp_field to [min, max]. The control values live in scratch memory from resource. Errors:
-/// those of the steps, out_of_memory.
+/// generate_field without the final clamp_field: control grid of params.mesh, sample_controls
+/// and diamond_square. Stage C2 reads the raw elevation for its peak candidates before it clamps
+/// (ADR 0010). The control values live in scratch memory from resource. Errors: those of the
+/// steps, out_of_memory.
+[[nodiscard]] core::Status generate_unclamped_field(
+    const core::Grid& grid, const params::FieldGenParams& params, core::RngKey key,
+    std::span<const std::int8_t> pinned_bins, std::span<float> out, core::Executor& exec,
+    const core::CancelFlag* cancel = nullptr,
+    core::MemoryResource& resource = core::default_memory_resource()) noexcept;
+
+/// One primary field: generate_unclamped_field, then clamp_field to [min, max]. Errors: those
+/// of the steps, out_of_memory.
 [[nodiscard]] core::Status generate_field(
     const core::Grid& grid, const params::FieldGenParams& params, core::RngKey key,
     std::span<const std::int8_t> pinned_bins, std::span<float> out, core::Executor& exec,

@@ -10,6 +10,7 @@
 #include "wg/core/thread_pool.hpp"
 #include "wg/params/load.hpp"
 #include "wg/params/validation.hpp"
+#include "wg/stages/classic.hpp"
 
 #ifndef WGCLI_DATA_DIR
 #define WGCLI_DATA_DIR "data"
@@ -153,7 +154,10 @@ core::Expected<std::unique_ptr<core::Executor>> make_executor(std::int64_t threa
 
 core::Expected<pipeline::StageRegistry> make_registry() {
   pipeline::StageRegistry registry;
-  // The library's stage adders join here: the classic stages from A11, the physical ones later.
+  // The library's stage adders: the classic stages (from A12), the physical ones later.
+  if (core::Status s = stages::add_classic_stages(registry); !s.ok()) {
+    return make_error(std::move(s));
+  }
   if (core::Status s = add_mock_stages(registry); !s.ok()) {
     return make_error(std::move(s));
   }

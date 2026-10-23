@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schema/profile.schema.json",
+  "schema_version": 1,
+  "name": "classic_seed",
+  "description": "The first classic stages (A12) until data/profiles/classic.json arrives with A23.",
+  "stages": ["c01_allocate", "c02_seed"]
+}

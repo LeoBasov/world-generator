@@ -334,3 +334,23 @@ TEST_CASE("fractal.generate_field observes cancel and reports allocation failure
   CHECK(wg::fractal::generate_field(grid, p, kKey, {}, z, exec, nullptr, resource).code ==
         StatusCode::out_of_memory);
 }
+
+TEST_CASE("fractal.generate_unclamped_field is generate_field before the clamp") {
+  SerialExecutor exec;
+  const Grid grid = wg::test::make_grid(65);
+  FieldGenParams p;
+  p.min = 0.0;
+  p.max = 100.0;
+  p.x_variance = 3200.0;
+  p.y_variance = 3200.0;
+  p.noise_scale = 1.0;
+  std::vector<float> raw = cells_of(grid);
+  REQUIRE(wg::fractal::generate_unclamped_field(grid, p, kKey, {}, raw, exec).ok());
+  // Strong noise leaves [min, max] somewhere, so the clamp is not a no-op.
+  CHECK(std::any_of(raw.begin(), raw.end(), [](float v) { return v < 0.0F || v > 100.0F; }));
+  REQUIRE(wg::fractal::clamp_field(raw, p.min, p.max, exec).ok());
+  CHECK(raw == generate(grid, p, kKey, exec));
+  CHECK(
+      wg::fractal::generate_unclamped_field(wg::test::make_grid(16), p, kKey, {}, raw, exec).code ==
+      StatusCode::invalid_argument);
+}

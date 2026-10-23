@@ -285,11 +285,11 @@ core::Status clamp_field(std::span<float> z, double lo, double hi, core::Executo
                             body);
 }
 
-core::Status generate_field(const core::Grid& grid, const params::FieldGenParams& params,
-                            core::RngKey key, std::span<const std::int8_t> pinned_bins,
-                            std::span<float> out, core::Executor& exec,
-                            const core::CancelFlag* cancel,
-                            core::MemoryResource& resource) noexcept {
+core::Status generate_unclamped_field(const core::Grid& grid, const params::FieldGenParams& params,
+                                      core::RngKey key, std::span<const std::int8_t> pinned_bins,
+                                      std::span<float> out, core::Executor& exec,
+                                      const core::CancelFlag* cancel,
+                                      core::MemoryResource& resource) noexcept {
   core::Expected<ControlGrid> controls = control_grid(grid, params.mesh);
   if (!controls) {
     return std::move(controls.error());
@@ -308,6 +308,16 @@ core::Status generate_field(const core::Grid& grid, const params::FieldGenParams
   if (status.ok()) {
     status = diamond_square(*values, *controls, grid, params, key, out, exec, cancel);
   }
+  return status;
+}
+
+core::Status generate_field(const core::Grid& grid, const params::FieldGenParams& params,
+                            core::RngKey key, std::span<const std::int8_t> pinned_bins,
+                            std::span<float> out, core::Executor& exec,
+                            const core::CancelFlag* cancel,
+                            core::MemoryResource& resource) noexcept {
+  core::Status status =
+      generate_unclamped_field(grid, params, key, pinned_bins, out, exec, cancel, resource);
   if (status.ok()) {
     status = clamp_field(out, params.min, params.max, exec);
   }

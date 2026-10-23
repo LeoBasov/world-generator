@@ -126,7 +126,7 @@ class Stage {
  public:
   virtual ~Stage() = default;
 
-  /// Stable id, equal to the source file stem (e.g. "c02_seed_primary"); keys the RNG.
+  /// Stable id, equal to the source file stem (e.g. "c02_seed"); keys the RNG.
   [[nodiscard]] virtual std::string_view id() const noexcept = 0;
   /// Fields and layers the stage reads (plan's in(s); "requires" is a C++20 keyword).
   [[nodiscard]] virtual FieldSet inputs() const noexcept = 0;

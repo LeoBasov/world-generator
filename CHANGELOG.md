@@ -109,3 +109,10 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `clamp_field` and `generate_field`. Results are bit-identical for any thread count and
   platform. ADR 0009 records the scheme, the RNG layout and the decision for a bounded map.
   Fractal benchmarks in `wg_bench`; shared statistics helpers `tests/support/stats.hpp`.
+- Classic stages C1 and C2 (A12): `c01_allocate` writes `latitude` from the pole option
+  (`wg::climate::latitude_of_row`, `fill_latitude`), and `c02_seed` writes the six primary fields
+  with the latitude bias of temperature (`climate::latitude_term`, -Delta T sin^2 phi) and one
+  peak candidate per summit area (`fractal::find_peak_candidates` on the raw elevation from the
+  new `fractal::generate_unclamped_field`). `wg::stages::add_classic_stages` registers them, and
+  wgcli's registry includes them. The test profile is `tests/fixtures/profiles/classic_seed.json`.
+  ADR 0010 records the conventions.

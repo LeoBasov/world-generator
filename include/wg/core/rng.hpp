@@ -55,7 +55,7 @@ struct RngKey {
 constexpr RngKey seed_key(std::uint64_t seed) noexcept { return {mix64(seed)}; }
 
 /// Key of attempt a of stage s: sigma_{s,a} = H(sigma || s || a). The stage id is the stable
-/// file stem, e.g. "c02_seed_primary".
+/// file stem, e.g. "c02_seed".
 constexpr RngKey stage_key(std::uint64_t seed, std::string_view stage_id,
                            std::uint32_t attempt) noexcept {
   return {combine(combine(seed_key(seed).v, hash_id(stage_id)), attempt)};
