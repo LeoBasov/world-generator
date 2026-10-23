@@ -1,19 +1,21 @@
-// wgcli: command-line front end of worldgen-core.
-// Placeholder until the commands of plan section 6.7 land in work package A10.
+// wgcli: command-line front end of worldgen-core (plan section 6.7). The commands live in
+// wgcli_app (cli.hpp) so the tests can run them in-process.
 
 #include <iostream>
 #include <string_view>
+#include <vector>
 
-#include "wg/wg.hpp"
+#include "cli.hpp"
 
 int main(int argc, char** argv) {
-  for (int i = 1; i < argc; ++i) {
-    const std::string_view arg{argv[i]};
-    if (arg != "--version" && arg != "-V") {
-      std::cerr << "wgcli: unknown argument '" << arg << "'\n";
-      return 2;  // invalid input (plan section 6.7)
+  try {
+    std::vector<std::string_view> args;
+    args.reserve(static_cast<std::size_t>(argc > 1 ? argc - 1 : 0));
+    for (int i = 1; i < argc; ++i) {
+      args.emplace_back(argv[i]);
     }
+    return wg::cli::run(args, std::cout, std::cerr);
+  } catch (...) {
+    return 3;  // internal error (plan section 6.7)
   }
-  std::cout << "wgcli " << wg::core::version_string() << '\n';
-  return 0;
 }

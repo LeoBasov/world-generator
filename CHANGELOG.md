@@ -92,3 +92,14 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   tinyexr v1.0.9, all compiled into the library; the project now also enables C.
 - `operator==` for `Version`, `RejectionRecord`, `Provenance` and the vector-layer structs.
 - World-file benchmarks in `wg_bench`.
+- `wgcli` commands (A10, plan section 6.7): `generate` (with `--snapshots none|final|all`),
+  `sweep` (metrics CSV, failure reports), `inspect` (header, provenance, chunk table, field
+  statistics and histograms from partial reads), `compare` (per-field differences, difference
+  PNGs), `hash` (world, field and per-stage hashes; golden seed lists with `--seeds`), `export`
+  (PNG16, EXR, layers JSON, colour-mapped review PNGs), `validate` (params, profiles, data
+  tables) and `bench` (per-stage times), each with `--help`; exit codes 0 success, 1 generation
+  failed, 2 invalid input, 3 internal error. The commands live in the library `wgcli_app` and
+  are tested in-process; until A11 wgcli registers the mock stages of the mock profile itself.
+  Reference in `docs/cli.md`, kept equal to the `--help` output by the test `wgcli.docs` and
+  `tools/wgcli/sync_cli_doc.py`. World and stage hashes are defined in ADR 0008; the golden
+  seed list format in `schema/golden_seeds.schema.json`.

@@ -6,3 +6,4 @@
 *.sh text eol=lf
 include/wg/generated/*.hpp text eol=lf
 tests/unit/core/rng_kat.inc text eol=lf
+docs/cli.md text eol=lf

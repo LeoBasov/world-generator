@@ -1,6 +1,7 @@
 # Golden-hash update on a pushed golden/** branch (plan sections 6.8 and 10.3): every matrix runner
 # regenerates its hash file tests/golden/hashes/<toolchain key>.json and uploads it as an artifact,
-# which the developer commits on that branch. Reference PNGs join once wgcli export exists (A10).
+# which the developer commits on that branch. Reference PNGs (wgcli export) join with the golden
+# seeds of the classic profile (A23).
 name: golden-update
 
 on:
@@ -55,13 +56,13 @@ jobs:
           echo "Toolchain key: \`$key\`" >> "$GITHUB_STEP_SUMMARY"
           if [ ! -f tests/golden/seeds.json ]; then
             echo "::notice::tests/golden/seeds.json does not exist yet; nothing to regenerate."
-            echo "No golden seed list yet (arrives with wgcli hash in A10)." >> "$GITHUB_STEP_SUMMARY"
+            echo "No golden seed list yet (arrives with the classic profile, A23)." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           wgcli=build/release/tools/wgcli/wgcli
           [ -f "$wgcli.exe" ] && wgcli="$wgcli.exe"
           mkdir -p tests/golden/hashes
-          # Command line finalised with wgcli hash in A10.
+          # Seed list format: schema/golden_seeds.schema.json; hashes: ADR 0008.
           "$wgcli" hash --per-stage --seeds tests/golden/seeds.json \
             --out "tests/golden/hashes/$key.json"
 
