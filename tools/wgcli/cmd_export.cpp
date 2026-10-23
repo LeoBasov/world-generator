@@ -54,8 +54,9 @@ int run_export(const ParsedArgs& args, const Io& io) {
                                       "option --format: expected png16, exr or json"));
   }
   std::optional<Colormap> colormap;
-  if (auto name = args.value("colormap")) {
-    colormap = colormap_from_name(*name);
+  const std::string colormap_name = args.value("colormap").value_or("");
+  if (!colormap_name.empty()) {
+    colormap = colormap_from_name(colormap_name);
     if (!colormap || *format != "png16") {
       return fail(io, core::make_status(core::StatusCode::invalid_argument,
                                         "option --colormap: expected grey, terrain or viridis "
@@ -127,8 +128,7 @@ int run_export(const ParsedArgs& args, const Io& io) {
       if (!values) {
         return fail(io, values.error());
       }
-      const std::filesystem::path map_file =
-          dir / (name + "_" + std::string(*args.value("colormap")) + ".png");
+      const std::filesystem::path map_file = dir / (name + "_" + colormap_name + ".png");
       if (core::Status s =
               write_colormap_png(map_file, reader->grid().n, *values, png->lo, png->hi, *colormap);
           !s.ok()) {

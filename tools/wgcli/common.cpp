@@ -38,11 +38,11 @@ int fail(const Io& io, const core::Status& status) {
   return static_cast<int>(exit_code_for(status));
 }
 
-std::filesystem::path default_data_dir() { return std::filesystem::path(WGCLI_DATA_DIR); }
+std::filesystem::path default_data_dir() { return {WGCLI_DATA_DIR}; }
 
 std::filesystem::path data_dir_option(const ParsedArgs& args) {
   if (auto dir = args.value("data-dir")) {
-    return std::filesystem::path(*dir);
+    return {*dir};
   }
   return default_data_dir();
 }
@@ -78,11 +78,11 @@ core::Expected<std::filesystem::path> resolve_named_file(std::string_view what,
                                                          std::string_view name_or_path,
                                                          const std::filesystem::path& dir) {
   std::error_code ec;
-  const std::filesystem::path as_path(name_or_path);
+  std::filesystem::path as_path(name_or_path);
   if (std::filesystem::is_regular_file(as_path, ec)) {
     return as_path;
   }
-  const std::filesystem::path named = dir / (std::string(name_or_path) + ".json");
+  std::filesystem::path named = dir / (std::string(name_or_path) + ".json");
   if (std::filesystem::is_regular_file(named, ec)) {
     return named;
   }

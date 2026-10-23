@@ -26,7 +26,7 @@
 namespace wg::cli {
 
 /// Exit codes of plan section 6.7.
-enum class ExitCode : int {
+enum class ExitCode : std::uint8_t {
   ok = 0,
   generation_failed = 1,  ///< every attempt was rejected (compare: the worlds differ)
   invalid_input = 2,      ///< bad arguments, unreadable or invalid files
