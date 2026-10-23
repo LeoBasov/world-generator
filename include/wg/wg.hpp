@@ -2,6 +2,7 @@
 
 // Umbrella header for the public worldgen-core API.
 
+#include "wg/climate/latitude.hpp"
 #include "wg/core/arena.hpp"
 #include "wg/core/assert.hpp"
 #include "wg/core/cancel.hpp"
@@ -24,6 +25,7 @@
 #include "wg/core/version.hpp"
 #include "wg/core/world_state.hpp"
 #include "wg/fractal/fractal.hpp"
+#include "wg/fractal/peaks.hpp"
 #include "wg/generated/field_ids.hpp"
 #include "wg/generated/gen_params.hpp"
 #include "wg/io/byte_source.hpp"
@@ -53,3 +55,4 @@
 #include "wg/pipeline/registry.hpp"
 #include "wg/pipeline/snapshot.hpp"
 #include "wg/pipeline/stage.hpp"
+#include "wg/stages/classic.hpp"

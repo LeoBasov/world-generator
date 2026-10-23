@@ -1,7 +1,7 @@
 #pragma once
 
 // Mock profile of wgcli (A10): the stages of tests/fixtures/profiles/mock.json, so the commands
-// can run a profile end to end before the first real stage exists (A11). They live in the tool,
+// can run a profile end to end before the classic profile is complete (A23). They live in the tool,
 // not in the library, to keep test stages out of the public API.
 //
 //   m01_seed    reads nothing                 writes latitude

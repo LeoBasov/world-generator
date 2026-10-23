@@ -44,6 +44,7 @@ endif()
 
 add_library(
   worldgen_core ${WG_LIBRARY_TYPE}
+  src/climate/latitude.cpp
   src/core/arena.cpp
   src/core/assert.cpp
   src/core/detmath.cpp
@@ -58,6 +59,7 @@ add_library(
   src/core/version.cpp
   src/core/world_state.cpp
   src/fractal/fractal.cpp
+  src/fractal/peaks.cpp
   src/io/byte_source.cpp
   src/io/export.cpp
   src/io/hash.cpp
@@ -84,7 +86,10 @@ add_library(
   src/pipeline/pipeline.cpp
   src/pipeline/profile.cpp
   src/pipeline/registry.cpp
-  src/pipeline/stage.cpp)
+  src/pipeline/stage.cpp
+  src/stages/classic/c01_allocate.cpp
+  src/stages/classic/c02_seed.cpp
+  src/stages/classic/classic.cpp)
 add_library(worldgen_core::worldgen_core ALIAS worldgen_core)
 
 target_include_directories(

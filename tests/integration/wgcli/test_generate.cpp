@@ -156,3 +156,22 @@ TEST_CASE("wgcli.generate gives the same world for 1 and 8 threads") {
   REQUIRE(h1.code == 0);
   CHECK(h1.out == h8.out);
 }
+
+TEST_CASE("wgcli.generate runs the classic stages c01 and c02") {
+  wg::test::TempDir dir("wgcli_generate");
+  const auto out = dir / "w.wgw";
+  const auto r = run_cli({"generate", "--profile", wg::test::classic_seed_profile(), "--size",
+                          std::string(kCliSize), "--seed", "5", "--out", out.string()});
+  INFO(r.err);
+  REQUIRE(r.code == 0);
+  auto world = wg::io::read_world_file(out);
+  REQUIRE(world);
+  CHECK(world->state.provenance().profile == "classic_seed");
+  CHECK(world->state.provenance().last_completed_stage() == "c02_seed");
+  for (const auto id :
+       {wg::core::FieldId::latitude, wg::core::FieldId::elevation, wg::core::FieldId::rainfall,
+        wg::core::FieldId::temperature, wg::core::FieldId::drainage, wg::core::FieldId::volcanism,
+        wg::core::FieldId::savagery}) {
+    CHECK(world->state.has(id));
+  }
+}

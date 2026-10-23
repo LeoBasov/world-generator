@@ -69,7 +69,7 @@ int fail(const Io& io, const core::Status& status);
 /// thread). Errors: invalid_argument outside [0, ThreadPool::kMaxThreads].
 [[nodiscard]] core::Expected<std::unique_ptr<core::Executor>> make_executor(std::int64_t threads);
 
-/// Registry of every stage a profile may name: the library's stages (from A11) and the mock
+/// Registry of every stage a profile may name: the library's stages (from A12) and the mock
 /// stages of mock_profile.hpp.
 [[nodiscard]] core::Expected<pipeline::StageRegistry> make_registry();
 
