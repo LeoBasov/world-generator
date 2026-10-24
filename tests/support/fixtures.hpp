@@ -1,8 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <string_view>
 #include <vector>
 
@@ -43,6 +45,49 @@ inline std::vector<float> cone(const wg::core::Grid& grid, double z0, double g, 
     const double ddx = x - cx;
     const double ddy = y - cy;
     return z0 - (g * std::sqrt((ddx * ddx) + (ddy * ddy)));
+  });
+}
+
+/// Bowl of plan 10.2 around the centre c = (n - 1) / 2, for n >= 33, with r the distance to c:
+/// a paraboloid 150 + 0.2 r^2 for r < 10, a rim at 200 for 10 <= r < 12, except a notch at the
+/// rim height 190 east of the centre (y = c), and outside a slope 180 - 10 (r - 12) down to
+/// an ocean ring of 50 on the map edge. The bowl fills to 190 and spills through the notch.
+inline std::vector<float> bowl(const wg::core::Grid& grid) {
+  const std::int32_t c = (grid.n - 1) / 2;
+  return make_field(grid, [=](std::int32_t x, std::int32_t y) {
+    if (x == 0 || y == 0 || x == grid.n - 1 || y == grid.n - 1) {
+      return 50.0;
+    }
+    const double ddx = x - c;
+    const double ddy = y - c;
+    const double r = std::sqrt((ddx * ddx) + (ddy * ddy));
+    if (r < 10.0) {
+      return 150.0 + (0.2 * r * r);
+    }
+    if (r < 12.0) {
+      return y == c && x > c ? 190.0 : 200.0;
+    }
+    return 180.0 - (10.0 * (r - 12.0));
+  });
+}
+
+/// V-valley of plan 10.2: two planes z = 100 + side |x - cx| + y meeting in a thalweg along
+/// column cx that falls to the north, where row 0 is ocean (50).
+inline std::vector<float> v_valley(const wg::core::Grid& grid, std::int32_t cx, double side) {
+  return make_field(grid, [=](std::int32_t x, std::int32_t y) {
+    return y == 0 ? 50.0 : 100.0 + (side * std::abs(x - cx)) + y;
+  });
+}
+
+/// Plateau of plan 10.2: a flat top at 300 on the cells at least margin cells from the edge,
+/// falling by 60 per cell of Chebyshev distance outside it, with the map edge set to ocean (50).
+inline std::vector<float> plateau(const wg::core::Grid& grid, std::int32_t margin) {
+  return make_field(grid, [=](std::int32_t x, std::int32_t y) {
+    const std::int32_t edge = std::min(std::min(x, y), std::min(grid.n - 1 - x, grid.n - 1 - y));
+    if (edge == 0) {
+      return 50.0;
+    }
+    return edge >= margin ? 300.0 : 300.0 - (60.0 * (margin - edge));
   });
 }
 
