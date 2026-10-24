@@ -281,6 +281,12 @@
           "description": "Ocean components with fewer cells are removed (R6.6).",
           "type": "integer", "minimum": 0, "maximum": 66049, "default": 64,
           "x-unit": "tiles", "x-report": "R6.6"
+        },
+        "width_class_bounds": {
+          "description": "Lower river widths of the classes stream, minor river, river and major river, strictly ascending; narrower rivers are brooks (R6.2).",
+          "type": "array", "minItems": 4, "maxItems": 4, "default": [1, 2, 5, 10],
+          "items": {"type": "number", "minimum": 0, "maximum": 10000},
+          "x-unit": "m", "x-report": "R6.2"
         }
       }
     },

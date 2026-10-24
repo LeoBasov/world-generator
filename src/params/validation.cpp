@@ -120,6 +120,16 @@ void check_pairs(const GenParams& p, std::vector<ValidationIssue>& issues) {
   if (e.hypsometry_cdf.front() != 0.0 || e.hypsometry_cdf.back() != 1.0) {
     add_error(issues, "$.elevation_post.hypsometry_cdf", "fractions must start at 0 and end at 1");
   }
+  // River width classes (R6.2): strictly ascending, so the class is monotone in the width.
+  const RiversParams& r = p.rivers;
+  for (std::size_t i = 1; i < r.width_class_bounds.size(); ++i) {
+    if (!(r.width_class_bounds[i - 1] < r.width_class_bounds[i])) {
+      add_error(issues, io::json_index_path("$.rivers.width_class_bounds", i),
+                "width " + format_number(r.width_class_bounds[i]) +
+                    " is not above the previous width " +
+                    format_number(r.width_class_bounds[i - 1]));
+    }
+  }
   const GeologyParams& g = p.geology;
   if (g.layer_count_min > g.layer_count_max) {
     add_error(issues, "$.geology.layer_count_min",
