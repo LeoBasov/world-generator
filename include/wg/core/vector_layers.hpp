@@ -43,7 +43,7 @@ struct RiverGraph {
   std::vector<float> discharge_m3_yr;
   /// River width class.
   std::vector<std::uint8_t> width_class;
-  /// Tributary (Strahler) order.
+  /// Tributary order: 1 on the main stem to a mouth, one more for each tributary level.
   std::vector<std::uint8_t> order;
   /// River name, -1 if unnamed.
   std::vector<std::int32_t> name_id;

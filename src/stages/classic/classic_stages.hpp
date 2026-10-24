@@ -19,6 +19,7 @@ inline constexpr std::string_view kC01Allocate = "c01_allocate";
 inline constexpr std::string_view kC02Seed = "c02_seed";
 inline constexpr std::string_view kC03Fit = "c03_fit";
 inline constexpr std::string_view kC05Shape = "c05_shape";
+inline constexpr std::string_view kC06Rivers = "c06_rivers";
 inline constexpr std::string_view kC07Smooth = "c07_smooth";
 
 /// C1 Allocate and orient (S1): writes latitude from the pole option (R5.3).
@@ -34,6 +35,11 @@ inline constexpr std::string_view kC07Smooth = "c07_smooth";
 
 /// C5 Terrain shaping (S5): plains smoothing (R4.4), volcano placement and VOLCANO_MIN (R4.5).
 [[nodiscard]] std::unique_ptr<pipeline::Stage> make_c05_shape() noexcept;
+
+/// C6 Erosion and rivers (S6): small oceans (R6.6), test-river erosion and RIVER_MINS (R6.1,
+/// R6.3, R6.4), filling, routing, discharge (R6.5), lakes and lake bulges (R6.1) and the river
+/// network with its width classes (R6.2).
+[[nodiscard]] std::unique_ptr<pipeline::Stage> make_c06_rivers() noexcept;
 
 /// C7 Final smoothing (S7): peak and volcano bumps (R4.3, R4.5), land smoothing and the
 /// downstream constraint along the rivers (plan 7.1).

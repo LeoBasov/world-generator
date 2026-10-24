@@ -142,6 +142,16 @@ TEST_CASE("params.validation hypsometry knots") {
   CHECK(only_issue(ends).path == "$.elevation_post.hypsometry_cdf");
 }
 
+TEST_CASE("params.validation river width classes ascend") {
+  GenParams p;
+  p.rivers.width_class_bounds = {0.0, 0.5, 2.0, 9.0};
+  CHECK(clean(p));
+  p.rivers.width_class_bounds[2] = 0.5;
+  const ValidationIssue issue = only_issue(p);
+  CHECK(issue.path == "$.rivers.width_class_bounds[2]");
+  CHECK(issue.message == "width 0.5 is not above the previous width 0.5");
+}
+
 TEST_CASE("params.validation square counts must fit the grid") {
   GenParams p;
   p.grid.size = 17;  // 289 squares

@@ -147,3 +147,13 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   for `EROSION_CYCLE_COUNT` and `PERIODICALLY_ERODE_EXTREMES`. Adds
   `terrain::kMountainElevation`. No stage uses them yet (C6 arrives with A17); parameters and
   fields are unchanged. ADR 0014 records the rules.
+- River network and stage C6 (A17). `wg::hydro` gains `area_weights` and `runoff_weights`
+  (r·P·a in m³/yr), `trace_rivers` (receiver chains from the sources, cut at ocean and lakes,
+  continued from lake outlets), `check_river_graph`, `width_class_thresholds` /
+  `river_width_class` (w = a_w Q^b against `rivers.width_class_bounds`), `river_attributes`
+  (discharge, width class, tributary order, stems and the naming hook `RiverNamer`),
+  `bulge_lakes` (R6.1) and `classify_water`. The classic stage `c06_rivers` runs small oceans,
+  erosion with `RIVER_MINS`, fill, routing, discharge, lakes, lake bulges and the network, and
+  writes `flow_receiver`, `flow_accum`, `discharge`, `water`, `river_class`, `lake_id`,
+  `river_graph` and `lakes`. New parameter `rivers.width_class_bounds` (changes every parameter
+  hash); test profile `tests/fixtures/profiles/classic_rivers.json`. ADR 0015 records the rules.
