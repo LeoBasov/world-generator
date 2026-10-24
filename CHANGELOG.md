@@ -164,3 +164,11 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   output may alias the base rainfall; moisture is an optional output. Test fixture
   `gaussian_ridge`. No stage uses it yet (C8 will); parameters and fields are unchanged. ADR 0016
   records the rules.
+- Vegetation and salinity (A19) in `wg::bio`: `miami_npp` and `compute_vegetation` (Miami NPP
+  from the game temperature in degC and P_mm = 30 P, normalised by 3000; 0 on ocean, lakes,
+  above the tree line and on glacier ice, T <= -5 with D >= 75), `coastal_salinity`,
+  `fresh_distance` and `compute_salinity` (S = 100 exp(-d / lambda) over the exact Euclidean
+  distance to the ocean, quantised with the salinity classes; rivers inherit the class of their
+  mouth cell within the fresh distance along the channel) and `assign_lake_salinity`. No stage
+  uses them yet (C4 and C8 will); parameters and fields are unchanged. ADR 0017 records the
+  rules.
