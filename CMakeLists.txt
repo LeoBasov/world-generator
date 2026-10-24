@@ -45,6 +45,7 @@ endif()
 add_library(
   worldgen_core ${WG_LIBRARY_TYPE}
   src/climate/latitude.cpp
+  src/climate/precipitation.cpp
   src/climate/temperature.cpp
   src/core/arena.cpp
   src/core/assert.cpp
