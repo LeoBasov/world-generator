@@ -157,3 +157,10 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   writes `flow_receiver`, `flow_accum`, `discharge`, `water`, `river_class`, `lake_id`,
   `river_graph` and `lakes`. New parameter `rivers.width_class_bounds` (changes every parameter
   hash); test profile `tests/fixtures/profiles/classic_rivers.json`. ADR 0015 records the rules.
+- Orographic precipitation (A18) in `wg::climate`: `orographic_precipitation`, the R7.2 upslope
+  model with moisture depletion, swept per row from west to east (saturated inflow, slope on
+  max(z, sea level), recharge over ocean and land, P clamped to [0, 100], 0 <= q <= q_max), with
+  the `OROGRAPHIC_PRECIPITATION` toggle and the DF drainage quirk (D < 50 keeps P_base). The
+  output may alias the base rainfall; moisture is an optional output. Test fixture
+  `gaussian_ridge`. No stage uses it yet (C8 will); parameters and fields are unchanged. ADR 0016
+  records the rules.

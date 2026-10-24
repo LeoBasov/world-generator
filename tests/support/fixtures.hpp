@@ -114,6 +114,16 @@ inline std::vector<float> plateau(const wg::core::Grid& grid, std::int32_t margi
   });
 }
 
+/// Ridge of plan 10.2 across the westerly wind: a Gaussian z = base + height
+/// exp(-(x - x0)^2 / (2 sigma^2)) along column x0, constant along y.
+inline std::vector<float> gaussian_ridge(const wg::core::Grid& grid, double x0, double sigma,
+                                         double height, double base) {
+  return make_field(grid, [=](std::int32_t x, std::int32_t /*y*/) {
+    const double d = (x - x0) / sigma;
+    return base + (height * std::exp(-0.5 * d * d));
+  });
+}
+
 /// Mask with each cell set with probability density.
 inline std::vector<std::uint8_t> random_mask(const wg::core::Grid& grid, double density,
                                              std::uint64_t seed,
