@@ -133,3 +133,9 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   base, latitude, lapse, vegetation and rain in that order and clamps to the registry range.
   Optional terms are left out by empty spans, and the output may alias the base. No stage uses it
   yet (C8 will); parameters and C2 are unchanged. ADR 0012 records the rules.
+- Filling, routing and lakes (A15) in `wg::hydro`: `remove_small_oceans` (interior ocean
+  components below `rivers.small_ocean_min_area` raised to land), the priority-flood fills
+  `fill_depressions` (flat water level) and `priority_flood` (epsilon gradient on flats), D8
+  receivers `d8_receivers`, the Braun–Willett `stack_order`, float64 `accumulate_flow`, and
+  `label_lakes` with spill elevation and outlet cell. No stage uses them yet (C6 arrives with
+  A17); parameters and fields are unchanged. ADR 0013 records the rules.
