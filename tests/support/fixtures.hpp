@@ -71,6 +71,29 @@ inline std::vector<float> bowl(const wg::core::Grid& grid) {
   });
 }
 
+/// Closed basin for the test rivers (A16) around the centre c = (n - 1) / 2, for n >= 33, with
+/// r the distance to c: a paraboloid 220 + r^2 for r < 6, a closed mountain rim at 320 for
+/// 6 <= r < 8, and outside a slope 300 - 12 (r - 8) down to an ocean ring of 50 on the map
+/// edge. Without erosion the basin fills to the rim height 320.
+inline std::vector<float> closed_basin(const wg::core::Grid& grid) {
+  const std::int32_t c = (grid.n - 1) / 2;
+  return make_field(grid, [=](std::int32_t x, std::int32_t y) {
+    if (x == 0 || y == 0 || x == grid.n - 1 || y == grid.n - 1) {
+      return 50.0;
+    }
+    const double ddx = x - c;
+    const double ddy = y - c;
+    const double r = std::sqrt((ddx * ddx) + (ddy * ddy));
+    if (r < 6.0) {
+      return 220.0 + (r * r);
+    }
+    if (r < 8.0) {
+      return 320.0;
+    }
+    return 300.0 - (12.0 * (r - 8.0));
+  });
+}
+
 /// V-valley of plan 10.2: two planes z = 100 + side |x - cx| + y meeting in a thalweg along
 /// column cx that falls to the north, where row 0 is ocean (50).
 inline std::vector<float> v_valley(const wg::core::Grid& grid, std::int32_t cx, double side) {

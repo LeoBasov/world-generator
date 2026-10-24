@@ -139,3 +139,11 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   receivers `d8_receivers`, the Braun–Willett `stack_order`, float64 `accumulate_flow`, and
   `label_lakes` with spill elevation and outlet cell. No stage uses them yet (C6 arrives with
   A17); parameters and fields are unchanged. ADR 0013 records the rules.
+- Test-river incision and thermal erosion (A16) in `wg::hydro`: the erosion lattice
+  (`snap_to_lattice`, q = 2^-15 eu), `find_river_sources` (mountain-edge cells at z >= 300),
+  `run_walker` (steepest descent with ties drawn from the source's stream; in a pit or on a flat
+  it floods the depression and digs its saddle), `thermal_erode` (talus relaxation of R6.4 with
+  exact transfers, run until every neighbour difference is <= Theta), and the driver `erode`
+  for `EROSION_CYCLE_COUNT` and `PERIODICALLY_ERODE_EXTREMES`. Adds
+  `terrain::kMountainElevation`. No stage uses them yet (C6 arrives with A17); parameters and
+  fields are unchanged. ADR 0014 records the rules.

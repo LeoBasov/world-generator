@@ -61,10 +61,13 @@ add_library(
   src/core/world_state.cpp
   src/fractal/fractal.cpp
   src/fractal/peaks.cpp
+  src/hydro/erosion.cpp
   src/hydro/lakes.cpp
   src/hydro/priority_flood.cpp
   src/hydro/routing.cpp
   src/hydro/small_ocean.cpp
+  src/hydro/test_rivers.cpp
+  src/hydro/thermal.cpp
   src/io/byte_source.cpp
   src/io/export.cpp
   src/io/hash.cpp
