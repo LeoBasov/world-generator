@@ -51,11 +51,11 @@ namespace wg::climate {
 /// Per-cell inputs of compute_temperature, one value per cell each. An empty optional span
 /// leaves its term out.
 struct TemperatureInputs {
-  std::span<const float> base;        ///< T_0 [game] (required)
-  std::span<const float> latitude;    ///< phi [rad]; empty: no latitude term
-  std::span<const float> elevation;   ///< z [elevation units]; empty: no lapse term
-  std::span<const float> vegetation;  ///< V_veg in [0, 1]; empty: no forest damping
-  std::span<const float> rainfall;    ///< P in [0, 100]; empty: no rain damping
+  std::span<const float> base{};        ///< T_0 [game] (required)
+  std::span<const float> latitude{};    ///< phi [rad]; empty: no latitude term
+  std::span<const float> elevation{};   ///< z [elevation units]; empty: no lapse term
+  std::span<const float> vegetation{};  ///< V_veg in [0, 1]; empty: no forest damping
+  std::span<const float> rainfall{};    ///< P in [0, 100]; empty: no rain damping
 };
 
 /// Writes T for every cell into out: the terms summed in float64 in the order base, latitude,
