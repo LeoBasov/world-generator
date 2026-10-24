@@ -127,3 +127,9 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `hypsometry_cdf`, `edge_ocean_width`, `final_alpha` and `final_iterations`, so every
   parameter hash changes. The test profile `classic_seed.json` now runs c01, c02, c03 and c05.
   ADR 0011 records the rules.
+- Temperature model (A14) in `wg::climate`: the lapse-rate, forest-damping and rain-damping
+  terms of R5.3 (`lapse_term`, `vegetation_term`, `rain_term`), the game-scale conversion
+  `celsius_to_game` / `game_to_celsius`, and the field kernel `compute_temperature`, which sums
+  base, latitude, lapse, vegetation and rain in that order and clamps to the registry range.
+  Optional terms are left out by empty spans, and the output may alias the base. No stage uses it
+  yet (C8 will); parameters and C2 are unchanged. ADR 0012 records the rules.
