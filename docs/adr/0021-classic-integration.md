@@ -91,6 +91,12 @@ runner's hash file as an artifact and prints it in the job summary with its SHA-
 files to `tests/golden/hashes/` on the branch. An intended output change also needs an ADR (plan
 section 10.3), like this one for the memo.
 
+The first run (2026-10-25) gave byte-identical files on all seven runners: GCC 14 on x64 and
+arm64, Clang 18, MSVC 19.44 and 19.51, and Apple Clang 17 and 21. MSVC 19.29 on the dev machine
+matches them too (SHA-256 `4ad9d34c…`). The pipeline is bit-reproducible across platforms.
+The goldens are still stored per toolchain key, as plan section 6.8 requires, so a future
+platform difference shows up as a failure on that toolchain alone.
+
 The linux-clang runner of that workflow also exports the review image set of the branch (after)
 and of main (before) with `tools/review/review_set.py`. That is six seeds at N = 257: elevation,
 water, rainfall, temperature, drainage, vegetation, salinity, biome and region id, with an
