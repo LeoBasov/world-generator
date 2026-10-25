@@ -46,6 +46,9 @@ add_library(
   worldgen_core ${WG_LIBRARY_TYPE}
   src/bio/salinity.cpp
   src/bio/vegetation.cpp
+  src/classify/biome.cpp
+  src/classify/checks.cpp
+  src/classify/regions.cpp
   src/climate/latitude.cpp
   src/climate/precipitation.cpp
   src/climate/temperature.cpp
@@ -105,9 +108,12 @@ add_library(
   src/stages/classic/c01_allocate.cpp
   src/stages/classic/c02_seed.cpp
   src/stages/classic/c03_fit.cpp
+  src/stages/classic/c04_vegetation.cpp
   src/stages/classic/c05_shape.cpp
   src/stages/classic/c06_rivers.cpp
   src/stages/classic/c07_smooth.cpp
+  src/stages/classic/c08_climate.cpp
+  src/stages/classic/c09_biomes.cpp
   src/stages/classic/classic.cpp
   src/terrain/bumps.cpp
   src/terrain/edge_ocean.cpp

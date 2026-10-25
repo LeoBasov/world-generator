@@ -12,7 +12,8 @@ TEST_CASE("stages.add_classic_stages registers the classic stages under their id
   StageRegistry registry;
   REQUIRE(wg::stages::add_classic_stages(registry).ok());
   CHECK(registry.ids() == std::vector<std::string_view>{"c01_allocate", "c02_seed", "c03_fit",
-                                                        "c05_shape", "c06_rivers", "c07_smooth"});
+                                                        "c04_vegetation", "c05_shape", "c06_rivers",
+                                                        "c07_smooth", "c08_climate", "c09_biomes"});
   for (const std::string_view id : registry.ids()) {
     CAPTURE(id);
     auto stage = registry.create(id);

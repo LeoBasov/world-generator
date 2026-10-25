@@ -172,3 +172,14 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   mouth cell within the fresh distance along the channel) and `assign_lake_salinity`. No stage
   uses them yet (C4 and C8 will); parameters and fields are unchanged. ADR 0017 records the
   rules.
+- Biomes and regions (A20) in `wg::classify`: `BiomeClassifier` (the biome table compiled into
+  lookups; the per-cell R9.1 order water, mountain, frozen band, base row, temperature, salinity
+  and mangrove variants; values rounded down; river cells keep their land biome; hills rows give
+  the region type `hills`), `classify_biomes`, `label_regions` (8-connected regions over every
+  cell with area, centroid, biome set, size class and the naming hook `RegionNamer`),
+  `count_region_types`, `check_region_counts` and `check_subregion_max`. New classic stages
+  `c04_vegetation` (vegetation, provisional biome, initial REGION_COUNTS), `c08_climate`
+  (rainfall, temperature, vegetation, salinity and lake classes on the final terrain) and
+  `c09_biomes` (`biome`, `region_id`, `regions`); they need the data tables. Test profile
+  `classic_biomes` (c01-c09). Parameters, fields and data tables are unchanged. ADR 0018 records
+  the rules.

@@ -36,24 +36,6 @@ using pipeline::StageResult;
 constexpr std::string_view kRiverMinsBefore = "RIVER_MINS[0]";
 constexpr std::string_view kRiverMinsAfter = "RIVER_MINS[1]";
 
-template <class T>
-core::Expected<std::span<T>> write_field(StageContext& ctx, FieldId id) noexcept {
-  core::Expected<core::FieldView<T>> view = ctx.state.write<T>(id);
-  if (!view) {
-    return core::make_error(std::move(view.error()));
-  }
-  return view->data;
-}
-
-template <class T>
-core::Expected<std::span<const T>> read_field(const StageContext& ctx, FieldId id) noexcept {
-  core::Expected<core::FieldView<const T>> view = ctx.state.read<T>(id);
-  if (!view) {
-    return core::make_error(std::move(view.error()));
-  }
-  return view->data;
-}
-
 class C06Rivers final : public pipeline::Stage {
  public:
   [[nodiscard]] std::string_view id() const noexcept override { return kC06Rivers; }

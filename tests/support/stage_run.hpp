@@ -2,11 +2,14 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include <doctest/doctest.h>
 
+#include "support/source_files.hpp"
 #include "wg/core/rng.hpp"
 #include "wg/core/sinks.hpp"
 #include "wg/pipeline/pipeline.hpp"
@@ -31,15 +34,15 @@ inline std::unique_ptr<wg::pipeline::Stage> make_classic_stage(std::string_view 
 }
 
 /// Calls f(stage, ctx) with the context Pipeline::run gives stage on state in attempt 0 (key
-/// stage_key(seed, id, 0)).
+/// stage_key(seed, id, 0)), with the data tables tables.
 template <class F>
 wg::pipeline::StageResult with_context(wg::pipeline::Stage& stage, wg::core::WorldState& state,
                                        const wg::params::GenParams& params, std::uint64_t seed,
                                        wg::core::Executor& exec, const wg::core::CancelFlag& cancel,
-                                       const F& f) {
+                                       const wg::params::DataTables* tables, const F& f) {
   wg::pipeline::StageContext ctx{.state = state,
                                  .params = params,
-                                 .tables = nullptr,
+                                 .tables = tables,
                                  .key = wg::core::stage_key(seed, stage.id(), 0),
                                  .attempt = 0,
                                  .exec = exec,
@@ -49,13 +52,25 @@ wg::pipeline::StageResult with_context(wg::pipeline::Stage& stage, wg::core::Wor
   return f(stage, ctx);
 }
 
-/// Runs stage on state with key stage_key(seed, id, 0).
+/// The data tables of data/ (loaded once).
+inline const wg::params::DataTables& repo_tables() {
+  static const wg::params::DataTables tables = [] {
+    auto loaded = wg::params::load_tables_dir(source_path("data"));
+    REQUIRE(loaded);
+    return std::move(*loaded);
+  }();
+  return tables;
+}
+
+/// Runs stage on state with key stage_key(seed, id, 0) and the data tables tables (none by
+/// default).
 inline wg::pipeline::StageResult run_stage(
     wg::pipeline::Stage& stage, wg::core::WorldState& state, const wg::params::GenParams& params,
     std::uint64_t seed, wg::core::Executor& exec,
-    const wg::core::CancelFlag& cancel = wg::pipeline::never_cancelled()) {
+    const wg::core::CancelFlag& cancel = wg::pipeline::never_cancelled(),
+    const wg::params::DataTables* tables = nullptr) {
   return with_context(
-      stage, state, params, seed, exec, cancel,
+      stage, state, params, seed, exec, cancel, tables,
       [](wg::pipeline::Stage& s, wg::pipeline::StageContext& ctx) { return s.run(ctx); });
 }
 
@@ -66,7 +81,7 @@ inline wg::pipeline::StageResult run_stage_with_repair(wg::pipeline::Stage& stag
                                                        const wg::params::GenParams& params,
                                                        std::uint64_t seed,
                                                        wg::core::Executor& exec) {
-  return with_context(stage, state, params, seed, exec, wg::pipeline::never_cancelled(),
+  return with_context(stage, state, params, seed, exec, wg::pipeline::never_cancelled(), nullptr,
                       [](wg::pipeline::Stage& s, wg::pipeline::StageContext& ctx) {
                         wg::pipeline::StageResult r = s.run(ctx);
                         if (r.kind == wg::pipeline::StageResult::Kind::reject) {
@@ -74,6 +89,20 @@ inline wg::pipeline::StageResult run_stage_with_repair(wg::pipeline::Stage& stag
                         }
                         return r;
                       });
+}
+
+/// Final state of a pipeline run of the classic stages stages with the data tables of data/.
+inline wg::core::WorldState run_classic(const std::vector<std::string>& stages,
+                                        const wg::params::GenParams& params, std::uint64_t seed,
+                                        wg::core::Executor& exec) {
+  const wg::pipeline::StageRegistry registry = classic_registry();
+  const wg::pipeline::Profile profile{.name = "test", .stages = stages};
+  auto pipeline = wg::pipeline::Pipeline::create(profile, registry);
+  REQUIRE(pipeline);
+  auto out = pipeline->run(params, seed, wg::pipeline::RunContext{.exec = exec},
+                           wg::pipeline::RunInputs{.tables = &repo_tables(), .initial = nullptr});
+  REQUIRE(out);
+  return std::move(out->state);
 }
 
 }  // namespace wg::test
