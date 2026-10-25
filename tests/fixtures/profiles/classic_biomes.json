@@ -2,6 +2,6 @@
   "$schema": "../../../schema/profile.schema.json",
   "schema_version": 1,
   "name": "classic_biomes",
-  "description": "The classic stages implemented so far (A12-A20), up to biomes and regions, until data/profiles/classic.json arrives with A23.",
+  "description": "A prefix of data/profiles/classic.json for tests: the classic stages up to biomes and regions (c01-c09).",
   "stages": ["c01_allocate", "c02_seed", "c03_fit", "c04_vegetation", "c05_shape", "c06_rivers", "c07_smooth", "c08_climate", "c09_biomes"]
 }

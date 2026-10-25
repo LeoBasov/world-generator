@@ -1,6 +1,6 @@
 # ADR 0014: Test-river incision and thermal erosion
 
-- Status: accepted
+- Status: accepted, amended by ADR 0021 (failed-basin memo of the walkers)
 - Date: 2026-10-24
 - Work package: A16
 

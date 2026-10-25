@@ -23,6 +23,8 @@ constexpr std::array kOptions = {
                OptionKind::list},
     OptionSpec{"colormap", "grey|terrain|viridis",
                "Also write <field>_<map>.png for review (png16 only)", OptionKind::value},
+    OptionSpec{"map-range", "registry|data", "Range the colour map spans (default registry)",
+               OptionKind::value},
     OptionSpec{"out", "DIR", "Output directory, required", OptionKind::value},
 };
 
@@ -38,7 +40,8 @@ const CommandSpec kExportSpec{
         "png16 writes DIR/<field>.png scaled by the field's registry range (or its data range)\n"
         "and stores the range in the PNG. exr writes DIR/<field>.exr with the values unscaled\n"
         "(only if the library was built with WG_WITH_EXR). json writes DIR/layers.json.\n"
-        "Colour maps are for looking at, never for reading back.",
+        "Colour maps are for looking at, never for reading back; --map-range data spreads\n"
+        "them over the field's finite values, e.g. for temperature.",
     .options = kOptions,
 };
 
@@ -62,6 +65,12 @@ int run_export(const ParsedArgs& args, const Io& io) {
                                         "option --colormap: expected grey, terrain or viridis "
                                         "with --format png16"));
     }
+  }
+  const std::string map_range = args.value("map-range").value_or("registry");
+  if ((map_range != "registry" && map_range != "data") || (args.value("map-range") && !colormap)) {
+    return fail(io, core::make_status(core::StatusCode::invalid_argument,
+                                      "option --map-range: expected registry or data, with "
+                                      "--colormap"));
   }
   if (*format == "exr" && !io::exr_supported()) {
     return fail(io, core::make_status(core::StatusCode::invalid_argument,
@@ -133,8 +142,17 @@ int run_export(const ParsedArgs& args, const Io& io) {
       map_name += colormap_name;
       map_name += ".png";
       const std::filesystem::path map_file = dir / map_name;
+      double lo = png->lo;
+      double hi = png->hi;
+      if (map_range == "data") {
+        const FieldStats stats = field_stats(*values);
+        if (stats.finite > 0 && stats.max > stats.min) {
+          lo = stats.min;
+          hi = stats.max;
+        }
+      }
       if (core::Status s =
-              write_colormap_png(map_file, reader->grid().n, *values, png->lo, png->hi, *colormap);
+              write_colormap_png(map_file, reader->grid().n, *values, lo, hi, *colormap);
           !s.ok()) {
         return fail(io, s);
       }

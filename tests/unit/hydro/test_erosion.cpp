@@ -127,8 +127,8 @@ TEST_CASE("hydro.erode follows the documented cycle layout") {
   std::vector<float> z = start;
   const ErosionReport report = run(z, grid, params);
 
-  // Cycle 0 by hand: snap, sources, one walker per source with stream (key.derive(0), source),
-  // then the thermal step.
+  // Cycle 0 by hand: snap, sources, one walker per source with stream (key.derive(0), source)
+  // and a shared failed-basin memo, then the thermal step.
   std::vector<float> manual = start;
   REQUIRE(wg::hydro::snap_to_lattice(manual).ok());
   wg::core::Expected<std::vector<std::int32_t>> sources =
@@ -137,13 +137,14 @@ TEST_CASE("hydro.erode follows the documented cycle layout") {
   CHECK(report.sources_before == static_cast<std::int32_t>(sources->size()));
   std::int64_t steps = 0;
   std::vector<std::uint8_t> visited(manual.size(), 0);
+  std::vector<std::uint8_t> failed(manual.size(), 0);
   for (const std::int32_t s : *sources) {
     wg::core::RngStream stream(kKey.derive(0), static_cast<std::uint64_t>(s));
     wg::core::Expected<wg::hydro::WalkerResult> walk =
         wg::hydro::run_walker(manual, grid, s,
                               wg::hydro::WalkerParams{.dig_depth = params.dig_depth,
                                                       .step_limit = params.walker_step_limit},
-                              stream, visited);
+                              stream, visited, {}, nullptr, failed);
     REQUIRE(walk.has_value());
     steps += walk->steps;
   }
@@ -161,6 +162,24 @@ TEST_CASE("hydro.erode follows the documented cycle layout") {
 
   // The same key gives the same world.
   std::vector<float> again = start;
+  run(again, grid, params);
+  CHECK(again == z);
+}
+
+TEST_CASE("hydro.erode floods a basin without an exit once per cycle (ADR 0021)") {
+  // Walkers from the rim of the closed basin run into the pit. With a step limit below the
+  // basin's size the first flood fails; the memo stops every later walker of the cycle on the
+  // flooded cells, so a cycle costs far fewer steps than walkers times the limit.
+  const Grid grid = wg::test::make_grid(33);
+  std::vector<float> z = wg::test::closed_basin(grid);
+  ErosionParams params = cycles(3, false);
+  params.walker_step_limit = 40;
+  const ErosionReport report = run(z, grid, params);
+  REQUIRE(report.sources_before > 10);
+  CHECK(report.walker_steps < static_cast<std::int64_t>(report.sources_before) * 40);
+
+  // The memo is deterministic.
+  std::vector<float> again = wg::test::closed_basin(grid);
   run(again, grid, params);
   CHECK(again == z);
 }

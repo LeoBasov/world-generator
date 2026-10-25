@@ -2,6 +2,7 @@
 
 // Helpers shared by the numerics kernels (not part of the public API).
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
@@ -54,6 +55,20 @@ inline core::Status first_error(std::initializer_list<core::Status> statuses) no
 /// True if cell i belongs to the mask; an empty mask holds every cell.
 inline bool in_mask(std::span<const std::uint8_t> mask, std::int64_t i) noexcept {
   return mask.empty() || mask[static_cast<std::size_t>(i)] != 0;
+}
+
+/// grid.neighbor(i, d) for every d of core::kDir8, in that order (core::kNoCell outside the
+/// grid), with one division for the cell instead of two per direction. For hot loops.
+inline std::array<std::int64_t, 8> neighbors8(const core::Grid& grid, std::int64_t i) noexcept {
+  const std::int32_t x = grid.x_of(i);
+  const std::int32_t y = grid.y_of(i);
+  std::array<std::int64_t, 8> out{};
+  for (std::size_t k = 0; k < core::kDir8.size(); ++k) {
+    const std::int32_t nx = x + core::dx(core::kDir8[k]);
+    const std::int32_t ny = y + core::dy(core::kDir8[k]);
+    out[k] = grid.contains(nx, ny) ? grid.idx(nx, ny) : core::kNoCell;
+  }
+  return out;
 }
 
 /// Arena capacity for count values of T, with room for the alignment padding.

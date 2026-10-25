@@ -270,6 +270,57 @@ TEST_CASE("hydro.run_walker floods a basin and digs its saddle") {
   CHECK(limited == before);
 }
 
+TEST_CASE("hydro.run_walker remembers floods without an exit (ADR 0021)") {
+  const Grid grid = wg::test::make_grid(33);
+  const std::vector<float> before = wg::test::closed_basin(grid);
+  std::vector<float> z = before;
+  const auto pit = static_cast<std::int32_t>(grid.idx(16, 16));
+  std::vector<std::uint8_t> visited(z.size(), 0);
+  std::vector<std::uint8_t> failed(z.size(), 0);
+  const WalkerParams params{.step_limit = 20};
+  const auto run = [&](std::int32_t source) {
+    RngStream stream(kKey, static_cast<std::uint64_t>(source));
+    wg::core::Expected<WalkerResult> r =
+        wg::hydro::run_walker(z, grid, source, params, stream, visited, {}, nullptr, failed);
+    REQUIRE(r.has_value());
+    return *r;
+  };
+
+  // The first flood from the pit ends at the step limit and marks the pit and the 20 cells it
+  // took.
+  const WalkerResult first = run(pit);
+  CHECK(first.stop == WalkerStop::step_limit);
+  CHECK(first.steps == 20);
+  const auto marked = std::count(failed.begin(), failed.end(), std::uint8_t{1});
+  CHECK(marked == 21);
+  CHECK(failed[static_cast<std::size_t>(pit)] == 1);
+
+  // A second walker on the pit stops at once.
+  const WalkerResult second = run(pit);
+  CHECK(second.stop == WalkerStop::failed_basin);
+  CHECK(second.steps == 0);
+  CHECK(second.end == pit);
+
+  // A walker from inside the bowl runs down towards the pit and stops on the first marked
+  // cell, without flooding again; nothing is dug and the memo is unchanged.
+  const auto inner = static_cast<std::int32_t>(grid.idx(16, 11));
+  const WalkerResult third = run(inner);
+  CHECK(third.stop == WalkerStop::failed_basin);
+  CHECK(third.steps < 20);
+  CHECK(failed[static_cast<std::size_t>(third.end)] == 1);
+  CHECK(std::count(failed.begin(), failed.end(), std::uint8_t{1}) == marked);
+  CHECK(z == before);
+  CHECK(std::all_of(visited.begin(), visited.end(), [](std::uint8_t v) { return v == 0; }));
+
+  // Without the memo the same walker floods the basin again.
+  std::vector<std::uint8_t> none;
+  RngStream stream(kKey, static_cast<std::uint64_t>(inner));
+  wg::core::Expected<WalkerResult> fresh =
+      wg::hydro::run_walker(z, grid, inner, params, stream, visited, {}, nullptr, none);
+  REQUIRE(fresh.has_value());
+  CHECK(fresh->stop == WalkerStop::step_limit);
+}
+
 TEST_CASE("hydro.run_walker paths are reproducible per source (A16 acceptance)") {
   // Random relief with an ocean ring, and a flat plateau where every step is a tie.
   const Grid grid = wg::test::make_grid(33);

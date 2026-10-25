@@ -68,8 +68,9 @@ Diagnostics go to stderr, results to stdout.
   `--data-dir` pointing there.
 - The data tables of `DIR` are loaded for every generation and passed to the stages.
 
-Until the first real stages land (A11), the only stages are the mock stages of
-`tests/fixtures/profiles/mock.json`, which wgcli registers itself:
+The shipped profile is `classic` (`data/profiles/classic.json`, the eleven classic stages
+c01–c11; ADR 0021), which the presets name, so `--params df_default` alone runs it. wgcli also
+registers the mock stages of `tests/fixtures/profiles/mock.json`, which its tests use:
 
 | Stage | Reads | Writes |
 |---|---|---|
@@ -107,6 +108,11 @@ directory. `params` and `size` are optional. With `--out`, the result is JSON:
 "status": "ok", "world": "0x...", "stages": [...]}]}]}`. A seed whose attempts all fail has
 `"status": "failed"` and no hash.
 
+On every push the `build + test` jobs of `ci.yml` hash the golden seed list with `--threads 1`
+and `--threads 8` and require identical files, then compare the 1-thread hashes with
+`tests/golden/hashes/<toolchain key>.json` (`tools/ci/compare_hashes.py`, which names the
+first stage whose output differs). ADR 0021 describes how the golden files are updated.
+
 ## Commands
 
 ### generate
@@ -139,7 +145,7 @@ Options:
 Example:
 
 ```bash
-wgcli generate --profile tests/fixtures/profiles/mock.json --size 65 --seed 7 --snapshots all --out world.wgw
+wgcli generate --profile classic --size 65 --seed 7 --snapshots all --out world.wgw
 ```
 
 ### sweep
@@ -253,12 +259,14 @@ Export fields as PNG16 or EXR, vector layers as JSON.
 png16 writes DIR/<field>.png scaled by the field's registry range (or its data range)
 and stores the range in the PNG. exr writes DIR/<field>.exr with the values unscaled
 (only if the library was built with WG_WITH_EXR). json writes DIR/layers.json.
-Colour maps are for looking at, never for reading back.
+Colour maps are for looking at, never for reading back; --map-range data spreads
+them over the field's finite values, e.g. for temperature.
 
 Options:
   --format png16|exr|json          Output format, required
   --field NAME|all ...             Field to export (default all; not for json)
   --colormap grey|terrain|viridis  Also write <field>_<map>.png for review (png16 only)
+  --map-range registry|data        Range the colour map spans (default registry)
   --out DIR                        Output directory, required
   -h, --help                       Show this help and exit
 ```

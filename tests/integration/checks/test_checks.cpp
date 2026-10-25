@@ -208,8 +208,8 @@ TEST_CASE("checks.c11_verify final REGION_COUNTS and SUBREGION_MAX") {
 
 TEST_CASE("checks.contradictory parameters end in a complete failure report") {
   const wg::pipeline::StageRegistry registry = wg::test::classic_registry();
-  auto profile = wg::pipeline::load_profile_file(
-      wg::test::source_path("tests/fixtures/profiles/classic_verify.json"));
+  auto profile =
+      wg::pipeline::load_profile_file(wg::test::source_path("data/profiles/classic.json"));
   REQUIRE(profile);
   REQUIRE(profile->stages == kClassic);
   auto pipeline = wg::pipeline::Pipeline::create(*profile, registry);

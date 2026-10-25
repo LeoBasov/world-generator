@@ -2,6 +2,6 @@
   "$schema": "../../../schema/profile.schema.json",
   "schema_version": 1,
   "name": "classic_seed",
-  "description": "The classic stages that run without rivers (A12, A13) until data/profiles/classic.json arrives with A23.",
+  "description": "A subset of data/profiles/classic.json for tests: the classic stages that run without rivers.",
   "stages": ["c01_allocate", "c02_seed", "c03_fit", "c05_shape"]
 }
