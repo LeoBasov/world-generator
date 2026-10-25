@@ -1,6 +1,7 @@
 #include <doctest/doctest.h>
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <span>
@@ -30,15 +31,41 @@ std::vector<float> elevation_of(const WorldState& state) {
   return {view->data.begin(), view->data.end()};
 }
 
-// A world holding only elevation z and the given peaks.
+// A world holding elevation z, the given peaks and the other *_RANGES fields at 50 (mid band).
 WorldState world_with(const std::vector<float>& z, std::vector<Peak> peaks) {
   auto state = WorldState::create(wg::test::make_grid(kN));
   REQUIRE(state);
   auto view = state->write<float>(FieldId::elevation);
   REQUIRE(view);
   std::copy(z.begin(), z.end(), view->data.begin());
+  for (const FieldId id :
+       {FieldId::rainfall, FieldId::drainage, FieldId::volcanism, FieldId::savagery}) {
+    auto field = state->write<float>(id);
+    REQUIRE(field);
+    std::fill(field->data.begin(), field->data.end(), 50.0F);
+  }
   state->layers().peaks = std::move(peaks);
   return std::move(*state);
+}
+
+// Elevation ramp over the cells, from 0 to 400 in index order.
+std::vector<float> ramp(const wg::core::Grid& grid) {
+  const auto m = static_cast<std::size_t>(grid.cells());
+  std::vector<float> z(m);
+  for (std::size_t i = 0; i < m; ++i) {
+    z[i] = static_cast<float>(400.0 * static_cast<double>(i) / static_cast<double>(m - 1));
+  }
+  return z;
+}
+
+// Squares of z below 400 / 3, in [400 / 3, 800 / 3) and from 800 / 3 on.
+std::array<std::int64_t, 3> elevation_bands(const std::vector<float>& z) {
+  std::array<std::int64_t, 3> n{};
+  for (const float v : z) {
+    const auto x = static_cast<double>(v);
+    ++n[x < 400.0 / 3.0 ? 0 : (x < 800.0 / 3.0 ? 1 : 2)];
+  }
+  return n;
 }
 
 // Land at 200 with three cells at 400.
@@ -174,6 +201,106 @@ TEST_CASE("stages.c03_fit repairs missing edge oceans") {
   CHECK(rejected.check_id == "COMPLETE_OCEAN_EDGE_MIN");
   CHECK(rejected.measured == 0.0);
   CHECK(rejected.required == 2.0);
+}
+
+TEST_CASE("stages.c03_fit checks the *_RANGES squares and reports the band counts") {
+  const wg::core::Grid grid = wg::test::make_grid(kN);
+  const std::vector<float> z = three_summits(grid);  // 1086 mid squares, 3 high
+  GenParams p = without_remap();
+  auto stage = wg::test::make_classic_stage("c03_fit");
+  wg::core::SerialExecutor exec;
+
+  WorldState plain = world_with(z, {});
+  const StageResult counted = wg::test::run_stage(*stage, plain, p, 1, exec);
+  CHECK(counted.kind == StageResult::Kind::ok);
+  CHECK(counted.metrics.value("elevation_low") == 0.0);
+  CHECK(counted.metrics.value("elevation_mid") == 1086.0);
+  CHECK(counted.metrics.value("elevation_high") == 3.0);
+  CHECK(counted.metrics.value("rainfall_mid") == 1089.0);
+  CHECK(counted.metrics.value("savagery_high") == 0.0);
+
+  // Unrepairable: rainfall sits at 50, so no low rain square exists.
+  p.checks.rain_ranges = {1, 0, 0};
+  WorldState dry = world_with(z, {});
+  const StageResult rain = wg::test::run_stage_with_repair(*stage, dry, p, 1, exec);
+  CHECK(rain.kind == StageResult::Kind::reject);
+  CHECK(rain.check_id == "RAIN_RANGES[0]");
+  CHECK(rain.measured == 0.0);
+  CHECK(rain.required == 1.0);
+
+  // Field order first: ELEVATION_RANGES fails before RAIN_RANGES.
+  p.checks.elevation_ranges = {0, 0, 4};
+  WorldState both = world_with(z, {});
+  const StageResult first = wg::test::run_stage(*stage, both, p, 1, exec);
+  CHECK(first.check_id == "ELEVATION_RANGES[2]");
+  CHECK(first.measured == 3.0);
+  CHECK(first.required == 4.0);
+}
+
+TEST_CASE("stages.c03_fit repairs ELEVATION_RANGES by moving the band cuts") {
+  const wg::core::Grid grid = wg::test::make_grid(kN);
+  const std::vector<float> z = ramp(grid);
+  REQUIRE(elevation_bands(z) == std::array<std::int64_t, 3>{363, 363, 363});
+  GenParams p = without_remap();
+  p.checks.elevation_ranges = {500, 0, 400};
+
+  auto stage = wg::test::make_classic_stage("c03_fit");
+  wg::core::SerialExecutor exec;
+  WorldState rejected = world_with(z, {});
+  const StageResult r = wg::test::run_stage(*stage, rejected, p, 1, exec);
+  CHECK(r.check_id == "ELEVATION_RANGES[0]");
+  CHECK(r.measured == 363.0);
+
+  WorldState state = world_with(z, {});
+  const StageResult repaired = run_c03(state, p);
+  CHECK(repaired.kind == StageResult::Kind::ok);
+  const std::vector<float> fitted = elevation_of(state);
+  CHECK(elevation_bands(fitted) == std::array<std::int64_t, 3>{500, 189, 400});
+  CHECK(std::is_sorted(fitted.begin(), fitted.end()));  // the ramp's order is kept
+  CHECK(fitted.front() == 0.0F);
+  CHECK(fitted.back() == 400.0F);
+  CHECK(repaired.metrics.value("elevation_low") == 500.0);
+
+  // Infeasible: equal values stay equal, so a constant field cannot have low and high squares.
+  WorldState flat = world_with(std::vector<float>(z.size(), 200.0F), {});
+  p.checks.elevation_ranges = {1, 0, 1};
+  const StageResult stays = run_c03(flat, p);
+  CHECK(stays.kind == StageResult::Kind::reject);
+  CHECK(stays.check_id == "ELEVATION_RANGES[0]");
+  CHECK(elevation_of(flat) == std::vector<float>(z.size(), 200.0F));
+}
+
+TEST_CASE("stages.c03_fit repairs edge oceans and elevation bands in one repair") {
+  const wg::core::Grid grid = wg::test::make_grid(kN);
+  // Land rising from 110 in the west to 210 in the east (264 low squares), three summits.
+  std::vector<float> z = three_summits(grid);
+  for (std::int32_t y = 0; y < kN; ++y) {
+    for (std::int32_t x = 0; x < kN; ++x) {
+      float& v = z[static_cast<std::size_t>(grid.idx(x, y))];
+      if (v < 400.0F) {
+        v = static_cast<float>(110.0 + (100.0 * x / (kN - 1)));
+      }
+    }
+  }
+  GenParams p = without_remap();
+  p.checks.complete_ocean_edge_min = 1;
+  // The edge repair adds low squares, but not enough: the band repair follows.
+  p.checks.elevation_ranges = {600, 0, 3};
+
+  WorldState state = world_with(z, {});
+  const StageResult r = run_c03(state, p);
+  CHECK(r.kind == StageResult::Kind::ok);
+  const std::vector<float> fitted = elevation_of(state);
+  const std::array<std::int64_t, 3> bands = elevation_bands(fitted);
+  CHECK(bands[0] >= 600);
+  CHECK(bands[2] >= 3);
+  auto edges = wg::terrain::count_ocean_edges(fitted, grid);
+  REQUIRE(edges);
+  CHECK(edges->complete >= 1);
+  // The summits keep the top of the scale.
+  for (const std::int32_t x : {8, 16, 24}) {
+    CHECK(fitted[static_cast<std::size_t>(grid.idx(x, 16))] == 400.0F);
+  }
 }
 
 TEST_CASE("stages.c03_fit is reproducible per seed and independent of the thread count") {

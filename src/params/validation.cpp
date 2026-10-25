@@ -200,6 +200,36 @@ void check_contradictions(const GenParams& p, std::vector<ValidationIssue>& issu
                 "rivers need a maximum elevation of at least 104 but $.fields.elevation.max is " +
                     format_number(z_max) + "; every attempt will be rejected (R4.2)");
   }
+  // *_RANGES bands are the thirds of 0-100 (ADR 0020); C2 clamps the field to [min, max], and
+  // nothing moves these four fields before C3 checks them. Elevation is left out, because the
+  // hypsometric remap and its repair move it.
+  struct Band {
+    std::string_view check;
+    std::string_view field;
+    const FieldGenParams& gen;
+    const std::array<std::int32_t, 3>& mins;
+  };
+  const std::array<Band, 4> bands = {{
+      {"RAIN_RANGES", "rainfall", p.fields.rainfall, p.checks.rain_ranges},
+      {"DRAINAGE_RANGES", "drainage", p.fields.drainage, p.checks.drainage_ranges},
+      {"VOLCANISM_RANGES", "volcanism", p.fields.volcanism, p.checks.volcanism_ranges},
+      {"SAVAGERY_RANGES", "savagery", p.fields.savagery, p.checks.savagery_ranges},
+  }};
+  constexpr double kLowMax = 100.0 / 3.0;
+  constexpr double kHighMin = 200.0 / 3.0;
+  constexpr std::array<std::string_view, 3> kBandNames = {"low", "mid", "high"};
+  for (const Band& b : bands) {
+    const std::array<bool, 3> reachable = {
+        b.gen.min < kLowMax, b.gen.min < kHighMin && b.gen.max >= kLowMax, b.gen.max >= kHighMin};
+    for (std::size_t k = 0; k < 3; ++k) {
+      if (b.mins[k] > 0 && !reachable[k]) {
+        add_warning(issues, io::json_index_path("$.checks." + std::string(b.check), k),
+                    "no " + std::string(b.field) + " value in [" + format_number(b.gen.min) + ", " +
+                        format_number(b.gen.max) + "] lies in the " + std::string(kBandNames[k]) +
+                        " band; every attempt will be rejected (R11)");
+      }
+    }
+  }
   const double z_min = p.fields.elevation.min;
   if ((p.checks.partial_ocean_edge_min > 0 || p.checks.complete_ocean_edge_min > 0) &&
       z_min >= 100.0) {

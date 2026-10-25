@@ -48,6 +48,7 @@ add_library(
   src/bio/vegetation.cpp
   src/classify/biome.cpp
   src/classify/checks.cpp
+  src/classify/field_ranges.cpp
   src/classify/regions.cpp
   src/climate/latitude.cpp
   src/climate/precipitation.cpp
@@ -105,6 +106,7 @@ add_library(
   src/params/reader.cpp
   src/params/tables.cpp
   src/params/validation.cpp
+  src/pipeline/attempts.cpp
   src/pipeline/field_set.cpp
   src/pipeline/pipeline.cpp
   src/pipeline/profile.cpp
@@ -120,7 +122,9 @@ add_library(
   src/stages/classic/c08_climate.cpp
   src/stages/classic/c09_biomes.cpp
   src/stages/classic/c10_subsurface.cpp
+  src/stages/classic/c11_verify.cpp
   src/stages/classic/classic.cpp
+  src/terrain/band_repair.cpp
   src/terrain/bumps.cpp
   src/terrain/edge_ocean.cpp
   src/terrain/hypsometry.cpp

@@ -196,3 +196,11 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `magma_depth_m`. New parameters `geology.deep_ocean_elevation` and `geology.soil_max_depth`;
   `layer_count_min` and `layer_count_max` now start at 2. Every parameter hash changes. ADR 0019
   records the rules.
+- Verification and repair (A22): the five `*_RANGES` checks in `c03_fit` (low, mid and high
+  squares as thirds of each field's registry scale; `classify::range_bands`, `count_bands`,
+  `check_field_ranges`), the hypsometry repair `terrain::fit_elevation_bands` (a monotone
+  rank-space remap that moves the band boundaries to the minimums) next to the edge-ocean repair
+  in one repair hook, the new classic stage `c11_verify` (final REGION_COUNTS and SUBREGION_MAX),
+  attempt statistics `pipeline::add_report` / `AttemptStatistics` (pass rate per stage, measured
+  and expected attempts) and validation warnings for unreachable `*_RANGES` bands. Test profile
+  `classic_verify` (c01-c11). ADR 0020 records the rules.

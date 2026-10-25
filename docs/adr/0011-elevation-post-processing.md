@@ -23,7 +23,7 @@ The report describes these steps only in outline. Each open detail below changes
 - **Edge oceans (R§11).** An edge is the outermost row or column. It is partly ocean if at least one of its cells is below 100, and completely ocean if all are. A complete edge also counts as partial.
 - **Checks in C3.** The order is COMPLETE_OCEAN_EDGE_MIN, then PARTIAL_OCEAN_EDGE_MIN, then PEAK_NUMBER_MIN. The first failure rejects with the measured count and the threshold.
   - Before the checks, C3 drops every peak whose cell now lies below 400, so the remap and the repair can remove peaks.
-  - The `*_RANGES` checks (low, mid and high squares) are left to A22, because the report does not define where low, mid and high start.
+  - The `*_RANGES` checks (low, mid and high squares) are left to A22, because the report does not define where low, mid and high start. ADR 0020 adds them to C3, after PEAK_NUMBER_MIN, with a hypsometry repair for ELEVATION_RANGES.
 - **Edge-ocean repair (R8).** C3's `repair` hook (`terrain::enforce_edge_oceans`) handles a failed edge-ocean check and then runs all checks again. A failed PEAK_NUMBER_MIN is not repaired. Cells are only ever lowered, to cap(d) = 99 + (d / w)·(400 − 99) for d < w, with w = `elevation_post.edge_ocean_width`:
   - **Complete edges.** d is the distance in cells to the edge line. Edges are taken in order of most ocean cells first, ties in the order north, east, south, west.
   - **Partial edges, after the complete step.** d is the Euclidean distance to the edge's lowest cell (ties go to the lower index), which opens a bay. Only edges without ocean are taken, lowest minimum first, ties in edge order.
