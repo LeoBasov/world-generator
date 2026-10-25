@@ -125,15 +125,19 @@ inline CountInterval binomial_interval99(std::size_t n, double p) {
 /// Central 99 % interval [lo, hi] of a Poisson(lambda) count: the largest lo and smallest hi
 /// with P(N < lo) <= 0.005 and P(N > hi) <= 0.005, from the exact probabilities.
 inline CountInterval poisson_interval99(double lambda) {
-  const auto pmf = [lambda](double k) {
-    return std::exp((k * std::log(lambda)) - lambda - std::lgamma(k + 1.0));
-  };
+  // log P(N = k) = log P(N = k - 1) + log lambda - log k, from log P(N = 0) = -lambda; the log
+  // form does not underflow for large lambda (std::lgamma is not thread safe).
+  const double log_lambda = std::log(lambda);
+  double log_p = -lambda;
   double cdf = 0.0;
   double k = 0.0;
   CountInterval out;
   bool lo_set = false;
   for (;; k += 1.0) {
-    const double p = pmf(k);
+    if (k > 0.0) {
+      log_p += log_lambda - std::log(k);
+    }
+    const double p = std::exp(log_p);
     if (!lo_set && cdf + p > 0.005) {
       out.lo = k;
       lo_set = true;
