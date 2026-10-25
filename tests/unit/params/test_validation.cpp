@@ -196,6 +196,37 @@ TEST_CASE("params.validation warns about checks the field ranges make impossible
   CHECK(only_issue(e).path == "$.checks.PARTIAL_OCEAN_EDGE_MIN");
 }
 
+TEST_CASE("params.validation warns about *_RANGES bands the field ranges cannot reach") {
+  GenParams p;
+  p.checks.rain_ranges = {1, 1, 1};
+  p.checks.savagery_ranges = {0, 0, 5};
+  CHECK(clean(p));  // 0-100 reaches every band
+
+  // The high band starts at 200 / 3: a maximum just below it cannot reach it.
+  p.fields.savagery.max = 66.66;
+  ValidationIssue i = only_issue(p);
+  CHECK(i.severity == Severity::warning);
+  CHECK(i.path == "$.checks.SAVAGERY_RANGES[2]");
+  p.fields.savagery.max = 66.67;
+  CHECK(clean(p));
+
+  // Rainfall in [40, 60] lies wholly in the mid band.
+  p.fields.rainfall.min = 40.0;
+  p.fields.rainfall.max = 60.0;
+  const std::vector<ValidationIssue> issues = validate(p);
+  REQUIRE(issues.size() == 2);
+  CHECK(issues[0].path == "$.checks.RAIN_RANGES[0]");
+  CHECK(issues[1].path == "$.checks.RAIN_RANGES[2]");
+  p.checks.rain_ranges = {0, 1, 0};
+  CHECK(clean(p));
+
+  // Elevation is left to the remap and the hypsometry repair.
+  GenParams e;
+  e.checks.elevation_ranges = {0, 0, 10};
+  e.fields.elevation.max = 200.0;
+  CHECK(clean(e));
+}
+
 TEST_CASE("params.validation has_errors and format_issues") {
   const std::vector<ValidationIssue> warnings = {{Severity::warning, "$.a", "w"}};
   CHECK(!wg::params::has_errors(warnings));

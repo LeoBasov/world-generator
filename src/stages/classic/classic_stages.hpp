@@ -25,6 +25,7 @@ inline constexpr std::string_view kC07Smooth = "c07_smooth";
 inline constexpr std::string_view kC08Climate = "c08_climate";
 inline constexpr std::string_view kC09Biomes = "c09_biomes";
 inline constexpr std::string_view kC10Subsurface = "c10_subsurface";
+inline constexpr std::string_view kC11Verify = "c11_verify";
 
 /// C1 Allocate and orient (S1): writes latitude from the pole option (R5.3).
 [[nodiscard]] std::unique_ptr<pipeline::Stage> make_c01_allocate() noexcept;
@@ -33,8 +34,8 @@ inline constexpr std::string_view kC10Subsurface = "c10_subsurface";
 /// (R5.3) and the peak candidates (R4.3).
 [[nodiscard]] std::unique_ptr<pipeline::Stage> make_c02_seed() noexcept;
 
-/// C3 Fit and first check (S3): the hypsometric remap (R4.1), the edge-ocean and peak checks
-/// (R11) and the edge-ocean repair.
+/// C3 Fit and first check (S3): the hypsometric remap (R4.1), the edge-ocean, peak and field
+/// range checks (R11) with the edge-ocean and hypsometry repairs.
 [[nodiscard]] std::unique_ptr<pipeline::Stage> make_c03_fit() noexcept;
 
 /// C4 First vegetation (S4): vegetation (R8.1), the provisional biome (R9.1-R9.2) and the
@@ -63,6 +64,9 @@ inline constexpr std::string_view kC10Subsurface = "c10_subsurface";
 /// C10 Subsurface (S10): geological regions, stone columns, soils, caverns and the magma sea
 /// (R10.1, R10.4), aquifers (R10.3) and mineral deposits (R10.2).
 [[nodiscard]] std::unique_ptr<pipeline::Stage> make_c10_subsurface() noexcept;
+
+/// C11 Verification (S11): the final REGION_COUNTS and SUBREGION_MAX (R11).
+[[nodiscard]] std::unique_ptr<pipeline::Stage> make_c11_verify() noexcept;
 
 /// The field id of the stage's state as T, for writing.
 template <class T>
