@@ -196,7 +196,18 @@ Json encode_geo_columns(const std::vector<core::GeoColumn>& columns, Encoder& en
       soils.push_back(std::move(lo));
     }
     o["soil_layers"] = std::move(soils);
-    o["cavern_levels"] = int_array(c.cavern_levels);
+    Json caverns = Json::array();
+    for (const core::Cavern& v : c.caverns) {
+      Json vo = Json::object();
+      vo["level"] = v.level;
+      vo["depth_m"] = enc.real(v.depth_m, "geo_columns", i, "caverns.depth_m");
+      vo["openness"] = v.openness;
+      vo["passage_density"] = v.passage_density;
+      vo["water"] = v.water;
+      caverns.push_back(std::move(vo));
+    }
+    o["caverns"] = std::move(caverns);
+    o["magma_depth_m"] = enc.real(c.magma_depth_m, "geo_columns", i, "magma_depth_m");
     a.push_back(std::move(o));
   }
   return a;
@@ -411,7 +422,15 @@ core::VectorLayers decode(ObjectReader& root, std::vector<ValidationIssue>& issu
       get_int(l, "soil_id", sl.soil_id);
       get_real(l, "thickness_m", sl.thickness_m);
     });
-    get_array(r, "cavern_levels", c.cavern_levels, issues);
+    for_each_object(r, "caverns", issues, [&](ObjectReader& v) {
+      core::Cavern& cv = c.caverns.emplace_back();
+      get_int(v, "level", cv.level);
+      get_real(v, "depth_m", cv.depth_m);
+      get_int(v, "openness", cv.openness);
+      get_int(v, "passage_density", cv.passage_density);
+      get_int(v, "water", cv.water);
+    });
+    get_real(r, "magma_depth_m", c.magma_depth_m);
   });
   for_each_object(root, "minerals", issues, [&](ObjectReader& r) {
     core::MineralDeposit& m = L.minerals.emplace_back();

@@ -24,6 +24,7 @@ inline constexpr std::string_view kC06Rivers = "c06_rivers";
 inline constexpr std::string_view kC07Smooth = "c07_smooth";
 inline constexpr std::string_view kC08Climate = "c08_climate";
 inline constexpr std::string_view kC09Biomes = "c09_biomes";
+inline constexpr std::string_view kC10Subsurface = "c10_subsurface";
 
 /// C1 Allocate and orient (S1): writes latitude from the pole option (R5.3).
 [[nodiscard]] std::unique_ptr<pipeline::Stage> make_c01_allocate() noexcept;
@@ -58,6 +59,10 @@ inline constexpr std::string_view kC09Biomes = "c09_biomes";
 
 /// C9 Biomes and regions (S9): the final biome (R9.1-R9.2) and the named regions (R9.3).
 [[nodiscard]] std::unique_ptr<pipeline::Stage> make_c09_biomes() noexcept;
+
+/// C10 Subsurface (S10): geological regions, stone columns, soils, caverns and the magma sea
+/// (R10.1, R10.4), aquifers (R10.3) and mineral deposits (R10.2).
+[[nodiscard]] std::unique_ptr<pipeline::Stage> make_c10_subsurface() noexcept;
 
 /// The field id of the stage's state as T, for writing.
 template <class T>

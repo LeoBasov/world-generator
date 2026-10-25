@@ -67,6 +67,11 @@ add_library(
   src/core/world_state.cpp
   src/fractal/fractal.cpp
   src/fractal/peaks.cpp
+  src/geology/aquifer.cpp
+  src/geology/column.cpp
+  src/geology/minerals.cpp
+  src/geology/regions.cpp
+  src/geology/soil.cpp
   src/hydro/discharge.cpp
   src/hydro/erosion.cpp
   src/hydro/lake_bulge.cpp
@@ -114,6 +119,7 @@ add_library(
   src/stages/classic/c07_smooth.cpp
   src/stages/classic/c08_climate.cpp
   src/stages/classic/c09_biomes.cpp
+  src/stages/classic/c10_subsurface.cpp
   src/stages/classic/classic.cpp
   src/terrain/bumps.cpp
   src/terrain/edge_ocean.cpp

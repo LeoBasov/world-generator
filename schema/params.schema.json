@@ -377,13 +377,13 @@
           "x-unit": "", "x-report": "R10.1"
         },
         "layer_count_min": {
-          "description": "Minimal number of stone layers per column.",
-          "type": "integer", "minimum": 1, "maximum": 32, "default": 3,
+          "description": "Minimal number of stone layers per column (at least 2: the top is never intrusive, the bottom always is).",
+          "type": "integer", "minimum": 2, "maximum": 32, "default": 3,
           "x-unit": "", "x-report": "R10.4"
         },
         "layer_count_max": {
           "description": "Maximal number of stone layers per column.",
-          "type": "integer", "minimum": 1, "maximum": 32, "default": 8,
+          "type": "integer", "minimum": 2, "maximum": 32, "default": 8,
           "x-unit": "", "x-report": "R10.4"
         },
         "layer_thickness_log_mean": {
@@ -395,6 +395,11 @@
           "description": "Standard deviation sigma of ln(thickness) of a stone layer.",
           "type": "number", "minimum": 0, "maximum": 5, "default": 0.5,
           "x-unit": "", "x-report": "R10.4"
+        },
+        "deep_ocean_elevation": {
+          "description": "Ocean cells below this elevation are deep ocean, the others shallow ocean.",
+          "type": "number", "minimum": 0, "maximum": 100, "default": 50,
+          "x-unit": "elevation units", "x-report": "R10.1"
         },
         "soil_max_layers": {
           "description": "Maximal number of soil layers (none on mountains).",
@@ -415,6 +420,11 @@
           "description": "Soil diffusivity kappa of downslope transport.",
           "type": "number", "minimum": 0, "maximum": 10, "default": 0.01,
           "x-unit": "m^2/yr", "x-report": "R10.4"
+        },
+        "soil_max_depth": {
+          "description": "Largest soil depth h; flat and concave cells, where transport does not balance production, reach it.",
+          "type": "number", "minimum": 0, "maximum": 100, "default": 10,
+          "x-unit": "m", "x-report": "R10.4"
         },
         "df_heavy_aquifer_quirk": {
           "description": "DF fidelity toggle: an aquifer is heavy when drainage mod 20 = 7 (R10.3, plan 16).",

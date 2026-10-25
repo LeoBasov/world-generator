@@ -16,7 +16,7 @@ struct Entry {
 };
 
 // In profile order.
-constexpr std::array<Entry, 9> kStages = {{
+constexpr std::array<Entry, 10> kStages = {{
     {kC01Allocate, &make_c01_allocate},
     {kC02Seed, &make_c02_seed},
     {kC03Fit, &make_c03_fit},
@@ -26,6 +26,7 @@ constexpr std::array<Entry, 9> kStages = {{
     {kC07Smooth, &make_c07_smooth},
     {kC08Climate, &make_c08_climate},
     {kC09Biomes, &make_c09_biomes},
+    {kC10Subsurface, &make_c10_subsurface},
 }};
 
 }  // namespace
