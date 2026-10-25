@@ -1,9 +1,11 @@
 // wg_bench: nanobench benchmarks of worldgen-core.
 // Kernel and stage benchmarks join as their work packages land; `--json <file>` writes the
-// results for the CI benchmark job (plan section 6.8).
+// results for the CI benchmark job (plan section 6.8), `--quick` leaves out the classic profile
+// at N = 257 (the smoke run of every push).
 
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -195,14 +197,50 @@ void bench_world_file(ankerl::nanobench::Bench& bench, const NumericsInputs& in)
   }
 }
 
+// Classic profile (A23): one whole run of data/profiles/classic.json with the schema defaults
+// and seed 1, a typical seed (ADR 0021), five times each. N = 257 is the size of the R6 budget.
+void bench_classic(ankerl::nanobench::Bench& bench, wg::core::Executor& exec, bool quick) {
+  const std::filesystem::path data{WG_BENCH_DATA_DIR};
+  auto tables = wg::params::load_tables_dir(data);
+  auto profile = wg::pipeline::load_profile_file(data / "profiles" / "classic.json");
+  wg::pipeline::StageRegistry registry;
+  if (!tables || !profile || !wg::stages::add_classic_stages(registry).ok()) {
+    std::cerr << "wg_bench: cannot load the classic profile or the data tables\n";
+    return;
+  }
+  auto pipeline = wg::pipeline::Pipeline::create(*profile, registry);
+  if (!pipeline) {
+    std::cerr << "wg_bench: " << pipeline.error().message << "\n";
+    return;
+  }
+  bench.epochs(5).epochIterations(1).warmup(0);
+  for (const std::int32_t n : {65, 257}) {
+    if (quick && n > 65) {
+      break;
+    }
+    wg::params::GenParams params;
+    params.grid.size = n;
+    bench.run("classic.pipeline(" + std::to_string(n) + ")", [&] {
+      ankerl::nanobench::doNotOptimizeAway(
+          pipeline
+              ->run(params, 1, wg::pipeline::RunContext{.exec = exec},
+                    wg::pipeline::RunInputs{.tables = &*tables, .initial = nullptr})
+              .has_value());
+    });
+  }
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
   std::string json_path;
+  bool quick = false;
   for (int i = 1; i < argc; ++i) {
     const std::string_view arg{argv[i]};
     if (arg == "--json" && i + 1 < argc) {
       json_path = argv[++i];
+    } else if (arg == "--quick") {
+      quick = true;
     } else {
       std::cerr << "wg_bench: unknown argument '" << arg << "'\n";
       return 2;
@@ -236,6 +274,11 @@ int main(int argc, char** argv) {
     bench_fractal(bench, **pool, "(8 threads)");
   }
   bench_world_file(bench, numerics);
+  if (pool) {
+    bench_classic(bench, **pool, quick);
+  } else {
+    bench_classic(bench, serial, quick);
+  }
 
   if (!json_path.empty()) {
     std::ofstream out{json_path};

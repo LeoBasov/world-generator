@@ -63,6 +63,8 @@ jobs:
           python tools/data/validate_data.py
           # Fixture profiles of the tests (A08) follow schema/profile.schema.json.
           python tools/data/validate_data.py tests/fixtures/profiles/*.json
+          # The golden seed list (A23) follows schema/golden_seeds.schema.json.
+          python tools/data/validate_data.py tests/golden/seeds.json
           python -m unittest discover -s tools/data/tests -v
       - name: Check RNG known-answer vectors
         run: |
@@ -70,6 +72,10 @@ jobs:
           # difference, then test the reference itself (A04).
           python tools/rng/gen_rng_kat.py --check
           python -m unittest discover -s tools/rng/tests -v
+      - name: CI and review tool tests
+        run: |
+          python -m unittest discover -s tools/ci/tests -v
+          python -m unittest discover -s tools/review/tests -v
 
   build-test:
     name: build + test (${{ matrix.name }})
@@ -116,7 +122,34 @@ jobs:
         run: |
           exe=build/release/bench/wg_bench
           [ -f "$exe.exe" ] && exe="$exe.exe"
-          "$exe"
+          "$exe" --quick
+      - name: Determinism (1 vs 8 threads)
+        run: |
+          # Every golden case and seed hashed per stage with 1 and with 8 threads must agree bit
+          # for bit (R1, plan section 6.8; A23).
+          wgcli=build/release/tools/wgcli/wgcli
+          [ -f "$wgcli.exe" ] && wgcli="$wgcli.exe"
+          py=python3; [ "$RUNNER_OS" = Windows ] && py=python
+          "$wgcli" hash --per-stage --seeds tests/golden/seeds.json --threads 1 \
+            --out hashes-1.json > /dev/null
+          "$wgcli" hash --per-stage --seeds tests/golden/seeds.json --threads 8 \
+            --out hashes-8.json > /dev/null
+          "$py" tools/ci/compare_hashes.py hashes-1.json hashes-8.json
+      - name: Golden hashes
+        # golden/** branches regenerate the goldens (golden-update.yml) instead.
+        if: ${{ !startsWith(github.ref, 'refs/heads/golden/') }}
+        run: |
+          # The hashes of this toolchain must equal tests/golden/hashes/<toolchain key>.json
+          # (plan sections 6.8 and 10.3). Changing them takes a golden/** branch and an ADR.
+          key=$(bash tools/ci/toolchain_key.sh build/release)
+          py=python3; [ "$RUNNER_OS" = Windows ] && py=python
+          golden="tests/golden/hashes/$key.json"
+          if [ ! -f "$golden" ]; then
+            echo "::warning::No golden hashes for toolchain $key; push a golden/** branch to create $golden"
+            exit 0
+          fi
+          "$py" tools/ci/compare_hashes.py "$golden" hashes-1.json \
+            || { echo "::error::Generated worlds differ from $golden; an intended change needs a golden/** branch and an ADR (plan section 10.3)"; exit 1; }
 
       - name: JUnit report
         if: always()
@@ -327,12 +360,64 @@ jobs:
       - name: Build
         run: cmake --build --preset release --target wg_bench
       - name: Run benchmarks
-        # The baseline comparison (> 10 % slower on two consecutive pushes fails) arrives with the
-        # first kernel benchmarks.
         run: build/release/bench/wg_bench --json wg_bench.json
+      - name: Restore the benchmark baseline
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: bench-state.json
+          key: bench-state-linux-clang-${{ github.run_id }}
+          restore-keys: bench-state-linux-clang-
+      - name: Compare with the baseline
+        # Baseline of the previous push to main on this runner label; a benchmark more than 10 %
+        # slower on two consecutive pushes fails (plan section 6.8, ADR 0021).
+        run: python3 tools/ci/bench_compare.py wg_bench.json --state bench-state.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Save the benchmark baseline
+        if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: bench-state.json
+          key: bench-state-linux-clang-${{ github.run_id }}
       - name: Upload benchmark results
+        if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: bench-linux-clang
-          path: wg_bench.json
+          path: |
+            wg_bench.json
+            bench-state.json
           retention-days: ${{ env.RETENTION_DAYS }}
+
+  classic-sweep:
+    name: classic sweep (linux-clang)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CC: clang-18
+      CXX: clang++-18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: linux-clang-release
+      - name: Configure
+        run: cmake --preset release
+      - name: Build
+        run: cmake --build --preset release --target wgcli
+      - name: Sweep 100 seeds at N = 257
+        # A23 acceptance: every seed succeeds or fails with a complete report (ADR 0021). The
+        # times are informative only; the R6 budget is measured on the reference machine.
+        run: |
+          build/release/tools/wgcli/wgcli sweep --profile classic --size 257 --seeds 1..100 \
+            --threads 0 --metrics sweep.csv --keep-failures sweep-failures --quiet
+          python3 tools/ci/check_sweep.py sweep.csv --failures sweep-failures | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Upload sweep results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: classic-sweep
+          path: |
+            sweep.csv
+            sweep-failures/
+          retention-days: ${{ env.RETENTION_DAYS }}
+          if-no-files-found: ignore

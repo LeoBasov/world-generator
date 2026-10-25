@@ -204,3 +204,19 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   attempt statistics `pipeline::add_report` / `AttemptStatistics` (pass rate per stage, measured
   and expected attempts) and validation warnings for unreachable `*_RANGES` bands. Test profile
   `classic_verify` (c01-c11). ADR 0020 records the rules.
+- Classic integration (A23): the shipped profile `data/profiles/classic.json` (c01-c11, replacing
+  the test profile `classic_verify`); end-to-end tests of the profile at N = 33 and 65 and of
+  bit-identical worlds for 1 and 8 threads; golden seeds `tests/golden/seeds.json` with
+  per-toolchain hash files in `tests/golden/hashes/`, checked with the 1-vs-8-thread determinism
+  check on every push (`tools/ci/compare_hashes.py`); the main-only 100-seed sweep at N = 257
+  (`tools/ci/check_sweep.py`) and benchmark baseline comparison (`tools/ci/bench_compare.py`,
+  `wg_bench` `classic.pipeline` benchmarks and `--quick`); the review image set
+  `tools/review/review_set.py` with the new `wgcli export --map-range registry|data`, before/after
+  PNGs in `golden-update.yml`, the review record
+  `docs/review/m1_classic.md` and the R6 measurement `docs/performance.md`. ADR 0021 records the
+  decisions.
+- Test-river walkers share a failed-basin memo per erosion cycle (`hydro::run_walker` argument
+  `failed`, `WalkerStop::failed_basin`): a flood that finds no exit is not repeated by later
+  walkers of the cycle. This changes `c06_rivers` output and brings every one of 100 seeds at
+  N = 257 under the R6 budget of 10 s (ADR 0021, amending ADR 0014). The walker and thermal
+  erosion loops are also about 15 % faster without changing their output.

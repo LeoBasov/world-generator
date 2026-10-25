@@ -1,0 +1,1315 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "classic_65",
+      "results": [
+        {
+          "seed": 1,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x9c4e22e1950cdb66",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x0a47a77fd9c1cb1c"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x9f9745f8ed2a50ef"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x17e1fb0629317ea8"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x8baf0f2f7d7479ab"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0xe7778b3c5167c302"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0xc83b52180a9870b2"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0xe91276d27f69c619"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xd678ab45f14a635a"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x9c4e22e1950cdb66"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x9c4e22e1950cdb66"
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0xf8dad5f55f010f4d",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x43bf4626c70ccee8"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x93ada483943d7c62"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xd50a03fa6c9e565e"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x4b4d511e3aeb9685"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x95311004c21b23c2"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x8f1a8b250970bf89"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x9f0be015bf7e7789"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x9186e5b6aea635cb"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xf8dad5f55f010f4d"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xf8dad5f55f010f4d"
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x458b3598cd465923",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x920019e4dee828b6"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0xcf94585505f45f9c"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x25a9182ca92c7074"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xa8568703c7869fc7"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x5630348f9ce2e7a8"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x7f4021e17f9a2301"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0xc9de07d5ecc5f0e5"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x44303fc163ae23ff"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x458b3598cd465923"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x458b3598cd465923"
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0xa6adbe7f6812189b",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x681e4719bdc6ba85"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x311261b3484c0b1b"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x7e7d936fca8c03da"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x83ae4f70b759e98f"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x62348c0d50fe7f85"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0xef35dff684eaf557"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x28ea87ef44c4868c"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xe3c2afd9fc381da9"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xa6adbe7f6812189b"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xa6adbe7f6812189b"
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x52e40117286a2d30",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x1385436347784cc6"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0xd3a39d814757cf72"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x04e32f21fd3b565c"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x5eff8076b8e7293d"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0xf5f491a391b8c7e0"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x68b637b0cf8d9275"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x4bf7f2f80bcc289e"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xb25670d3b02d8926"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x52e40117286a2d30"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x52e40117286a2d30"
+            }
+          ]
+        },
+        {
+          "seed": 6,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x142b9eeafd686710",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x97bf556afa97b2ba"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x8872f5618a3b3855"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x407870ecd1700cd9"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x03796e558ed05cab"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x01e723d03bcc9110"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0xe8377ef9e267529d"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x9d213532c2e3f4af"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xf3f4a3f0efa43765"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x142b9eeafd686710"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x142b9eeafd686710"
+            }
+          ]
+        },
+        {
+          "seed": 7,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x5722ec74a09930ce",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x38abe4b7ca6c581d"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x8a46ce98bb1e23da"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x553dd2600ed037a8"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xd68f9d9893516e83"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0xbd813fa27a5fdb74"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x80e8ca5fe70e01a5"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x3b35c430840bee51"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xde0a19971bc8bdd4"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x5722ec74a09930ce"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x5722ec74a09930ce"
+            }
+          ]
+        },
+        {
+          "seed": 8,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x49cd7b1b7c28e29a",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xaf42a59d14698c73"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0xea184478ed37d228"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xe42051c5aeac618e"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xc701f88f6bba751c"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x3b0160fccea674ee"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0xca920327e0376829"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x037377e09a0e6470"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x29306c8e174180a6"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x49cd7b1b7c28e29a"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x49cd7b1b7c28e29a"
+            }
+          ]
+        },
+        {
+          "seed": 9,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x0cab3e5bd5d2f03b",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x6a386c7b3aa19471"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x14f5c2b18235b130"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xdf9df404e54bb010"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xe613a12766318493"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x04e96f9c24f6eb58"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x8179fc61d56c5e17"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x35f11b1f08e454f5"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x00077c9e6397008a"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x0cab3e5bd5d2f03b"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x0cab3e5bd5d2f03b"
+            }
+          ]
+        },
+        {
+          "seed": 10,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0xa6e57f25b8b51503",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xda23848f4751f78a"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x2317e5074000ffb2"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x15e4bd2c26f87813"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xb37d7409a0532d43"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x79e2c99ea6333911"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0xca89ef4dc05fefa2"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x86a2479fc36f310f"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xa0168014ccc4af2c"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xa6e57f25b8b51503"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xa6e57f25b8b51503"
+            }
+          ]
+        },
+        {
+          "seed": 11,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0xd96e66f1b7e3bd20",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xdd5c8657129712f6"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x394a3358fcb2bacd"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x862f0a45c33a06ea"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x562ec60d77c65039"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x0b002a2bffa9a621"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x23290508269b1bdf"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x308bad69b2944dbc"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x19bc0e5aa9309356"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xd96e66f1b7e3bd20"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xd96e66f1b7e3bd20"
+            }
+          ]
+        },
+        {
+          "seed": 12,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x71f35702356b665d",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xae5c4becb3ba4a8e"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x5a88c0f8c878a02d"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xed3bcc576e5cbaaa"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x9bfd2a604fefc9b6"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x8af2810a4aba8685"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x314900aeca079014"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x4cde1a7757ca87e4"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x1c3a9da3e1e2a4b6"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x71f35702356b665d"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x71f35702356b665d"
+            }
+          ]
+        },
+        {
+          "seed": 13,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x09eee19c46ca7838",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x5acb163be1759f89"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0xb84908d2a37a5726"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xb6fe57bd28ae62ec"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xe586bf3470e00603"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0xd0c12d292f4ad402"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x1c8f99216b8271aa"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x079dc03d675a90b6"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x15592f40113c1639"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x09eee19c46ca7838"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x09eee19c46ca7838"
+            }
+          ]
+        },
+        {
+          "seed": 14,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0xd5332c26e3754cc9",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xfc89a96670bb0d6d"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0xda5859381130cdb9"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xeae8a5ac5d5e6117"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x07ed73038516d240"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x965ed00eeabbc8b4"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0xe43c5f7b8ee77149"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0xa02c4592674168b0"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x5f5d56100a67f1ac"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xd5332c26e3754cc9"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xd5332c26e3754cc9"
+            }
+          ]
+        },
+        {
+          "seed": 15,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0xa1ff8200fb9033c4",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x54d454b5fcf3b113"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0xce056ca9c47278d0"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x1a62c1e8b1166ec4"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x31fd66b5d9888820"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x60a40a4f772d8200"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x102dd44eeff13fc4"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x268e5837c079ce2c"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x34ea967855719591"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xa1ff8200fb9033c4"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xa1ff8200fb9033c4"
+            }
+          ]
+        },
+        {
+          "seed": 16,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x85b22157dd9dfe88",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x0c13ad1009f5da66"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x6b4d79f75b06d850"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xd96cb980e28278a7"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xc89b1751437e0dd1"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x7f3634f66868e6e4"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x3309e39f85c4e138"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x3dea05c0d5d00b3e"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xe73690e1bb5ef9d3"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x85b22157dd9dfe88"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x85b22157dd9dfe88"
+            }
+          ]
+        },
+        {
+          "seed": 17,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x518aaaf5b9764e38",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xde0c22361074747a"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x07e9fa6b03118116"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x36587065c54bb3a7"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x243b5641feecf2e3"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x8a1ad8a8721f451a"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x63a87a553f0081c3"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0xb90a6d38e3001ef7"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xae055f61b1c07e2c"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x518aaaf5b9764e38"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x518aaaf5b9764e38"
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x5c3c07bdcbf190e7",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x6c4a7f1ee9543f3e"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x014b14af62772623"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x4649b9e2d2d8bd14"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x5a8a8511e096da83"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x4b62da224a5adc99"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x479076637cac6501"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0xf623e82b716d717e"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xb4603620637a0d0f"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x5c3c07bdcbf190e7"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x5c3c07bdcbf190e7"
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0xfb74d44f879e33fe",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x0c356a8cf9d83ec3"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0xf804621c57c2dd86"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x35bd2d07b8bc2523"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xf8419f80ceacb7ce"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0xaf2db542f74565a3"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x99d37776b61c52f9"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x2a61099693ec98af"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x81d5c7d4ce5cacd7"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xfb74d44f879e33fe"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xfb74d44f879e33fe"
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "attempt": 0,
+          "status": "ok",
+          "world": "0x9e13c666ac7af5cd",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x6ea036cf7f895c84"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xce629c7bee096ad4"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x92f3b8213ddd543e"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xdf1bca2bef3b40bc"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x32eff6ba113f5409"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0xbd7621a1c3c9830e"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0xfbceb077addcc83b"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x547b1284f5f9d8d2"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x42255a3bccf6f24d"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x9e13c666ac7af5cd"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x9e13c666ac7af5cd"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "classic_small_island",
+      "results": [
+        {
+          "seed": 1,
+          "attempt": 15,
+          "status": "ok",
+          "world": "0xd6bd6ebceef4e8bf",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x3b255d2235f89f75"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x435eecb3838b48d1"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x1f0a8aa469173671"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xc57c960007749afd"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x802db3286205cf2c"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x3832bce0ebc2eb44"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x1f1f932a35d437c9"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x7835667222c2b171"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xf816b4147e91891d"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xd6bd6ebceef4e8bf"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xd6bd6ebceef4e8bf"
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "attempt": 55,
+          "status": "ok",
+          "world": "0xc2df4f973387afbf",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x3b255d2235f89f75"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xdbd3740e9eb2d71d"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0xf7abf31eabd0436c"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x3b4a557e3ea0185f"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x3da26ec886178a92"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x7d604e1118fb9773"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x98dd3a4260a652da"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x8df0a0e74e377ee6"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x78f648a500e05a3c"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xc2df4f973387afbf"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xc2df4f973387afbf"
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "attempt": 44,
+          "status": "ok",
+          "world": "0xccdd2a1ab64d6fb1",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x3b255d2235f89f75"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xda06b042b26312cf"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x85e01a1feaf7c257"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0xa6d1782845c1dac3"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0x47af951ce2692e44"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x911991375dfad10e"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0xe1ed2a43d70e38f9"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0xf1c0edcc0e452467"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xd87041cd345e3b04"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0xccdd2a1ab64d6fb1"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0xccdd2a1ab64d6fb1"
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "attempt": 9,
+          "status": "ok",
+          "world": "0x6900fc8177b47820",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x3b255d2235f89f75"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0xa3ef3fb62b0e5ef3"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x16f37226a20b50b0"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x0b86558caddb626f"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xe72b67c2ae7a2b6d"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x8175c0b5811594a2"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0xc4c16800fe2e161f"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0xedf8732870d9b8dd"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0xaa5df08b1d5caa46"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x6900fc8177b47820"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x6900fc8177b47820"
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "attempt": 22,
+          "status": "ok",
+          "world": "0x202e7ca8ac0733f5",
+          "stages": [
+            {
+              "stage": "c01_allocate",
+              "world": "0x3b255d2235f89f75"
+            },
+            {
+              "stage": "c02_seed",
+              "world": "0x5630cf7326bdd417"
+            },
+            {
+              "stage": "c03_fit",
+              "world": "0x7eea1fc647212742"
+            },
+            {
+              "stage": "c04_vegetation",
+              "world": "0x4d421605d93b1e13"
+            },
+            {
+              "stage": "c05_shape",
+              "world": "0xa7adcbbb1a41e228"
+            },
+            {
+              "stage": "c06_rivers",
+              "world": "0x519e8c4edf654604"
+            },
+            {
+              "stage": "c07_smooth",
+              "world": "0x3c3ed3c82e9c1c91"
+            },
+            {
+              "stage": "c08_climate",
+              "world": "0x5c8836ee3eb1e9c8"
+            },
+            {
+              "stage": "c09_biomes",
+              "world": "0x56e263d36895c4f8"
+            },
+            {
+              "stage": "c10_subsurface",
+              "world": "0x202e7ca8ac0733f5"
+            },
+            {
+              "stage": "c11_verify",
+              "world": "0x202e7ca8ac0733f5"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

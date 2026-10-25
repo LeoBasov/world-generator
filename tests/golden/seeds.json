@@ -1,0 +1,11 @@
+{
+  "$schema": "../../schema/golden_seeds.schema.json",
+  "schema_version": 1,
+  "description": "Golden seeds of the classic profile (A23, ADR 0021): 20 seeds at N = 65 with the schema defaults, and the small_island preset, whose seeds pass only after rejected attempts.",
+  "cases": [
+    { "name": "classic_65", "profile": "classic", "size": 65,
+      "seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] },
+    { "name": "classic_small_island", "profile": "classic", "params": "small_island",
+      "seeds": [1, 2, 3, 4, 5] }
+  ]
+}

@@ -47,7 +47,7 @@ core::Expected<ErosionReport> erode(std::span<float> z, const core::Grid& grid,
                               .max_transfers = ThermalParams{}.max_transfers};
 
   core::Expected<core::Arena> arena =
-      core::Arena::create(detail::arena_bytes<std::uint8_t>(z.size()), resource);
+      core::Arena::create(2 * detail::arena_bytes<std::uint8_t>(z.size()), resource);
   if (!arena) {
     return core::make_error(std::move(arena.error()));
   }
@@ -56,6 +56,11 @@ core::Expected<ErosionReport> erode(std::span<float> z, const core::Grid& grid,
     return core::make_error(std::move(visited.error()));
   }
   std::fill(visited->begin(), visited->end(), std::uint8_t{0});
+  // Cells of floods without an exit in the current cycle (ADR 0021).
+  core::Expected<std::span<std::uint8_t>> failed = arena->allocate<std::uint8_t>(z.size());
+  if (!failed) {
+    return core::make_error(std::move(failed.error()));
+  }
 
   ErosionReport report;
   core::Expected<std::vector<std::int32_t>> sources = find_river_sources(z, grid);
@@ -74,10 +79,11 @@ core::Expected<ErosionReport> erode(std::span<float> z, const core::Grid& grid,
       }
     }
     const core::RngKey cycle_key = key.derive(static_cast<std::uint64_t>(c));
+    std::fill(failed->begin(), failed->end(), std::uint8_t{0});
     for (const std::int32_t source : *sources) {
       core::RngStream stream(cycle_key, static_cast<std::uint64_t>(source));
       core::Expected<WalkerResult> walk =
-          run_walker(z, grid, source, walker, stream, *visited, stop_mask);
+          run_walker(z, grid, source, walker, stream, *visited, stop_mask, nullptr, *failed);
       if (!walk) {
         return core::make_error(std::move(walk.error()));
       }

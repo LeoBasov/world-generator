@@ -57,7 +57,7 @@ A22 adds the field-statistics checks, the hypsometry repair, the final verificat
 
 ## Consequences
 
-- The classic profile has eleven stages. `tests/fixtures/profiles/classic_verify.json` runs all of them until `data/profiles/classic.json` arrives (A23).
+- The classic profile has eleven stages. `data/profiles/classic.json` (A23, ADR 0021) runs all of them; until then the test fixture `classic_verify.json` did.
 - C3's inputs grow by four fields. Every profile that runs C3 also runs C2, so R2 is unaffected.
 - The defaults (all minimums 0, `SUBREGION_MAX` 2750) reject nothing new. No parameter or field changes, so no hash changes.
 - `tests/integration/checks/test_checks.cpp` holds the acceptance tests:

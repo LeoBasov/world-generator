@@ -49,10 +49,11 @@ struct WalkerParams {
 
 /// Why a walker stopped.
 enum class WalkerStop : std::uint8_t {
-  ocean,       ///< it reached a cell with z < terrain::kSeaLevel
-  mask,        ///< it reached a cell of the stop mask (a lake)
-  step_limit,  ///< it took step_limit steps
-  stuck,       ///< no unvisited cell was left to move to or to flood
+  ocean,         ///< it reached a cell with z < terrain::kSeaLevel
+  mask,          ///< it reached a cell of the stop mask (a lake)
+  step_limit,    ///< it took step_limit steps
+  stuck,         ///< no unvisited cell was left to move to or to flood
+  failed_basin,  ///< it reached a cell flooded by an earlier walker whose flood found no exit
 };
 
 /// End of a walk.
@@ -75,12 +76,16 @@ struct WalkerResult {
 /// flooded cell is one step), or when stuck (no unvisited cell left to move to or flood).
 /// visited is scratch with one byte per cell that must be 0 on entry and is 0 again on return.
 /// path, if given, receives the walk from the source to the end, flood routes included, as a
-/// chain of 8-neighbours. Errors: invalid_argument for an invalid grid, spans without one value
-/// per cell, a source outside the grid or invalid params; out_of_memory.
+/// chain of 8-neighbours. failed (empty: none) is a memo shared by the walkers of one erosion
+/// cycle (ADR 0021): a flood that ends without an exit (step limit or stuck) marks every cell it
+/// took, and a walker that is on, or whose flood takes, a marked cell stops with
+/// WalkerStop::failed_basin instead of flooding the same basin again. Errors: invalid_argument
+/// for an invalid grid, spans without one value per cell, a source outside the grid or invalid
+/// params; out_of_memory.
 [[nodiscard]] core::Expected<WalkerResult> run_walker(
     std::span<float> z, const core::Grid& grid, std::int32_t source, const WalkerParams& params,
     core::RngStream& stream, std::span<std::uint8_t> visited,
-    std::span<const std::uint8_t> stop_mask = {},
-    std::vector<std::int32_t>* path = nullptr) noexcept;
+    std::span<const std::uint8_t> stop_mask = {}, std::vector<std::int32_t>* path = nullptr,
+    std::span<std::uint8_t> failed = {}) noexcept;
 
 }  // namespace wg::hydro

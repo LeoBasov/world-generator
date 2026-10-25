@@ -1,6 +1,7 @@
 #include "wg/hydro/thermal.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -74,13 +75,13 @@ core::Expected<std::int64_t> thermal_erode(std::span<float> z, const core::Grid&
     const auto cu = static_cast<std::size_t>(c);
     if (in_queue[cu] == 0) {
       in_queue[cu] = 1;
-      (*ring)[(head + size) % cells] = static_cast<std::int32_t>(c);
+      const std::size_t tail = head + size;
+      (*ring)[tail < cells ? tail : tail - cells] = static_cast<std::int32_t>(c);
       ++size;
     }
   };
   for (std::int64_t i = 0; i < grid.cells(); ++i) {
-    for (const core::Dir8 d : core::kDir8) {
-      const std::int64_t j = grid.neighbor(i, d);
+    for (const std::int64_t j : detail::neighbors8(grid, i)) {
       if (j != core::kNoCell && steep(i, j)) {
         push(i);
         break;
@@ -91,12 +92,11 @@ core::Expected<std::int64_t> thermal_erode(std::span<float> z, const core::Grid&
   std::int64_t transfers = 0;
   while (size > 0) {
     const std::int64_t i = (*ring)[head];
-    head = (head + 1) % cells;
+    head = head + 1 < cells ? head + 1 : 0;
     --size;
     in_queue[static_cast<std::size_t>(i)] = 0;
     bool changed = false;
-    for (const core::Dir8 dir : core::kDir8) {
-      const std::int64_t j = grid.neighbor(i, dir);
+    for (const std::int64_t j : detail::neighbors8(grid, i)) {
       if (j == core::kNoCell || !steep(i, j)) {
         continue;
       }

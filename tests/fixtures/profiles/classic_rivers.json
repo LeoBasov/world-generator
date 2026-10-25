@@ -2,6 +2,6 @@
   "$schema": "../../../schema/profile.schema.json",
   "schema_version": 1,
   "name": "classic_rivers",
-  "description": "The classic stages implemented so far (A12-A17), with rivers, until data/profiles/classic.json arrives with A23.",
+  "description": "A subset of data/profiles/classic.json for tests: the classic stages with rivers, without climate and biomes.",
   "stages": ["c01_allocate", "c02_seed", "c03_fit", "c05_shape", "c06_rivers", "c07_smooth"]
 }

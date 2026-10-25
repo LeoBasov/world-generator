@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -91,6 +92,40 @@ TEST_CASE("wgcli.export writes every field, colour maps and the layers") {
   std::stringstream text;
   text << in.rdbuf();
   CHECK(contains(text.str(), "\"peaks\""));
+}
+
+TEST_CASE("wgcli.export --map-range data spreads the colour map over the values") {
+  wg::test::TempDir dir("wgcli_export");
+  const auto world = make_world(dir);
+  const auto decode = [](const std::filesystem::path& file) {
+    std::vector<unsigned char> rgb;
+    unsigned w = 0;
+    unsigned h = 0;
+    REQUIRE(lodepng::decode(rgb, w, h, load_file(file), LCT_RGB, 8) == 0);
+    return rgb;
+  };
+  for (const char* range : {"registry", "data"}) {
+    const auto r =
+        run_cli({"export", world.string(), "--format", "png16", "--field", "elevation",
+                 "--colormap", "grey", "--map-range", range, "--out", (dir / range).string()});
+    INFO(r.err);
+    REQUIRE(r.code == 0);
+  }
+  // With the data range the darkest and the brightest grey of the map are 0 and 255.
+  const std::vector<unsigned char> data = decode(dir / "data" / "elevation_grey.png");
+  CHECK(*std::min_element(data.begin(), data.end()) == 0);
+  CHECK(*std::max_element(data.begin(), data.end()) == 255);
+  CHECK(decode(dir / "registry" / "elevation_grey.png") != data);
+  // The PNG16 itself keeps the registry range.
+  CHECK(load_file(dir / "data" / "elevation.png") == load_file(dir / "registry" / "elevation.png"));
+
+  const auto out = (dir / "x").string();
+  CHECK(run_cli({"export", world.string(), "--format", "png16", "--colormap", "grey", "--map-range",
+                 "log", "--out", out})
+            .code == 2);
+  CHECK(
+      run_cli({"export", world.string(), "--format", "png16", "--map-range", "data", "--out", out})
+          .code == 2);
 }
 
 TEST_CASE("wgcli.export writes EXR only with EXR support") {

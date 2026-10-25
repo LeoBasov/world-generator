@@ -16,17 +16,21 @@ namespace detail = num::detail;
 
 namespace {
 
-// Open cell of the flood from a pit, with the node it was reached from.
+// Open cell of the flood from a pit, with the node it was reached from. 12 bytes: the heap
+// moves these on every step of a flood (grids have fewer than 2^31 cells).
 struct FloodEntry {
   float z = 0.0F;
-  std::int64_t cell = core::kNoCell;
+  std::int32_t cell = -1;
   std::int32_t parent = -1;
 };
 
-// Min-heap order: lowest z first, ties to the lower index.
-bool later(const FloodEntry& a, const FloodEntry& b) noexcept {
-  return a.z != b.z ? a.z > b.z : a.cell > b.cell;
-}
+// Min-heap order: lowest z first, ties to the lower index. A function object, so the heap
+// operations inline it.
+struct Later {
+  bool operator()(const FloodEntry& a, const FloodEntry& b) const noexcept {
+    return a.z != b.z ? a.z > b.z : a.cell > b.cell;
+  }
+};
 
 // Flooded cell and its parent in the flood tree.
 struct FloodNode {
@@ -81,8 +85,7 @@ core::Expected<std::vector<std::int32_t>> find_river_sources(std::span<const flo
       if (!(z[static_cast<std::size_t>(i)] >= terrain::kMountainElevation)) {
         continue;
       }
-      for (const core::Dir8 d : core::kDir8) {
-        const std::int64_t j = grid.neighbor(i, d);
+      for (const std::int64_t j : detail::neighbors8(grid, i)) {
         if (j != core::kNoCell && z[static_cast<std::size_t>(j)] < terrain::kMountainElevation) {
           sources.push_back(static_cast<std::int32_t>(i));
           break;
@@ -99,14 +102,18 @@ core::Expected<WalkerResult> run_walker(std::span<float> z, const core::Grid& gr
                                         std::int32_t source, const WalkerParams& params,
                                         core::RngStream& stream, std::span<std::uint8_t> visited,
                                         std::span<const std::uint8_t> stop_mask,
-                                        std::vector<std::int32_t>* path) noexcept {
+                                        std::vector<std::int32_t>* path,
+                                        std::span<std::uint8_t> failed) noexcept {
   if (core::Status s = detail::first_error(
           {core::validate(grid),
            detail::check_field(z, grid, "run_walker: z must have one value per cell"),
            detail::check_field(visited, grid, "run_walker: visited must have one value per cell"),
            detail::check_optional_field(stop_mask, grid,
                                         "run_walker: stop_mask must be empty or have one value "
-                                        "per cell")});
+                                        "per cell"),
+           detail::check_optional_field(failed, grid,
+                                        "run_walker: failed must be empty or have one value per "
+                                        "cell")});
       !s.ok()) {
     return core::make_error(std::move(s));
   }
@@ -148,6 +155,10 @@ core::Expected<WalkerResult> run_walker(std::span<float> z, const core::Grid& gr
         result.stop = WalkerStop::mask;
         break;
       }
+      if (!failed.empty() && failed[static_cast<std::size_t>(i)] != 0) {
+        result.stop = WalkerStop::failed_basin;
+        break;
+      }
       if (result.steps == params.step_limit) {
         result.stop = WalkerStop::step_limit;
         break;
@@ -155,8 +166,7 @@ core::Expected<WalkerResult> run_walker(std::span<float> z, const core::Grid& gr
       // The lowest neighbours not visited yet, in kDir8 order.
       std::size_t ties = 0;
       float low = 0.0F;
-      for (const core::Dir8 d : core::kDir8) {
-        const std::int64_t j = grid.neighbor(i, d);
+      for (const std::int64_t j : detail::neighbors8(grid, i)) {
         if (j == core::kNoCell || visited[static_cast<std::size_t>(j)] != 0) {
           continue;
         }
@@ -192,12 +202,11 @@ core::Expected<WalkerResult> run_walker(std::span<float> z, const core::Grid& gr
       nodes.clear();
       nodes.push_back({i, -1});
       const auto enqueue = [&](std::int64_t c, std::int32_t parent) {
-        for (const core::Dir8 d : core::kDir8) {
-          const std::int64_t j = grid.neighbor(c, d);
+        for (const std::int64_t j : detail::neighbors8(grid, c)) {
           if (j != core::kNoCell && visited[static_cast<std::size_t>(j)] == 0) {
             mark(j, 2);
-            heap.push_back({z[static_cast<std::size_t>(j)], j, parent});
-            std::push_heap(heap.begin(), heap.end(), later);
+            heap.push_back({z[static_cast<std::size_t>(j)], static_cast<std::int32_t>(j), parent});
+            std::push_heap(heap.begin(), heap.end(), Later{});
           }
         }
       };
@@ -214,9 +223,13 @@ core::Expected<WalkerResult> run_walker(std::span<float> z, const core::Grid& gr
           result.stop = WalkerStop::step_limit;
           break;
         }
-        std::pop_heap(heap.begin(), heap.end(), later);
+        std::pop_heap(heap.begin(), heap.end(), Later{});
         const FloodEntry e = heap.back();
         heap.pop_back();
+        if (!failed.empty() && failed[static_cast<std::size_t>(e.cell)] != 0) {
+          result.stop = WalkerStop::failed_basin;
+          break;
+        }
         ++result.steps;
         const auto k = static_cast<std::int32_t>(nodes.size());
         nodes.push_back({e.cell, e.parent});
@@ -230,6 +243,12 @@ core::Expected<WalkerResult> run_walker(std::span<float> z, const core::Grid& gr
         enqueue(e.cell, k);
       }
       if (exit < 0) {
+        // A flood without an exit: later walkers sharing failed stop where this one flooded.
+        if (!failed.empty() && result.stop != WalkerStop::failed_basin) {
+          for (const FloodNode& n : nodes) {
+            failed[static_cast<std::size_t>(n.cell)] = 1;
+          }
+        }
         break;
       }
       // Cells queued but not flooded stay open for the rest of the walk.

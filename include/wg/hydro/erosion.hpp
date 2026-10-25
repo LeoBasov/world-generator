@@ -25,7 +25,8 @@ struct ErosionReport {
 /// Test-river erosion of the classic profile (R6.1, R6.3, R6.4). First snaps z (and the dig
 /// depth) to the lattice of kErosionQuantum. Then each cycle c of erosion_cycle_count finds the
 /// sources (find_river_sources), runs one walker from each in ascending order with the stream
-/// core::RngStream(key.derive(c), source), and, with periodically_erode_extremes, ends with
+/// core::RngStream(key.derive(c), source) and a failed-basin memo that is cleared at the start
+/// of the cycle (run_walker, ADR 0021), and, with periodically_erode_extremes, ends with
 /// thermal_erode (talus_threshold, talus_fraction). Cycle c draws the same numbers whatever the
 /// cycle count, so a run of n cycles is a prefix of a run of n + 1. Serial, so the result is
 /// the same on every platform. stop_mask (empty: none) stops the walkers, e.g. at lakes;
