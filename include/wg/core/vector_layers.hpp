@@ -145,14 +145,31 @@ struct SoilLayer {
   friend bool operator==(const SoilLayer&, const SoilLayer&) = default;
 };
 
+/// One of the three cavern layers (R10.1); openness, passage density and water are 0 ... 100.
+struct Cavern {
+  /// Cavern layer 0, 1 or 2, from the top.
+  std::uint8_t level = 0;
+  /// Depth below the surface [m].
+  float depth_m = 0.0F;
+  std::uint8_t openness = 0;
+  std::uint8_t passage_density = 0;
+  std::uint8_t water = 0;
+
+  friend bool operator==(const Cavern&, const Cavern&) = default;
+};
+
 /// Stone column of one geological region (C10, P3), top to bottom; geo_region matches the
 /// geo_region field.
 struct GeoColumn {
   std::int32_t geo_region = 0;
+  /// Stone layers, top to bottom, below the soil.
   std::vector<RockLayer> layers;
+  /// Soil layers, top to bottom.
   std::vector<SoilLayer> soil_layers;
-  /// Cavern layers present, ascending.
-  std::vector<std::uint8_t> cavern_levels;
+  /// Cavern layers present, by ascending level.
+  std::vector<Cavern> caverns;
+  /// Depth of the top of the magma sea below the surface [m].
+  float magma_depth_m = 0.0F;
 
   friend bool operator==(const GeoColumn&, const GeoColumn&) = default;
 };

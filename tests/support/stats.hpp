@@ -106,4 +106,48 @@ inline double chi2_statistic(std::span<const double> expected, std::span<const d
   return chi2;
 }
 
+/// Closed interval of counts.
+struct CountInterval {
+  double lo = 0.0;
+  double hi = 0.0;
+
+  [[nodiscard]] bool contains(double x) const { return x >= lo && x <= hi; }
+};
+
+/// Central 99 % interval of a Binomial(n, p) count (normal approximation, n p (1 - p) large).
+inline CountInterval binomial_interval99(std::size_t n, double p) {
+  constexpr double kZ995 = 2.5758293035489004;  // Phi^-1(0.995)
+  const double mean = static_cast<double>(n) * p;
+  const double sd = std::sqrt(mean * (1.0 - p));
+  return {mean - (kZ995 * sd), mean + (kZ995 * sd)};
+}
+
+/// Central 99 % interval [lo, hi] of a Poisson(lambda) count: the largest lo and smallest hi
+/// with P(N < lo) <= 0.005 and P(N > hi) <= 0.005, from the exact probabilities.
+inline CountInterval poisson_interval99(double lambda) {
+  // log P(N = k) = log P(N = k - 1) + log lambda - log k, from log P(N = 0) = -lambda; the log
+  // form does not underflow for large lambda (std::lgamma is not thread safe).
+  const double log_lambda = std::log(lambda);
+  double log_p = -lambda;
+  double cdf = 0.0;
+  double k = 0.0;
+  CountInterval out;
+  bool lo_set = false;
+  for (;; k += 1.0) {
+    if (k > 0.0) {
+      log_p += log_lambda - std::log(k);
+    }
+    const double p = std::exp(log_p);
+    if (!lo_set && cdf + p > 0.005) {
+      out.lo = k;
+      lo_set = true;
+    }
+    cdf += p;
+    if (cdf >= 0.995) {
+      out.hi = k;
+      return out;
+    }
+  }
+}
+
 }  // namespace wg::test

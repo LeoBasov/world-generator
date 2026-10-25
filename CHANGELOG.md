@@ -183,3 +183,16 @@ and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `c09_biomes` (`biome`, `region_id`, `regions`); they need the data tables. Test profile
   `classic_biomes` (c01-c09). Parameters, fields and data tables are unchanged. ADR 0018 records
   the rules.
+- Geology and subsurface (A21) in the new module `wg::geology`: `classify_environment` and
+  `label_geo_regions` (8-connected regions of equal environment and volcanism band),
+  `GeologyTables` and `draw_column` (constrained Markov chain over the rock classes with
+  P(extrusive top) = V / 100, log-normal thicknesses, soil layers, three cavern layers and the
+  magma sea), `check_column`, `compute_soil_depth` (steady state of soil production against
+  transport), `assign_aquifers` (AQUIFER layers, low ground and low drainage, the DF heavy quirk)
+  and `MineralHosts` / `place_minerals` (Poisson deposits per host layer, nested inclusions). New
+  classic stage `c10_subsurface` (`soil_depth`, `geo_region`, `aquifer`, `geo_columns`,
+  `minerals`); it needs the data tables. Test profile `classic_geology` (c01-c10).
+  `core::GeoColumn` replaces `cavern_levels` with `caverns` (`core::Cavern`) and gains
+  `magma_depth_m`. New parameters `geology.deep_ocean_elevation` and `geology.soil_max_depth`;
+  `layer_count_min` and `layer_count_max` now start at 2. Every parameter hash changes. ADR 0019
+  records the rules.

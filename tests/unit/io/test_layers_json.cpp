@@ -58,6 +58,8 @@ TEST_CASE("io.layers_json uses member names and labels") {
   CHECK(j["minerals"][0]["inclusion"] == "cluster_small");
   CHECK(j["river_graph"]["downstream"][2] == -1);
   CHECK(j["volcanoes"][0]["magma_connected"] == true);
+  CHECK(j["geo_columns"][0]["caverns"][1]["passage_density"] == 1);
+  CHECK(j["geo_columns"][0]["magma_depth_m"] == 3121.25);
   auto empty = encode_layers(wg::core::VectorLayers{});
   REQUIRE(empty);
   auto back = decode_layers(*empty, "$");

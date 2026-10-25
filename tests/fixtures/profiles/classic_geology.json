@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schema/profile.schema.json",
+  "schema_version": 1,
+  "name": "classic_geology",
+  "description": "The classic stages implemented so far (A12-A21), up to the subsurface, until data/profiles/classic.json arrives with A23.",
+  "stages": ["c01_allocate", "c02_seed", "c03_fit", "c04_vegetation", "c05_shape", "c06_rivers", "c07_smooth", "c08_climate", "c09_biomes", "c10_subsurface"]
+}

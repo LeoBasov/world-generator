@@ -72,7 +72,10 @@ inline core::VectorLayers sample_layers() {
       {.geo_region = 2,
        .layers = {{.rock_id = 4, .thickness_m = 120.5F}, {.rock_id = 7, .thickness_m = 3000.0F}},
        .soil_layers = {{.soil_id = 1, .thickness_m = 0.75F}},
-       .cavern_levels = {1, 3}}};
+       .caverns =
+           {{.level = 1, .depth_m = 900.25F, .openness = 40, .passage_density = 70, .water = 5},
+            {.level = 2, .depth_m = 2100.0F, .openness = 100, .passage_density = 1, .water = 0}},
+       .magma_depth_m = 3121.25F}};
   L.minerals = {{.mineral_id = 12,
                  .host_layer = 1,
                  .inclusion = core::InclusionType::cluster_small,
